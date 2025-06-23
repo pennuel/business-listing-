@@ -101,7 +101,17 @@ export function BillingPage({
   onApplicationGroupSelect,
 }: BillingPageProps) {
   const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
-  const [paymentMethods, setPaymentMethods] = useState([
+  interface PaymentMethod {
+    id: string;
+    type: string;
+    last4: string;
+    expiry: string;
+    isDefault: boolean;
+    phoneNumber?: string;
+    bankName?: string;
+  }
+
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
       id: "1",
       type: "Visa",
