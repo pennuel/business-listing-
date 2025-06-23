@@ -1,5 +1,5 @@
-import ProfileDashboard from "../profile-dashboard"
+import ProfileDashboard from "../components/dashboard/profile-dashboard";
 
 export default function Page() {
-  return <ProfileDashboard />
+  return <ProfileDashboard />;
 }
