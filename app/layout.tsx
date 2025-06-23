@@ -1,21 +1,35 @@
 import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata: Metadata = {
   title: "Profile Dashboard",
   description: "User profile and application management dashboard",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+    other: [
+      { rel: "icon", url: "/favicon-16x16.png" },
+      { rel: "icon", url: "/favicon-32x32.png" },
+    ],
   },
-    generator: 'v0.dev'
-}
+  appleWebApp: {
+    capable: true,
+    title: "Profile Dashboard",
+    statusBarStyle: "black-translucent",
+  },
+};
 
 export default function RootLayout({
   children,
