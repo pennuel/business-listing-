@@ -75,61 +75,61 @@ const navItems = [
 
 // User's applications with their personal data
 const userApplications = [
-  {
-    title: "Analytics Pro",
-    key: "app-analytics-pro",
-    icon: BarChart3,
-    status: "active",
-    userStats: {
-      reportsCreated: 127,
-      dataProcessed: "2.3TB",
-      lastLogin: "2 hours ago",
-    },
-  },
-  {
-    title: "Task Manager",
-    key: "app-task-manager",
-    icon: Database,
-    status: "active",
-    userStats: {
-      tasksCompleted: 892,
-      projectsManaged: 23,
-      lastLogin: "1 hour ago",
-    },
-  },
-  {
-    title: "Website Builder",
-    key: "app-website-builder",
-    icon: Globe,
-    status: "maintenance",
-    userStats: {
-      sitesBuilt: 12,
-      pagesCreated: 89,
-      lastLogin: "6 hours ago",
-    },
-  },
-  {
-    title: "Code Editor",
-    key: "app-code-editor",
-    icon: Code,
-    status: "active",
-    userStats: {
-      linesWritten: "125K",
-      filesEdited: 234,
-      lastLogin: "30 minutes ago",
-    },
-  },
-  {
-    title: "Mobile App",
-    key: "app-mobile-app",
-    icon: Smartphone,
-    status: "beta",
-    userStats: {
-      appsBuilt: 5,
-      deploymentsCount: 18,
-      lastLogin: "4 hours ago",
-    },
-  },
+  // {
+  //   title: "Analytics Pro",
+  //   key: "app-analytics-pro",
+  //   icon: BarChart3,
+  //   status: "active",
+  //   userStats: {
+  //     reportsCreated: 127,
+  //     dataProcessed: "2.3TB",
+  //     lastLogin: "2 hours ago",
+  //   },
+  // },
+  // {
+  //   title: "Task Manager",
+  //   key: "app-task-manager",
+  //   icon: Database,
+  //   status: "active",
+  //   userStats: {
+  //     tasksCompleted: 892,
+  //     projectsManaged: 23,
+  //     lastLogin: "1 hour ago",
+  //   },
+  // },
+  // {
+  //   title: "Website Builder",
+  //   key: "app-website-builder",
+  //   icon: Globe,
+  //   status: "maintenance",
+  //   userStats: {
+  //     sitesBuilt: 12,
+  //     pagesCreated: 89,
+  //     lastLogin: "6 hours ago",
+  //   },
+  // },
+  // {
+  //   title: "Code Editor",
+  //   key: "app-code-editor",
+  //   icon: Code,
+  //   status: "active",
+  //   userStats: {
+  //     linesWritten: "125K",
+  //     filesEdited: 234,
+  //     lastLogin: "30 minutes ago",
+  //   },
+  // },
+  // {
+  //   title: "Mobile App",
+  //   key: "app-mobile-app",
+  //   icon: Smartphone,
+  //   status: "beta",
+  //   userStats: {
+  //     appsBuilt: 5,
+  //     deploymentsCount: 18,
+  //     lastLogin: "4 hours ago",
+  //   },
+  // },
 ]
 
 const settingsItems = [
@@ -206,7 +206,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <Collapsible defaultOpen className="group/collapsible">
+        {/* <Collapsible defaultOpen className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild>
               <CollapsibleTrigger className="flex w-full items-center justify-between">
@@ -246,7 +246,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
               </SidebarGroupContent>
             </CollapsibleContent>
           </SidebarGroup>
-        </Collapsible>
+        </Collapsible> */}
 
         <SidebarGroup>
           <SidebarGroupLabel>Settings</SidebarGroupLabel>
