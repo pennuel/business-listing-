@@ -133,23 +133,23 @@ export function BillingPage({
   );
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Billing Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Billing Overview</h1>
           <p className="text-muted-foreground">
             Manage your application subscriptions and payment methods
           </p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Download className="h-4 w-4 mr-2" />
           Download Summary
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -255,7 +255,7 @@ export function BillingPage({
       {/* Payment Methods */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <CardTitle>Payment Methods</CardTitle>
               <CardDescription>
@@ -265,6 +265,7 @@ export function BillingPage({
             <Button
               variant="outline"
               onClick={() => setIsAddPaymentModalOpen(true)}
+              className="w-full sm:w-auto"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Method

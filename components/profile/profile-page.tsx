@@ -16,7 +16,7 @@ interface ProfilePageProps {
 
 export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -27,15 +27,15 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
 
       {/* Profile Header */}
       <Card>
-        <CardHeader className="flex flex-row items-center gap-6">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
           <Avatar className="h-24 w-24">
             <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
             <AvatarFallback className="text-2xl">JD</AvatarFallback>
           </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center gap-4 mb-2">
-              <h1 className="text-3xl font-bold">John Doe</h1>
-              <Button size="sm" onClick={() => onEditProfile()}>
+          <div className="flex-1 w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold">John Doe</h1>
+              <Button size="sm" onClick={() => onEditProfile()} className="w-full sm:w-auto">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
@@ -50,7 +50,7 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
         </CardHeader>
       </Card>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         {/* Personal Information */}
         <Card>
           <CardHeader>
@@ -192,7 +192,7 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
       </div>
 
       {/* Account Statistics */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">

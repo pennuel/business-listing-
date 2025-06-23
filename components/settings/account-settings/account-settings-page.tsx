@@ -23,7 +23,7 @@ import {
 
 export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -34,11 +34,11 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Account Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Account Settings</h1>
         <p className="text-muted-foreground">Manage your account preferences and personal information</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         {/* Profile Settings */}
         <Card>
           <CardHeader>

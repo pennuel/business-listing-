@@ -138,7 +138,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
   }, [selectedCategory])
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -148,19 +148,19 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">My Applications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">My Applications</h1>
           <p className="text-muted-foreground">Your personal data and activity across all applications</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="w-full sm:w-auto">
           <ExternalLink className="h-4 w-4 mr-2" />
           Browse More Apps
         </Button>
       </div>
 
       {/* Usage Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
           </div>
 
           {/* Available Apps in Category */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active App */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200"
@@ -322,7 +322,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active App */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-green-200"
@@ -416,7 +416,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active Apps */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200"
@@ -539,7 +539,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
           <CardDescription>Common actions across your applications</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Button variant="outline" className="justify-start">
               <ExternalLink className="h-4 w-4 mr-2" />
               Export All Data

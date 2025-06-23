@@ -16,30 +16,30 @@ interface ProfileEditPageProps {
 
 export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={onBack}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <Button variant="ghost" size="sm" onClick={onBack} className="w-fit">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">Edit Profile</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Edit Profile</h1>
           <p className="text-muted-foreground">Update your personal information and profile details</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={onBack}>
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
             <X className="h-4 w-4 mr-2" />
             Cancel
           </Button>
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Save className="h-4 w-4 mr-2" />
             Save Changes
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
         {/* Profile Picture & Basic Info */}
         <Card className="md:col-span-1">
           <CardHeader>
@@ -265,7 +265,7 @@ export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
                   <div className="flex-1">
                     <Input defaultValue="Senior Full Stack Developer" className="font-medium mb-2" />
                     <Input defaultValue="TechCorp Inc." className="text-sm mb-2" />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <Input defaultValue="2021" placeholder="Start Year" />
                       <Input defaultValue="Present" placeholder="End Year" />
                     </div>
@@ -281,7 +281,7 @@ export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
                   <div className="flex-1">
                     <Input defaultValue="Full Stack Developer" className="font-medium mb-2" />
                     <Input defaultValue="StartupXYZ" className="text-sm mb-2" />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <Input defaultValue="2019" placeholder="Start Year" />
                       <Input defaultValue="2021" placeholder="End Year" />
                     </div>
@@ -302,11 +302,11 @@ export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
       </div>
 
       {/* Save Actions */}
-      <div className="flex justify-end gap-2 pt-6 border-t">
-        <Button variant="outline" onClick={onBack}>
+      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-6 border-t">
+        <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
           Cancel
         </Button>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Save className="h-4 w-4 mr-2" />
           Save Changes
         </Button>

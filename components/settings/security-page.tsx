@@ -21,7 +21,7 @@ import {
 
 export function SecurityPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -32,12 +32,12 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Security Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Security Settings</h1>
         <p className="text-muted-foreground">Manage your account security and privacy settings</p>
       </div>
 
       {/* Security Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -74,7 +74,7 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         {/* Password & Authentication */}
         <Card>
           <CardHeader>

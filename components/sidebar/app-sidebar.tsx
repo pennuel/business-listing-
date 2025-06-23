@@ -33,6 +33,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -155,6 +156,16 @@ const settingsItems = [
 ]
 
 export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSidebarProps) {
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const handleSectionChange = (section: string) => {
+    onSectionChange(section)
+    // Close sidebar on mobile when a section is selected
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
+
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
@@ -183,7 +194,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
-                    onClick={() => onSectionChange(item.key)}
+                    onClick={() => handleSectionChange(item.key)}
                     tooltip={item.title}
                   >
                     <item.icon />
@@ -210,7 +221,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                     <SidebarMenuItem key={app.key}>
                       <SidebarMenuButton
                         isActive={activeSection === app.key}
-                        onClick={() => onSectionChange(app.key)}
+                        onClick={() => handleSectionChange(app.key)}
                         tooltip={app.title}
                       >
                         <div className="flex items-center justify-between w-full">
@@ -245,7 +256,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
-                    onClick={() => onSectionChange(item.key)}
+                    onClick={() => handleSectionChange(item.key)}
                     tooltip={item.title}
                   >
                     <item.icon />
@@ -283,11 +294,11 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={() => onSectionChange("profile")}>
+                <DropdownMenuItem onClick={() => handleSectionChange("profile")}>
                   <User2 />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onSectionChange("account")}>
+                <DropdownMenuItem onClick={() => handleSectionChange("account")}>
                   <Settings />
                   Settings
                 </DropdownMenuItem>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { AppSidebar } from "../sidebar/app-sidebar";
 import { DashboardContent } from "./dashboard-content";
 import { ProfilePage } from "../profile/profile-page";
@@ -48,10 +48,10 @@ export default function ProfileDashboard() {
     null
   );
 
-  const handleApplicationsSelect = (category?: string) => {
-    setSelectedCategory(category);
+  const handleApplicationsSelect = useCallback(() => {
+    setSelectedCategory(undefined);
     setActiveSection("applications");
-  };
+  }, []);
 
   const renderContent = () => {
     if (isEditingProfile) {

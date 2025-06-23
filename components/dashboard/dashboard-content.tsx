@@ -79,33 +79,35 @@ const applicationsData = [
 ]
 
 interface DashboardContentProps {
-  onApplicationsSelect?: (category?: string) => void
+  onApplicationsSelect?: () => void
 }
 
 // Replace the entire return statement with this updated version:
 export function DashboardContent({ onApplicationsSelect }: DashboardContentProps) {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-4 p-2 sm:p-4 pt-0">
       {/* Profile Header */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="md:col-span-2 lg:col-span-2">
-          <CardHeader className="flex flex-row items-center gap-4">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="col-span-1 md:col-span-2 lg:col-span-2">
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Avatar className="h-16 w-16">
               <AvatarImage src="/placeholder.svg?height=64&width=64" alt="Profile" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <CardTitle className="text-2xl">John Doe</CardTitle>
-              <CardDescription className="text-base">Senior Developer</CardDescription>
-              <div className="flex items-center gap-2 mt-2">
+            <div className="flex-1 w-full">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                <h1 className="text-xl sm:text-2xl font-bold">John Doe</h1>
+                <Button size="sm" className="w-fit">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              </div>
+              <p className="text-sm sm:text-base text-muted-foreground mb-3">Senior Developer</p>
+              <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">Pro Member</Badge>
                 <Badge variant="outline">5 Applications</Badge>
               </div>
             </div>
-            <Button size="sm">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
           </CardHeader>
         </Card>
 
@@ -142,21 +144,18 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
 
       {/* Applications Overview - Category Based */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">My Applications</h2>
-          <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold">My Applications</h2>
+          <Button variant="outline" size="sm" onClick={() => onApplicationsSelect?.()} className="w-fit">
             <ExternalLink className="h-4 w-4 mr-2" />
             View All
           </Button>
         </div>
 
         {/* Application Categories */}
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
           {/* Analytics & Data Category */}
-          <Card
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onApplicationsSelect?.("analytics")}
-          >
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onApplicationsSelect?.()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -196,10 +195,7 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
           </Card>
 
           {/* Productivity Category */}
-          <Card
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onApplicationsSelect?.("productivity")}
-          >
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onApplicationsSelect?.()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -239,10 +235,7 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
           </Card>
 
           {/* Development Category */}
-          <Card
-            className="hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => onApplicationsSelect?.("development")}
-          >
+          <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => onApplicationsSelect?.()}>
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -290,7 +283,7 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
       </div>
 
       {/* Application Activity & Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
         {/* Recent Application Activity */}
         <Card className="lg:col-span-4">
           <CardHeader>
@@ -302,8 +295,8 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
               <div className="p-2 rounded-lg bg-blue-500 text-white">
                 <BarChart3 className="h-4 w-4" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Analytics Pro - New dashboard created</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Analytics Pro - New dashboard created</p>
                 <p className="text-xs text-muted-foreground">2 hours ago • 45 new users today</p>
               </div>
             </div>
@@ -311,8 +304,8 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
               <div className="p-2 rounded-lg bg-green-500 text-white">
                 <Database className="h-4 w-4" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Task Manager - 127 tasks completed</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Task Manager - 127 tasks completed</p>
                 <p className="text-xs text-muted-foreground">1 hour ago • 23 active projects</p>
               </div>
             </div>
@@ -320,8 +313,8 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
               <div className="p-2 rounded-lg bg-purple-500 text-white">
                 <Code className="h-4 w-4" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Code Editor - 15 files deployed</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Code Editor - 15 files deployed</p>
                 <p className="text-xs text-muted-foreground">30 minutes ago • 8 collaborators online</p>
               </div>
             </div>
@@ -329,8 +322,8 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
               <div className="p-2 rounded-lg bg-orange-500 text-white">
                 <Globe className="h-4 w-4" />
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium">Website Builder - Maintenance completed</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Website Builder - Maintenance completed</p>
                 <p className="text-xs text-muted-foreground">6 hours ago • All systems operational</p>
               </div>
             </div>
@@ -347,11 +340,11 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
             <div className="space-y-3">
               {applicationsData.map((app) => (
                 <div key={app.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <app.icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{app.name}</span>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <app.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm truncate">{app.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <Badge
                       variant={
                         app.status === "active" ? "default" : app.status === "maintenance" ? "destructive" : "secondary"
@@ -369,7 +362,7 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
       </div>
 
       {/* Application Performance Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Applications</CardTitle>
