@@ -56,21 +56,21 @@ const navItems = [
     key: "profile",
     icon: User,
   },
-  {
-    title: "Applications",
-    key: "applications",
-    icon: Grid3X3,
-  },
-  {
-    title: "Activity",
-    key: "activity",
-    icon: Activity,
-  },
-  {
-    title: "Notifications",
-    key: "notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Applications",
+  //   key: "applications",
+  //   icon: Grid3X3,
+  // },
+  // {
+  //   title: "Activity",
+  //   key: "activity",
+  //   icon: Activity,
+  // },
+  // {
+  //   title: "Notifications",
+  //   key: "notifications",
+  //   icon: Bell,
+  // },
 ]
 
 // User's applications with their personal data
