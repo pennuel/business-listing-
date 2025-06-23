@@ -1,0 +1,243 @@
+"use client"
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Edit, Mail, Phone, MapPin, Calendar, Briefcase, GraduationCap, Award, ArrowLeft } from "lucide-react"
+
+interface ProfilePageProps {
+  onEditProfile: () => void
+  onBack: () => void
+}
+
+export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+      {/* Back Navigation - Top Level */}
+      <div className="flex items-center gap-2 mb-4">
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Profile
+        </Button>
+      </div>
+
+      {/* Profile Header */}
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-6">
+          <Avatar className="h-24 w-24">
+            <AvatarImage src="/placeholder.svg?height=96&width=96" alt="Profile" />
+            <AvatarFallback className="text-2xl">JD</AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <div className="flex items-center gap-4 mb-2">
+              <h1 className="text-3xl font-bold">John Doe</h1>
+              <Button size="sm" onClick={() => onEditProfile()}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
+            <p className="text-lg text-muted-foreground mb-3">Senior Full Stack Developer</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">Pro Member</Badge>
+              <Badge variant="outline">Verified Account</Badge>
+              <Badge variant="outline">5 Years Experience</Badge>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Personal Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>Your basic profile information</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" value="John" readOnly />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" value="Doe" readOnly />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <Textarea
+                id="bio"
+                value="Passionate full-stack developer with 5+ years of experience building scalable web applications. Love working with React, Node.js, and cloud technologies."
+                readOnly
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <Input id="location" value="San Francisco, CA" readOnly />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Contact Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contact Information</CardTitle>
+            <CardDescription>How others can reach you</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <Input id="email" value="john.doe@example.com" readOnly />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <Input id="phone" value="+1 (555) 123-4567" readOnly />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="website">Website</Label>
+              <Input id="website" value="https://johndoe.dev" readOnly />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="linkedin">LinkedIn</Label>
+              <Input id="linkedin" value="linkedin.com/in/johndoe" readOnly />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Professional Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Professional Information</CardTitle>
+            <CardDescription>Your work and career details</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <Briefcase className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Senior Full Stack Developer</p>
+                <p className="text-sm text-muted-foreground">TechCorp Inc. • 2021 - Present</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <Briefcase className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Full Stack Developer</p>
+                <p className="text-sm text-muted-foreground">StartupXYZ • 2019 - 2021</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 border rounded-lg">
+              <GraduationCap className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Computer Science, B.S.</p>
+                <p className="text-sm text-muted-foreground">University of California • 2015 - 2019</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Skills & Achievements */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Skills & Achievements</CardTitle>
+            <CardDescription>Your expertise and accomplishments</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label className="text-sm font-medium">Technical Skills</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Badge variant="secondary">React</Badge>
+                <Badge variant="secondary">Node.js</Badge>
+                <Badge variant="secondary">TypeScript</Badge>
+                <Badge variant="secondary">Python</Badge>
+                <Badge variant="secondary">AWS</Badge>
+                <Badge variant="secondary">Docker</Badge>
+                <Badge variant="secondary">PostgreSQL</Badge>
+                <Badge variant="secondary">GraphQL</Badge>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Recent Achievements</Label>
+              <div className="flex items-center gap-3 p-3 border rounded-lg">
+                <Award className="h-5 w-5 text-yellow-500" />
+                <div>
+                  <p className="font-medium">Employee of the Month</p>
+                  <p className="text-sm text-muted-foreground">TechCorp Inc. • March 2024</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 border rounded-lg">
+                <Award className="h-5 w-5 text-blue-500" />
+                <div>
+                  <p className="font-medium">AWS Solutions Architect Certified</p>
+                  <p className="text-sm text-muted-foreground">Amazon Web Services • 2023</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Account Statistics */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Member Since</p>
+                <p className="font-semibold">January 2019</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Award className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Profile Views</p>
+                <p className="font-semibold">2,847</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Projects</p>
+                <p className="font-semibold">23</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <Award className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="text-sm text-muted-foreground">Achievements</p>
+                <p className="font-semibold">12</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
