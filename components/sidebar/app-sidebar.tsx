@@ -149,11 +149,11 @@ const settingsItems = [
   //   key: "billing",
   //   icon: CreditCard,
   // },
-  {
-    title: "Help & Support",
-    key: "help",
-    icon: HelpCircle,
-  },
+  // {
+  //   title: "Help & Support",
+  //   key: "help",
+  //   icon: HelpCircle,
+  // },
 ]
 
 export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSidebarProps) {
@@ -322,12 +322,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   <User2 />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem
+                {/* <DropdownMenuItem
                   onClick={() => handleSectionChange("account")}
                 >
                   <Settings />
                   Settings
-                </DropdownMenuItem>
+                </DropdownMenuItem> */}
                 <DropdownMenuItem>
                   <LogOut />
                   Log out
