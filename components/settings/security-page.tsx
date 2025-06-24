@@ -38,7 +38,7 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
 
       {/* Security Overview */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-        <Card>
+        {/* <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-green-500" />
@@ -49,8 +49,8 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5 text-blue-500" />
@@ -60,8 +60,8 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           </CardContent>
-        </Card>
-        <Card>
+        </Card> */}
+        {/* <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-orange-500" />
@@ -71,7 +71,7 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
@@ -95,7 +95,7 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               </Button>
             </div>
 
-            <div className="flex items-center justify-between p-3 border rounded-lg">
+            {/* <div className="flex items-center justify-between p-3 border rounded-lg">
               <div className="flex items-center gap-3">
                 <Smartphone className="h-4 w-4 text-green-500" />
                 <div>
@@ -104,9 +104,9 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
                 </div>
               </div>
               <Switch defaultChecked />
-            </div>
+            </div> */}
 
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <Label className="text-sm font-medium">Backup Codes</Label>
               <div className="flex items-center justify-between p-3 border rounded-lg">
                 <div>
@@ -117,12 +117,12 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
                   View Codes
                 </Button>
               </div>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
 
         {/* Privacy Settings */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5" />
@@ -163,10 +163,10 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               <Switch id="marketing-emails" />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Login Activity */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Recent Login Activity</CardTitle>
             <CardDescription>Monitor your account access and login history</CardDescription>
@@ -208,10 +208,10 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               View All Login Activity
             </Button>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Security Recommendations */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
@@ -250,11 +250,11 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Connected Apps */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Connected Applications</CardTitle>
           <CardDescription>Third-party applications with access to your account</CardDescription>
@@ -307,7 +307,7 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

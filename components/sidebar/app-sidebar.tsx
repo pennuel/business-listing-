@@ -167,7 +167,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
     }
   }
 
-  const {user, isloading} = useUserStore();
+  const {user} = useUserStore();
 
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
