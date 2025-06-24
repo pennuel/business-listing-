@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { TrendingUp, Clock, Edit, BarChart3 } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TrendingUp, Clock, Edit, BarChart3 } from "lucide-react";
 // Add these new imports at the top
 import {
   ExternalLink,
@@ -17,8 +23,8 @@ import {
   Shield,
   Grid3X3,
   ArrowRight,
-} from "lucide-react"
-import { useUserStore } from "@/stores/userStore"
+} from "lucide-react";
+import { useUserStore } from "@/stores/userStore";
 
 // Add this new applications data after the existing imports:
 const applicationsData = [
@@ -77,15 +83,16 @@ const applicationsData = [
     lastActivity: "4 hours ago",
     color: "bg-pink-500",
   },
-]
+];
 
 interface DashboardContentProps {
-  onApplicationsSelect?: () => void
+  onApplicationsSelect?: () => void;
 }
 
 // Replace the entire return statement with this updated version:
-export function DashboardContent({ onApplicationsSelect }: DashboardContentProps) {
-
+export function DashboardContent({
+  onApplicationsSelect,
+}: DashboardContentProps) {
   const { user, isLoading } = useUserStore();
 
   return (
@@ -93,40 +100,47 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
       {/* Profile Header */}
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <Card className="col-span-1 md:col-span-2 lg:col-span-2">
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <Avatar
-              className="h-24 w-24"
-              style={{ border: "2px solid #e5e7eb" }}
-            >
-              <AvatarImage
-                src="/logos/THiNK_Logo_Updated-02(icon).jpg"
-                alt="Profile"
-              />
-              <AvatarFallback className="text-2xl">
-                {user ? `${user.firstName[0]}${user.lastName[0]}` : "U"}
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="flex-1 w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-                <h1 className="text-xl sm:text-2xl font-bold">John Doe</h1>
-                <Button size="sm" className="w-fit">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
+          <CardHeader className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            {/* Avatar and Info Side by Side */}
+            <div className="flex flex-row md:flex-row items-start md:items-center gap-4 flex-1">
+              <Avatar
+                className="h-24 w-24"
+                style={{ border: "2px solid #e5e7eb" }}
+              >
+                <AvatarImage
+                  src="/logos/THiNK_Logo_Updated-02(icon).jpg"
+                  alt="Profile"
+                />
+                <AvatarFallback className="text-2xl">
+                  {user ? `${user.firstName[0]}${user.lastName[0]}` : "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 w-full">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                  <h1 className="text-xl sm:text-2xl font-bold">
+                    {user ? `${user.firstName} ${user.lastName}` : "Loading..."}
+                  </h1>
+                </div>
+                <p className="text-sm sm:text-base text-muted-foreground mb-3">
+                  Senior Developer
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary">Pro Member</Badge>
+                  {/* <Badge variant="outline">5 Applications</Badge> */}
+                </div>
               </div>
-              <p className="text-sm sm:text-base text-muted-foreground mb-3">
-                Senior Developer
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary">Pro Member</Badge>
-                <Badge variant="outline">5 Applications</Badge>
-              </div>
+            </div>
+            {/* Edit Button aligned to the right */}
+            <div className="flex md:flex-col justify-end w-full md:w-auto sm:justify-center">
+              <Button size="sm" className="w-fit">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
             </div>
           </CardHeader>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Verification Status
@@ -147,7 +161,7 @@ export function DashboardContent({ onApplicationsSelect }: DashboardContentProps
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
