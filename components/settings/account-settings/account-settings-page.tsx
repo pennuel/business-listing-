@@ -275,7 +275,7 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
               <Switch id="personalization" defaultChecked />
             </div>
 
-            {/* <div className="space-y-3">
+            <div className="space-y-3">
               <Label className="text-sm font-medium">Data Export & Management</Label>
 
               <Button variant="outline" className="w-full justify-start">
@@ -287,14 +287,14 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
                 <Upload className="h-4 w-4 mr-2" />
                 Import Data
               </Button>
-            </div> */}
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Danger Zone */}
-      <Card className="border-red-200">
-        <CardHeader>
+      {/* <Card className="border-red-200"> */}
+        {/* <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-600">
             <AlertTriangle className="h-5 w-5" />
             Danger Zone
@@ -315,7 +315,7 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
                 Delete Account
               </Button>
             </div>
-          </div>
+          </div> */}
 
           {/* <div className="p-4 border border-orange-200 rounded-lg bg-orange-50">
             <div className="flex items-start justify-between">
@@ -330,8 +330,8 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
               </Button>
             </div>
           </div> */}
-        </CardContent>
-      </Card>
+        {/* </CardContent> */}
+      {/* </Card> */}
     </div>
   )
 }

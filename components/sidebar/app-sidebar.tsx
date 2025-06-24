@@ -134,21 +134,21 @@ const userApplications = [
 ]
 
 const settingsItems = [
-  {
-    title: "Account Settings",
-    key: "account",
-    icon: Settings,
-  },
+  // {
+  //   title: "Account Settings",
+  //   key: "account",
+  //   icon: Settings,
+  // },
   {
     title: "Security",
     key: "security",
     icon: Shield,
   },
-  {
-    title: "Billing",
-    key: "billing",
-    icon: CreditCard,
-  },
+  // {
+  //   title: "Billing",
+  //   key: "billing",
+  //   icon: CreditCard,
+  // },
   {
     title: "Help & Support",
     key: "help",
@@ -180,7 +180,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   <User className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">My Profile</span>
+                  <span className="truncate font-semibold">My THiNK ID Profile</span>
                   <span className="truncate text-xs">Dashboard</span>
                 </div>
               </div>
@@ -300,8 +300,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">John Doe</span>
-                    <span className="truncate text-xs">john@example.com</span>
+                    <span className="truncate font-semibold">
+                      {user
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Loading..."}
+                    </span>
+                    <span className="truncate text-xs">{user?.email}</span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
