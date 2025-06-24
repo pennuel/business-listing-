@@ -38,6 +38,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useUserStore } from "@/stores/userStore"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   activeSection: string
@@ -133,21 +134,21 @@ const userApplications = [
 ]
 
 const settingsItems = [
-  {
-    title: "Account Settings",
-    key: "account",
-    icon: Settings,
-  },
+  // {
+  //   title: "Account Settings",
+  //   key: "account",
+  //   icon: Settings,
+  // },
   {
     title: "Security",
     key: "security",
     icon: Shield,
   },
-  {
-    title: "Billing",
-    key: "billing",
-    icon: CreditCard,
-  },
+  // {
+  //   title: "Billing",
+  //   key: "billing",
+  //   icon: CreditCard,
+  // },
   {
     title: "Help & Support",
     key: "help",
@@ -166,6 +167,8 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
     }
   }
 
+  const {user, isloading} = useUserStore();
+
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
       <SidebarHeader>
@@ -177,7 +180,7 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   <User className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">My Profile</span>
+                  <span className="truncate font-semibold">My THiNK ID Profile</span>
                   <span className="truncate text-xs">Dashboard</span>
                 </div>
               </div>
@@ -277,13 +280,32 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Avatar" />
+                  {/* <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage
+                      src="/placeholder.svg?height=32&width=32"
+                      alt="Avatar"
+                    />
                     <AvatarFallback className="rounded-lg">JD</AvatarFallback>
+                  </Avatar> */}
+                  <Avatar
+                    className="h-8 w-8"
+                    style={{ border: "2px solid #e5e7eb" }}
+                  >
+                    <AvatarImage
+                      src="/logos/THiNK_Logo_Updated-02(icon).jpg"
+                      alt="Profile"
+                    />
+                    <AvatarFallback className="text-2xl">
+                      {user ? `${user.firstName[0]}${user.lastName[0]}` : "U"}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">John Doe</span>
-                    <span className="truncate text-xs">john@example.com</span>
+                    <span className="truncate font-semibold">
+                      {user
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Loading..."}
+                    </span>
+                    <span className="truncate text-xs">{user?.email}</span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -294,11 +316,15 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                 align="end"
                 sideOffset={4}
               >
-                <DropdownMenuItem onClick={() => handleSectionChange("profile")}>
+                <DropdownMenuItem
+                  onClick={() => handleSectionChange("profile")}
+                >
                   <User2 />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleSectionChange("account")}>
+                <DropdownMenuItem
+                  onClick={() => handleSectionChange("account")}
+                >
                   <Settings />
                   Settings
                 </DropdownMenuItem>
@@ -313,5 +339,5 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }
