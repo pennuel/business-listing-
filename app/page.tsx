@@ -1,32 +1,31 @@
 "use client";
-import { useUserReducer } from "@/hooks/userhooks/use-user";
+
 import ProfileDashboard from "../components/dashboard/profile-dashboard";
 import { useEffect } from "react";
 import { fetchUser } from "./actions/profile/fetchuser";
+import { useUserStore } from "../stores/userStore";
 
 export default function Page() {
-  
-  const { setUser } = useUserReducer();
+  const { setUser, setLoading, setError } = useUserStore();
 
-  // Initialize user state if needed
   useEffect(() => {
-    // Initialize user state
     const initializeUser = async () => {
+      setLoading(true);
       try {
-        // Example: Fetch user data from API or localStorage
-        // const response = await fetch("/api/user");
-        // const userData = await response.json();
         const userData = await fetchUser();
         setUser(userData);
-
-        console.log("User initialized:", userData);
       } catch (error) {
         console.error("Failed to initialize user:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to load user"
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
     initializeUser();
-  }, [setUser]);
+  }, [setUser, setLoading, setError]);
 
   return <ProfileDashboard />;
 }
