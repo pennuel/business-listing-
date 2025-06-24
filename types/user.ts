@@ -43,4 +43,5 @@ export type User = {
   usernameStatus: string;
   verified: boolean;
   verifiedInstant: number;
+  imageUrl: string;
 };

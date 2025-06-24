@@ -9,7 +9,16 @@ const profiledata = {
       active: true,
       birthDate: "1976-05-30",
       connectorId: "e3306678-a53a-4964-9040-1c96f36dda72",
-      data: {},
+      data: {
+        'profession': {
+          'title': ["software engineer"],
+          "skill" : [],
+        },
+        'role': ['Member'],
+        'bio' : "John Doe is a software engineer with over 10 years of experience in web development. He enjoys coding, hiking, and photography.",
+        'location': {
+          "town":"Denver, CO"},
+      },
       email: "paulpennuel@fusionauth.io",
       firstName: "John",
       id: "167a72a4-6212-4ad4-beb1-72265af7797e",
@@ -21,7 +30,7 @@ const profiledata = {
       mobilePhone: "303-555-1234",
       passwordChangeRequired: false,
       passwordLastUpdateInstant: 1748411698683,
-      preferredLanguages: [],
+      preferredLanguages: ['english', 'spanish'],
       registrations: [
         {
           applicationId: "776acd74-19d3-4be9-9180-b0c798f5c7c4",
@@ -63,6 +72,7 @@ const profiledata = {
         methods: [],
         recoveryCodes: [],
       },
+      imageUrl: "https://example.com/profile-image.jpg",
       uniqueUsername: "johnny1233",
       username: "johnny1233",
       usernameStatus: "ACTIVE",
