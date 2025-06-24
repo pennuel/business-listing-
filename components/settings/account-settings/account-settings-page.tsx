@@ -23,7 +23,7 @@ import {
 
 export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -34,12 +34,12 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Account Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">Account Settings</h1>
         <p className="text-muted-foreground">Manage your account preferences and personal information</p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Profile Settings */}
+      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+        {/* Profile Settings
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -86,10 +86,10 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
 
             <Button className="w-full">Save Changes</Button>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Notification Preferences */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
@@ -158,10 +158,10 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Appearance Settings */}
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Moon className="h-5 w-5" />
@@ -247,7 +247,7 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
               <Switch id="animations" defaultChecked />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Data & Privacy */}
         <Card>
@@ -293,8 +293,8 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Danger Zone */}
-      <Card className="border-red-200">
-        <CardHeader>
+      {/* <Card className="border-red-200"> */}
+        {/* <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-600">
             <AlertTriangle className="h-5 w-5" />
             Danger Zone
@@ -315,9 +315,9 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
                 Delete Account
               </Button>
             </div>
-          </div>
+          </div> */}
 
-          <div className="p-4 border border-orange-200 rounded-lg bg-orange-50">
+          {/* <div className="p-4 border border-orange-200 rounded-lg bg-orange-50">
             <div className="flex items-start justify-between">
               <div>
                 <h4 className="font-medium text-orange-800">Reset All Settings</h4>
@@ -329,9 +329,9 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
                 Reset Settings
               </Button>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </div> */}
+        {/* </CardContent> */}
+      {/* </Card> */}
     </div>
   )
 }

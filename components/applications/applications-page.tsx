@@ -19,98 +19,7 @@ import {
 } from "lucide-react"
 import { useEffect, useRef } from "react"
 
-const applicationsData = [
-  {
-    name: "Analytics Pro",
-    key: "app-analytics-pro",
-    icon: BarChart3,
-    description: "Your personal analytics dashboard and reporting data",
-    category: "Analytics",
-    version: "v2.4.1",
-    lastUsed: "2 hours ago",
-    usageTime: "45 hours this month",
-    color: "bg-blue-500",
-    userStats: {
-      reportsCreated: 127,
-      dataProcessed: "2.3TB",
-      dashboardsBuilt: 15,
-      queriesRun: 1847,
-    },
-    recentActivity: "Generated quarterly sales report",
-  },
-  {
-    name: "Task Manager Pro",
-    key: "app-task-manager",
-    icon: Database,
-    description: "Your personal task management and project data",
-    category: "Productivity",
-    version: "v1.8.3",
-    lastUsed: "1 hour ago",
-    usageTime: "32 hours this month",
-    color: "bg-green-500",
-    userStats: {
-      tasksCompleted: 892,
-      projectsManaged: 23,
-      teamMembersAdded: 45,
-      milestonesReached: 67,
-    },
-    recentActivity: "Completed 8 tasks in Project Alpha",
-  },
-  {
-    name: "Website Builder",
-    key: "app-website-builder",
-    icon: Globe,
-    description: "Your websites, templates, and design assets",
-    category: "Development",
-    version: "v3.1.0",
-    lastUsed: "6 hours ago",
-    usageTime: "18 hours this month",
-    color: "bg-orange-500",
-    userStats: {
-      sitesBuilt: 12,
-      pagesCreated: 89,
-      templatesUsed: 8,
-      customComponents: 34,
-    },
-    recentActivity: "Published new portfolio website",
-  },
-  {
-    name: "Code Editor Plus",
-    key: "app-code-editor",
-    icon: Code,
-    description: "Your coding projects, files, and development data",
-    category: "Development",
-    version: "v4.2.1",
-    lastUsed: "30 minutes ago",
-    usageTime: "67 hours this month",
-    color: "bg-purple-500",
-    userStats: {
-      linesWritten: "125K",
-      filesEdited: 234,
-      repositoriesConnected: 12,
-      collaborations: 56,
-    },
-    recentActivity: "Pushed React component updates",
-  },
-  {
-    name: "Mobile App Studio",
-    key: "app-mobile-app",
-    icon: Smartphone,
-    description: "Your mobile app projects and deployment history",
-    category: "Development",
-    version: "v2.0.0-beta",
-    lastUsed: "4 hours ago",
-    usageTime: "28 hours this month",
-    color: "bg-pink-500",
-    userStats: {
-      appsBuilt: 5,
-      deploymentsCount: 18,
-      downloadsGenerated: "12.5K",
-      platformsTargeted: 3,
-    },
-    recentActivity: "Deployed iOS app to TestFlight",
-  },
-]
+
 
 interface ApplicationsPageProps {
   onApplicationSelect: (appKey: string) => void
@@ -138,7 +47,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
   }, [selectedCategory])
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -148,19 +57,19 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">My Applications</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">My Applications</h1>
           <p className="text-muted-foreground">Your personal data and activity across all applications</p>
         </div>
-        <Button variant="outline">
+        <Button variant="outline" className="w-full sm:w-auto">
           <ExternalLink className="h-4 w-4 mr-2" />
           Browse More Apps
         </Button>
       </div>
 
       {/* Usage Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -228,7 +137,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
           </div>
 
           {/* Available Apps in Category */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active App */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-blue-200"
@@ -322,7 +231,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active App */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-green-200"
@@ -416,7 +325,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {/* Active Apps */}
             <Card
               className="hover:shadow-lg transition-shadow cursor-pointer border-orange-200"
@@ -539,7 +448,7 @@ export function ApplicationsPage({ onApplicationSelect, onBack, selectedCategory
           <CardDescription>Common actions across your applications</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <Button variant="outline" className="justify-start">
               <ExternalLink className="h-4 w-4 mr-2" />
               Export All Data

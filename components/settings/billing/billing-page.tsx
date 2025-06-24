@@ -1,9 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   CreditCard,
   Download,
@@ -16,8 +22,8 @@ import {
   Code,
   Smartphone,
   Plus,
-} from "lucide-react"
-import { AddPaymentMethodModal } from "./add-payment-method-modal"
+} from "lucide-react";
+import { AddPaymentMethodModal } from "./add-payment-method-modal";
 
 const applicationGroups = [
   {
@@ -83,16 +89,29 @@ const applicationGroups = [
     ],
     totalMonthly: 32.97,
   },
-]
+];
 
 interface BillingPageProps {
-  onBack?: () => void
-  onApplicationGroupSelect: (category: string) => void
+  onBack?: () => void;
+  onApplicationGroupSelect: (category: string) => void;
 }
 
-export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPageProps) {
-  const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false)
-  const [paymentMethods, setPaymentMethods] = useState([
+export function BillingPage({
+  onBack,
+  onApplicationGroupSelect,
+}: BillingPageProps) {
+  const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+  interface PaymentMethod {
+    id: string;
+    type: string;
+    last4: string;
+    expiry: string;
+    isDefault: boolean;
+    phoneNumber?: string;
+    bankName?: string;
+  }
+
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
     {
       id: "1",
       type: "Visa",
@@ -107,34 +126,40 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
       expiry: "08/25",
       isDefault: false,
     },
-  ])
+  ]);
 
   const handlePaymentMethodAdded = (newMethod: any) => {
-    setPaymentMethods([...paymentMethods, newMethod])
-  }
+    setPaymentMethods([...paymentMethods, newMethod]);
+  };
 
-  const totalMonthly = applicationGroups.reduce((sum, group) => sum + group.totalMonthly, 0)
+  const totalMonthly = applicationGroups.reduce(
+    (sum, group) => sum + group.totalMonthly,
+    0
+  );
   const activeSubscriptions = applicationGroups.reduce(
-    (sum, group) => sum + group.applications.filter((app) => app.status === "active").length,
-    0,
-  )
+    (sum, group) =>
+      sum + group.applications.filter((app) => app.status === "active").length,
+    0
+  );
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Billing Overview</h1>
-          <p className="text-muted-foreground">Manage your application subscriptions and payment methods</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Billing Overview</h1>
+          <p className="text-muted-foreground">
+            Manage your application subscriptions and payment methods
+          </p>
         </div>
-        <Button>
+        <Button className="w-full sm:w-auto">
           <Download className="h-4 w-4 mr-2" />
           Download Summary
         </Button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center gap-3">
@@ -151,7 +176,9 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
             <div className="flex items-center gap-3">
               <CheckCircle className="h-8 w-8 text-blue-500" />
               <div>
-                <p className="text-sm text-muted-foreground">Active Subscriptions</p>
+                <p className="text-sm text-muted-foreground">
+                  Active Subscriptions
+                </p>
                 <p className="text-3xl font-bold">{activeSubscriptions}</p>
               </div>
             </div>
@@ -186,12 +213,15 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
                   <div>
                     <CardTitle className="text-xl">{group.category}</CardTitle>
                     <CardDescription>
-                      {group.applications.length} application{group.applications.length > 1 ? "s" : ""}
+                      {group.applications.length} application
+                      {group.applications.length > 1 ? "s" : ""}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-2xl font-bold">${group.totalMonthly.toFixed(2)}</p>
+                      <p className="text-2xl font-bold">
+                        ${group.totalMonthly.toFixed(2)}
+                      </p>
                       <p className="text-sm text-muted-foreground">/month</p>
                     </div>
                     <ArrowRight className="h-5 w-5 text-muted-foreground" />
@@ -201,20 +231,29 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
               <CardContent>
                 <div className="flex items-center gap-2">
                   {group.applications.map((app) => {
-                    const Icon = app.icon
+                    const Icon = app.icon;
                     return (
                       <div key={app.key} className="flex items-center gap-2">
-                        <div className={`p-2 rounded-lg ${app.color} text-white`}>
+                        <div
+                          className={`p-2 rounded-lg ${app.color} text-white`}
+                        >
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{app.name}</span>
-                          <Badge variant={app.status === "active" ? "default" : "secondary"} className="text-xs">
+                          <span className="text-sm font-medium">
+                            {app.name}
+                          </span>
+                          <Badge
+                            variant={
+                              app.status === "active" ? "default" : "secondary"
+                            }
+                            className="text-xs"
+                          >
                             {app.status === "trial" ? "Trial" : "Active"}
                           </Badge>
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </CardContent>
@@ -226,12 +265,18 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
       {/* Payment Methods */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <CardTitle>Payment Methods</CardTitle>
-              <CardDescription>Manage your payment methods for all subscriptions</CardDescription>
+              <CardDescription>
+                Manage your payment methods for all subscriptions
+              </CardDescription>
             </div>
-            <Button variant="outline" onClick={() => setIsAddPaymentModalOpen(true)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsAddPaymentModalOpen(true)}
+              className="w-full sm:w-auto"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Add Method
             </Button>
@@ -240,7 +285,10 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
         <CardContent>
           <div className="space-y-3">
             {paymentMethods.map((method) => (
-              <div key={method.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={method.id}
+                className="flex items-center justify-between p-4 border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded bg-gray-100">
                     <CreditCard className="h-4 w-4 text-gray-600" />
@@ -250,15 +298,15 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
                       {method.type === "M-Pesa"
                         ? `M-Pesa •••• ${method.last4}`
                         : method.type === "Bank"
-                          ? `${method.bankName} •••• ${method.last4}`
-                          : `•••• •••• •••• ${method.last4}`}
+                        ? `${method.bankName} •••• ${method.last4}`
+                        : `•••• •••• •••• ${method.last4}`}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {method.type === "M-Pesa"
                         ? `Phone: ${method.phoneNumber}`
                         : method.type === "Bank"
-                          ? `Bank Account`
-                          : `${method.type} • Expires ${method.expiry}`}
+                        ? `Bank Account`
+                        : `${method.type} • Expires ${method.expiry}`}
                     </p>
                   </div>
                 </div>
@@ -284,5 +332,5 @@ export function BillingPage({ onBack, onApplicationGroupSelect }: BillingPagePro
         onPaymentMethodAdded={handlePaymentMethodAdded}
       />
     </div>
-  )
+  );
 }

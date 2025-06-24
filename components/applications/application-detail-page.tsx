@@ -159,7 +159,7 @@ export function ApplicationDetailPage({ appKey, onBack }: ApplicationDetailPageP
   const Icon = app.icon
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-0">
+    <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
@@ -169,24 +169,24 @@ export function ApplicationDetailPage({ appKey, onBack }: ApplicationDetailPageP
       </div>
 
       {/* Main Header */}
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
         <div className={`p-3 rounded-lg ${app.color} text-white`}>
           <Icon className="h-8 w-8" />
         </div>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold">{app.name}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{app.name}</h1>
           <p className="text-muted-foreground">{app.description}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             <Share className="h-4 w-4 mr-2" />
             Share
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Export Data
           </Button>
-          <Button size="sm">
+          <Button size="sm" className="w-full sm:w-auto">
             <ExternalLink className="h-4 w-4 mr-2" />
             Open App
           </Button>
@@ -194,7 +194,7 @@ export function ApplicationDetailPage({ appKey, onBack }: ApplicationDetailPageP
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -242,23 +242,23 @@ export function ApplicationDetailPage({ appKey, onBack }: ApplicationDetailPageP
       </div>
 
       <Tabs defaultValue="overview" className="flex-1">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="data">Your Data</TabsTrigger>
+          <TabsTrigger value="data">Data</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           {/* User Statistics */}
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle>Your Statistics</CardTitle>
                 <CardDescription>Your personal usage and creation metrics</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {Object.entries(app.userData)
                     .filter(
                       ([key]) =>
