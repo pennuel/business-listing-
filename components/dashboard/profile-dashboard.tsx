@@ -70,7 +70,10 @@ export default function ProfileDashboard() {
     switch (activeSection) {
       case "dashboard":
         return (
-          <DashboardContent onApplicationsSelect={handleApplicationsSelect} />
+          <DashboardContent 
+            onApplicationsSelect={handleApplicationsSelect}
+            onViewProfile={() => setActiveSection("profile")}
+          />
         );
       case "profile":
         return (
@@ -180,7 +183,9 @@ export default function ProfileDashboard() {
           );
         }
         return (
-          <DashboardContent onApplicationsSelect={handleApplicationsSelect} />
+          <DashboardContent 
+          onViewProfile={() => setActiveSection("profile")}
+          onApplicationsSelect={handleApplicationsSelect} />
         );
     }
   };
