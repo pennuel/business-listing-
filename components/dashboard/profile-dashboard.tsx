@@ -183,7 +183,9 @@ export default function ProfileDashboard() {
           );
         }
         return (
-          <DashboardContent onApplicationsSelect={handleApplicationsSelect} />
+          <DashboardContent 
+          onViewProfile={() => setActiveSection("profile")}
+          onApplicationsSelect={handleApplicationsSelect} />
         );
     }
   };
