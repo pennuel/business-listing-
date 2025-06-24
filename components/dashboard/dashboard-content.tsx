@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { TrendingUp, Clock, Edit, BarChart3 } from "lucide-react";
+import { TrendingUp, Clock, Edit, BarChart3, User } from "lucide-react";
 // Add these new imports at the top
 import {
   ExternalLink,
@@ -86,12 +86,14 @@ const applicationsData = [
 ];
 
 interface DashboardContentProps {
+  onViewProfile: () => void;
   onApplicationsSelect?: () => void;
 }
 
 // Replace the entire return statement with this updated version:
 export function DashboardContent({
   onApplicationsSelect,
+  onViewProfile,
 }: DashboardContentProps) {
   const { user, isLoading } = useUserStore();
 
@@ -122,25 +124,31 @@ export function DashboardContent({
                   </h1>
                 </div>
                 <p className="text-sm sm:text-base text-muted-foreground mb-3">
-                  Senior Developer
+                  {user ? user.data.profession.title : ""}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary">Pro Member</Badge>
+                  <Badge variant="secondary">
+                    {user ? user.data.role : "User"}
+                  </Badge>
                   {/* <Badge variant="outline">5 Applications</Badge> */}
                 </div>
               </div>
             </div>
             {/* Edit Button aligned to the right */}
             <div className="flex md:flex-col justify-end w-full md:w-auto sm:justify-center">
-              <Button size="sm" className="w-fit">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
+              <Button
+                size="sm"
+                className="w-fit"
+                onClick={() => onViewProfile()}
+              >
+                <User className="h-4 w-4 mr-2" />
+                View Profile
               </Button>
             </div>
           </CardHeader>
         </Card>
 
-        {/* <Card>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
               Verification Status
@@ -150,18 +158,30 @@ export function DashboardContent({
           <CardContent>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium">Developer Verified</span>
+                {user?.verified ? (
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Clock className="h-4 w-4 text-orange-500" />
+                )}
+                {/* <CheckCircle className="h-4 w-4 text-green-500" /> */}
+                <span className="text-sm font-medium">User Verified</span>
               </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-orange-500" />
+                <span className="text-sm text-muted-foreground">
+                  THiNK Pending
+                </span>
+              </div>
+              {/* 
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-orange-500" />
                 <span className="text-sm text-muted-foreground">
                   Business Pending
                 </span>
-              </div>
+              </div> */}
             </div>
           </CardContent>
-        </Card> */}
+        </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
