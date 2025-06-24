@@ -18,8 +18,24 @@ import {
   Code,
   ArrowLeft,
 } from "lucide-react"
+import { digitsToDate } from "@/lib/utils"
+import { useUserStore } from "@/stores/userStore"
+import redirectToExternalApp from "@/utils/redirect-to-ExternalApp"
 
 export function SecurityPage({ onBack }: { onBack: () => void }) {
+
+
+  const {user} = useUserStore();
+
+  const redirectToProfile = () => {
+    
+    redirectToExternalApp(
+      "https://account.think.ke/auth/forgot-password?returnUrl=https%3A%2F%2Fthink.ke&appId=6172dbba-0f63-4820-8bb0-70f41ea14f69&callback=https%3A%2F%2Fthink.ke"
+    );
+    onBack();
+  }
+
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
       {/* Back Navigation - Top Level */}
@@ -88,9 +104,13 @@ export function SecurityPage({ onBack }: { onBack: () => void }) {
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <p className="font-medium">Password</p>
-                <p className="text-sm text-muted-foreground">Last changed 3 months ago</p>
+                <p className="text-sm text-muted-foreground">
+                  Last Changed on { user ? digitsToDate(user.passwordLastUpdateInstant ) : "" }
+                </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm"
+              onClick={redirectToProfile}
+              >
                 Change
               </Button>
             </div>
