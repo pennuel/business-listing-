@@ -158,25 +158,23 @@ export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Profile
         </Button>
+      </div>
+      <div className="flex flex-row items-center justify-between gap-4 w-full">
         <div className="flex-1">
           <h1 className="text-2xl sm:text-3xl font-bold">Edit Profile</h1>
           <p className="text-muted-foreground">
-            Update your personal information and profile details
+        Update your personal information and profile details
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          <Button
-            variant="outline"
-            onClick={onBack}
-            className="w-full sm:w-auto"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Cancel
+          <Button variant="outline" onClick={onBack} className="w-full sm:w-auto">
+        <X className="h-4 w-4 mr-2" />
+        Cancel
           </Button>
           {/* <Button className="w-full sm:w-auto">
-            <Save className="h-4 w-4 mr-2" />
-            Save Changes
-          </Button> */}
+          <Save className="h-4 w-4 mr-2" />
+          Save Changes
+        </Button> */}
         </div>
       </div>
       <form id="profile-form" action={handleSubmit} className="space-y-8">
@@ -191,13 +189,25 @@ export function ProfileEditPage({ onBack }: ProfileEditPageProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex flex-col items-center space-y-4">
-                <Avatar className="h-32 w-32">
+                {/* <Avatar className="h-32 w-32">
                   <AvatarImage
                     src={previewImage || user?.imageUrl || "/placeholder.svg?height=128&width=128"}
                     alt="Profile"
                   />
                   <AvatarFallback className="text-2xl">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar> */}
+                <Avatar
+                  className="h-32 w-32"
+                  style={{ border: "2px solid #e5e7eb" }}
+                >
+                  <AvatarImage
+                    src="/logos/THiNK_Logo_Updated-02(icon).jpg"
+                    alt="Profile"
+                  />
+                  <AvatarFallback className="text-2xl">
+                    {user ? `${user.firstName[0]}${user.lastName[0]}` : "U"}
                   </AvatarFallback>
                 </Avatar>
                 {/* <div className="flex gap-2">
