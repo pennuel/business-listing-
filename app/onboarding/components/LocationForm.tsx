@@ -1,0 +1,128 @@
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import type { BusinessData } from "../page"
+
+interface LocationFormProps {
+  data: BusinessData
+  onUpdate: (data: Partial<BusinessData>) => void
+  onNext: () => void
+  onPrevious: () => void
+}
+
+const countries = ["Kenya", "Uganda", "Tanzania", "Rwanda", "Burundi"]
+const counties = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Thika", "Malindi"]
+const subCounties = ["Westlands", "Kasarani", "Embakasi", "Dagoretti", "Langata", "Starehe"]
+
+export default function LocationForm({ data, onUpdate, onNext, onPrevious }: LocationFormProps) {
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!data.country) newErrors.country = "Country is required"
+    if (!data.county) newErrors.county = "County is required"
+    if (!data.subCounty) newErrors.subCounty = "Sub County is required"
+    if (!data.address.trim()) newErrors.address = "Address is required"
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validateForm()) {
+      onNext()
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label>Country *</Label>
+        <Select value={data.country} onValueChange={(value) => onUpdate({ country: value })}>
+          <SelectTrigger className={errors.country ? "border-red-500" : ""}>
+            <SelectValue placeholder="Select country" />
+          </SelectTrigger>
+          <SelectContent>
+            {countries.map((country) => (
+              <SelectItem key={country} value={country}>
+                {country}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {errors.country && <p className="text-sm text-red-500 mt-1">{errors.country}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label>County *</Label>
+          <Select value={data.county} onValueChange={(value) => onUpdate({ county: value })}>
+            <SelectTrigger className={errors.county ? "border-red-500" : ""}>
+              <SelectValue placeholder="County" />
+            </SelectTrigger>
+            <SelectContent>
+              {counties.map((county) => (
+                <SelectItem key={county} value={county}>
+                  {county}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.county && <p className="text-sm text-red-500 mt-1">{errors.county}</p>}
+        </div>
+
+        <div>
+          <Label>Sub County *</Label>
+          <Select value={data.subCounty} onValueChange={(value) => onUpdate({ subCounty: value })}>
+            <SelectTrigger className={errors.subCounty ? "border-red-500" : ""}>
+              <SelectValue placeholder="Sub County" />
+            </SelectTrigger>
+            <SelectContent>
+              {subCounties.map((subCounty) => (
+                <SelectItem key={subCounty} value={subCounty}>
+                  {subCounty}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.subCounty && <p className="text-sm text-red-500 mt-1">{errors.subCounty}</p>}
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="address">Street Address *</Label>
+        <Textarea
+          id="address"
+          value={data.address}
+          onChange={(e) => onUpdate({ address: e.target.value })}
+          placeholder="Building name, street name, landmarks..."
+          rows={3}
+          className={errors.address ? "border-red-500" : ""}
+        />
+        {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
+      </div>
+
+      <div>
+        <Label htmlFor="pin">PIN/Postal Code</Label>
+        <Input id="pin" value={data.pin} onChange={(e) => onUpdate({ pin: e.target.value })} placeholder="Optional" />
+      </div>
+
+      <div className="flex gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onPrevious} className="flex-1 bg-transparent">
+          Back
+        </Button>
+        <Button type="submit" className="flex-1">
+          Continue
+        </Button>
+      </div>
+    </form>
+  )
+}
