@@ -1,8 +1,9 @@
 // User repository - handles all user-related database operations
 import { prisma } from "../config"
-import type { User, Prisma } from "@prisma/client"
+import { User, Prisma } from "@prisma/client"
 
 export interface CreateUserData {
+  id: string
   email: string
   name?: string
 }
@@ -13,9 +14,18 @@ export interface UpdateUserData {
 }
 
 export class UserRepository {
+
+  /**
+   * Create or update a user coming from THiNKID.
+   * Uses the FusionAuth user id as the primary key to avoid duplicates.
+   * It will also help with updating the other fields of the user
+   */
   async create(data: CreateUserData): Promise<User> {
-    return await prisma.user.create({
-      data,
+    const { id, ...rest } = data
+    return await prisma.user.upsert({
+      where: { id },
+      create: { id, ...rest },
+      update: { ...rest },
     })
   }
 
@@ -71,13 +81,14 @@ export class UserRepository {
     return await prisma.user.count({ where })
   }
 
-  async findOrCreate(email: string, name?: string): Promise<User> {
-    const existingUser = await this.findByEmail(email)
+  async findOrCreate(data: Partial<User>): Promise<User> {
+    const existingUser = await this.findByEmail(data.email || "")
     if (existingUser) {
       return existingUser
     }
 
-    return await this.create({ email, name })
+    // If user does not exist, create a new one based on the CreateUserData type.
+    return await this.create(data as CreateUserData)
   }
 }
 
