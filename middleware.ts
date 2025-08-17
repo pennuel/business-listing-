@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Protect dashboard and onboarding routes
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("")) {
+  if (pathname.startsWith("/dashboard") || pathname.startsWith("/backoffice")) {
     if (!token) {
       const loginUrl = new URL("/login", request.url)
       loginUrl.searchParams.set("callbackUrl", request.url)
