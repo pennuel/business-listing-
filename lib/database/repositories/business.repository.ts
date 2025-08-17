@@ -1,6 +1,6 @@
 // Business repository - handles all business-related database operations
 import { prisma } from "../config"
-import type { Business, Prisma } from "@prisma/client"
+import { Business, Prisma } from "@prisma/client"
 
 export interface CreateBusinessData {
   userId: string
@@ -19,7 +19,9 @@ export interface CreateBusinessData {
   weekdaySchedule: Prisma.JsonValue
   weekendSchedule: Prisma.JsonValue
   holidayHours: Prisma.JsonValue
+  paymentStatus?: string | "pending" // Default to "pending" if not provided
 }
+
 
 export interface UpdateBusinessData {
   name?: string
@@ -38,17 +40,23 @@ export interface UpdateBusinessData {
   weekendSchedule?: Prisma.JsonValue
   holidayHours?: Prisma.JsonValue
   status?: string
-  paymentStatus?: string
+  paymentStatus?: string | "pending" // Default to "pending" if not provided
 }
 
 export class BusinessRepository {
   async create(data: CreateBusinessData): Promise<Business> {
+    const normalized = {
+      ...data,
+      weekdaySchedule:
+        data.weekdaySchedule === null ? Prisma.JsonNull : data.weekdaySchedule,
+      weekendSchedule:
+        data.weekendSchedule === null ? Prisma.JsonNull : data.weekendSchedule,
+      holidayHours:
+        data.holidayHours === null ? Prisma.JsonNull : data.holidayHours,
+    };
+    
     return await prisma.business.create({
-      data: {
-        ...data,
-        status: "pending_payment",
-        paymentStatus: "pending",
-      },
+      data : normalized
     })
   }
 
@@ -89,7 +97,15 @@ export class BusinessRepository {
   async update(id: string, data: UpdateBusinessData): Promise<Business> {
     return await prisma.business.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        weekdaySchedule:
+          data.weekdaySchedule === null ? Prisma.JsonNull : data.weekdaySchedule,
+        weekendSchedule:
+          data.weekendSchedule === null ? Prisma.JsonNull : data.weekendSchedule,
+        holidayHours:
+          data.holidayHours === null ? Prisma.JsonNull : data.holidayHours,
+      },
     })
   }
 
