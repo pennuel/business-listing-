@@ -3,7 +3,7 @@ import { prisma } from "../config"
 import { User, Prisma } from "@prisma/client"
 
 export interface CreateUserData {
-  id: string
+  id?: string
   email: string
   name?: string
 }
@@ -21,11 +21,19 @@ export class UserRepository {
    * It will also help with updating the other fields of the user
    */
   async create(data: CreateUserData): Promise<User> {
-    const { id, ...rest } = data
+    const { id, email, ...rest } = data
+    if (!id && !email) {
+      throw new Error("create: either 'id' or 'email' must be provided")
+    }
+
+    const where: Prisma.UserWhereUniqueInput = id ? { id } : { email }
+    const createData = id ? { id, email, ...rest } : { email, ...rest }
+    const updateData = { email, ...rest }
+
     return await prisma.user.upsert({
-      where: { id },
-      create: { id, ...rest },
-      update: { ...rest },
+      where,
+      create: createData,
+      update: updateData,
     })
   }
 

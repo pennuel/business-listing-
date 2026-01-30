@@ -1,51 +1,23 @@
 import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import GitHubProvider from "next-auth/providers/github"
+import FusionAuthProvider from "next-auth/providers/fusionauth"
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
-
-        // Demo users for testing
-        const demoUsers = [
-          {
-            id: "user-1",
-            email: "demo@example.com",
-            name: "John Doe",
-            image: "/placeholder.svg?height=40&width=40",
-          },
-          {
-            id: "user-2",
-            email: "jane@example.com",
-            name: "Jane Smith",
-            image: "/placeholder.svg?height=40&width=40",
-          },
+    // FusionAuth (OpenID Connect/OAuth2) provider
+    ...(process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
+      ? [
+          FusionAuthProvider({
+            id: "fusionauth",
+            name: "FusionAuth",
+            clientId: process.env.FUSIONAUTH_CLIENT_ID,
+            clientSecret: process.env.FUSIONAUTH_CLIENT_SECRET,
+            issuer: process.env.FUSIONAUTH_ISSUER,
+            authorization: { params: { scope: "openid profile email" } },
+          }),
         ]
-
-        const user = demoUsers.find((u) => u.email === credentials.email)
-
-        if (user && credentials.password === "password") {
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            image: user.image,
-          }
-        }
-
-        return null
-      },
-    }),
+      : []),
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
           GoogleProvider({
@@ -71,9 +43,10 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, profile }) {
       if (user) {
-        token.id = user.id
+        // Try to set token.id from multiple possible sources (OAuth/OIDC subject, user id)
+        token.id = (user as any).id ?? (profile as any)?.sub ?? token.sub
       }
       return token
     },
