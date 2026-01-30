@@ -15,9 +15,14 @@ export async function middleware(request: NextRequest) {
   // Protect dashboard and onboarding routes
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/backoffice")) {
     if (!token) {
-      const loginUrl = new URL("/login", request.url)
-      loginUrl.searchParams.set("callbackUrl", request.url)
-      return NextResponse.redirect(loginUrl)
+      // Prefer redirecting directly to FusionAuth provider if configured
+      const providerPath = process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
+        ? "/api/auth/signin/fusionauth"
+        : "/login"
+
+      const redirectUrl = new URL(providerPath, request.url)
+      redirectUrl.searchParams.set("callbackUrl", request.url)
+      return NextResponse.redirect(redirectUrl)
     }
   }
 

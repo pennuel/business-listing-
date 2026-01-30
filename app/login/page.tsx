@@ -19,33 +19,9 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
+    // credentials no longer supported; prevent default and show a helpful message
     e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError("Invalid email or password")
-      } else if (result?.ok) {
-        // Wait for session to be established
-        const session = await getSession()
-        if (session) {
-          router.push("/dashboard")
-          router.refresh()
-        }
-      }
-    } catch (error) {
-      console.error("Login error:", error)
-      setError("An error occurred. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
+    setError("This app uses FusionAuth OAuth. Use the 'Continue with FusionAuth' button.")
   }
 
   const handleOAuthLogin = async (provider: string) => {
@@ -87,20 +63,11 @@ export default function LoginPage() {
             <Button
               variant="outline"
               className="w-full bg-transparent"
-              onClick={() => handleOAuthLogin("google")}
+              onClick={() => handleOAuthLogin("fusionauth")}
               disabled={isLoading}
             >
               <Mail className="mr-2 h-4 w-4" />
-              Continue with Google
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={() => handleOAuthLogin("github")}
-              disabled={isLoading}
-            >
-              <Github className="mr-2 h-4 w-4" />
-              Continue with GitHub
+              Continue with FusionAuth
             </Button>
           </div>
 
@@ -113,42 +80,12 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Credentials Form */}
+          {/* Informational note: credentials removed in favor of FusionAuth OAuth */}
           <form onSubmit={handleCredentialsLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="demo@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+            <div className="text-sm text-muted-foreground">
+              This application uses FusionAuth for authentication. Click "Continue with FusionAuth" to sign in.
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800 font-medium mb-2">Demo Credentials:</p>
-            <p className="text-xs text-blue-700">Email: demo@example.com</p>
-            <p className="text-xs text-blue-700">Password: password</p>
-          </div>
         </CardContent>
       </Card>
     </div>
