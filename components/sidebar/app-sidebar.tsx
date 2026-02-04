@@ -19,6 +19,7 @@ import {
   Globe,
   Code,
   Smartphone,
+  Users,
 } from "lucide-react"
 
 import {
@@ -45,115 +46,55 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onSectionChange: (section: string) => void
 }
 
-// Navigation items
-const navItems = [
+// User Profile Section
+const userProfileItems = [
+  {
+    title: "My Profile",
+    key: "profile",
+    icon: User,
+  },
+  {
+    title: "Security",
+    key: "security",
+    icon: Shield,
+  },
+]
+
+// Application Studio Section
+const applicationStudioItems = [
   {
     title: "Dashboard",
     key: "dashboard",
     icon: BarChart3,
   },
   {
-    title: "Profile",
-    key: "profile",
-    icon: User,
+    title: "Applications",
+    key: "applications",
+    icon: Grid3X3,
   },
-  // {
-  //   title: "Applications",
-  //   key: "applications",
-  //   icon: Grid3X3,
-  // },
-  // {
-  //   title: "Activity",
-  //   key: "activity",
-  //   icon: Activity,
-  // },
-  // {
-  //   title: "Notifications",
-  //   key: "notifications",
-  //   icon: Bell,
-  // },
-]
-
-// User's applications with their personal data
-const userApplications = [
-  // {
-  //   title: "Analytics Pro",
-  //   key: "app-analytics-pro",
-  //   icon: BarChart3,
-  //   status: "active",
-  //   userStats: {
-  //     reportsCreated: 127,
-  //     dataProcessed: "2.3TB",
-  //     lastLogin: "2 hours ago",
-  //   },
-  // },
-  // {
-  //   title: "Task Manager",
-  //   key: "app-task-manager",
-  //   icon: Database,
-  //   status: "active",
-  //   userStats: {
-  //     tasksCompleted: 892,
-  //     projectsManaged: 23,
-  //     lastLogin: "1 hour ago",
-  //   },
-  // },
-  // {
-  //   title: "Website Builder",
-  //   key: "app-website-builder",
-  //   icon: Globe,
-  //   status: "maintenance",
-  //   userStats: {
-  //     sitesBuilt: 12,
-  //     pagesCreated: 89,
-  //     lastLogin: "6 hours ago",
-  //   },
-  // },
-  // {
-  //   title: "Code Editor",
-  //   key: "app-code-editor",
-  //   icon: Code,
-  //   status: "active",
-  //   userStats: {
-  //     linesWritten: "125K",
-  //     filesEdited: 234,
-  //     lastLogin: "30 minutes ago",
-  //   },
-  // },
-  // {
-  //   title: "Mobile App",
-  //   key: "app-mobile-app",
-  //   icon: Smartphone,
-  //   status: "beta",
-  //   userStats: {
-  //     appsBuilt: 5,
-  //     deploymentsCount: 18,
-  //     lastLogin: "4 hours ago",
-  //   },
-  // },
-]
-
-const settingsItems = [
-  // {
-  //   title: "Account Settings",
-  //   key: "account",
-  //   icon: Settings,
-  // },
   {
-    title: "Security",
-    key: "security",
-    icon: Shield,
+    title: "Teams",
+    key: "teams", // Feature for later
+    icon: Users,
   },
-  // {
-  //   title: "Billing",
-  //   key: "billing",
-  //   icon: CreditCard,
-  // },
-  // {
-  //   title: "Help & Support",
-  //   key: "help",
-  //   icon: HelpCircle,
-  // },
+  {
+    title: "Account Settings",
+    key: "account",
+    icon: Settings,
+  },
+  {
+    title: "Billing",
+    key: "billing",
+    icon: CreditCard,
+  },
+]
+
+const helpItems = [
+  {
+    title: "Help & Support",
+    key: "help",
+    icon: HelpCircle,
+  },
 ]
 
 export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSidebarProps) {
@@ -189,11 +130,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {/* User Profile Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
+          <SidebarGroupLabel>User Profile</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {userProfileItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
@@ -209,53 +151,31 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger className="flex w-full items-center justify-between">
-                My Applications
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {userApplications.map((app) => (
-                    <SidebarMenuItem key={app.key}>
-                      <SidebarMenuButton
-                        isActive={activeSection === app.key}
-                        onClick={() => handleSectionChange(app.key)}
-                        tooltip={app.title}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <app.icon className="h-4 w-4" />
-                            <span>{app.title}</span>
-                          </div>
-                          <div
-                            className={`h-2 w-2 rounded-full ${
-                              app.status === "active"
-                                ? "bg-green-500"
-                                : app.status === "maintenance"
-                                  ? "bg-orange-500"
-                                  : "bg-blue-500"
-                            }`}
-                          />
-                        </div>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible> */}
-
+        {/* Application Studio Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupLabel>Application Studio</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {settingsItems.map((item) => (
+              {applicationStudioItems.map((item) => (
+                <SidebarMenuItem key={item.key}>
+                  <SidebarMenuButton
+                    isActive={activeSection === item.key}
+                    onClick={() => handleSectionChange(item.key)}
+                    tooltip={item.title}
+                  >
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {helpItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
@@ -280,13 +200,13 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  {/* <Avatar className="h-8 w-8 rounded-lg">
+                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage
                       src="/placeholder.svg?height=32&width=32"
                       alt="Avatar"
                     />
                     <AvatarFallback className="rounded-lg">JD</AvatarFallback>
-                  </Avatar> */}
+                  </Avatar> 
                   <Avatar
                     className="h-8 w-8"
                     style={{ border: "2px solid #e5e7eb" }}
@@ -322,12 +242,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   <User2 />
                   Profile
                 </DropdownMenuItem>
-                {/* <DropdownMenuItem
+                <DropdownMenuItem
                   onClick={() => handleSectionChange("account")}
                 >
                   <Settings />
                   Settings
-                </DropdownMenuItem> */}
+                </DropdownMenuItem>
                 <DropdownMenuItem>
                   <LogOut />
                   Log out
