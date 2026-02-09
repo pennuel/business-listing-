@@ -70,6 +70,11 @@ export async function submitBusinessData(
       subCounty: businessData.subCounty?.trim() || "",
       address: businessData.address.trim(),
       pin: businessData.pin?.trim() || undefined,
+      // Full location helpers
+      formattedAddress: businessData.formattedAddress || undefined,
+      latitude: businessData.coordinates?.lat,
+      longitude: businessData.coordinates?.lng,
+      placeId: businessData.placeId || undefined,
 
       // Schedule - Store as JSON
       weekdaySchedule: businessData.weekdaySchedule,

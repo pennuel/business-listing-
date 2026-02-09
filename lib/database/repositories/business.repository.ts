@@ -16,6 +16,10 @@ export interface CreateBusinessData {
   subCounty: string
   address: string
   pin?: string
+  formattedAddress?: string
+  latitude?: number
+  longitude?: number
+  placeId?: string
   weekdaySchedule: Prisma.JsonValue
   weekendSchedule: Prisma.JsonValue
   holidayHours: Prisma.JsonValue
@@ -36,6 +40,10 @@ export interface UpdateBusinessData {
   subCounty?: string
   address?: string
   pin?: string
+  formattedAddress?: string
+  latitude?: number
+  longitude?: number
+  placeId?: string
   weekdaySchedule?: Prisma.JsonValue
   weekendSchedule?: Prisma.JsonValue
   holidayHours?: Prisma.JsonValue

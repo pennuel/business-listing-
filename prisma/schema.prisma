@@ -38,6 +38,10 @@ model Business {
   subCounty        String
   address          String
   pin              String?
+  formattedAddress String?
+  latitude         Float?
+  longitude        Float?
+  placeId          String?
   paymentStatus   String   @default("pending")
   weekdaySchedule  Json
   weekendSchedule  Json

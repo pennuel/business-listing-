@@ -15,6 +15,10 @@ export interface Business {
   subCounty: string
   address: string
   pin?: string
+  formattedAddress?: string
+  latitude?: number
+  longitude?: number
+  placeId?: string
   status: "active" | "pending_payment" | "inactive"
   paymentStatus: "paid" | "pending" | "failed"
   weekdaySchedule: {

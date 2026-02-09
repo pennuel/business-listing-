@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
+import MapLocationForm from "./MapLocationForm"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -28,6 +29,7 @@ type LocationData = {
 
 export default function LocationForm({ data, onUpdate, onNext, onPrevious }: LocationFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showMap, setShowMap] = useState(false)
   const [locations, setLocations] = useState<LocationData | null>(null)
   const [countryOptions, setCountryOptions] = useState<string[]>(fallbackCountries)
   const [countyOptions, setCountyOptions] = useState<string[]>([])
@@ -209,6 +211,25 @@ export default function LocationForm({ data, onUpdate, onNext, onPrevious }: Loc
         />
         {errors.address && <p className="text-sm text-red-500 mt-1">{errors.address}</p>}
       </div>
+
+      {/* <div className="pt-2">
+        <Label className="text-sm font-medium">Set Location on Map</Label>
+        <p className="text-sm text-gray-500 mb-2">Use the map to pin your precise location (recommended).</p>
+        <div className="flex gap-2">
+          <Button type="button" variant={showMap ? "destructive" : "outline"} onClick={() => setShowMap((s) => !s)}>
+            {showMap ? "Hide Map" : "Open Map"}
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => setShowMap(true)}>
+            Center Map
+          </Button>
+        </div>
+      </div>
+
+      {showMap && (
+        <div className="mt-4">
+          <MapLocationForm data={data} onUpdate={onUpdate} onNext={onNext} onPrevious={onPrevious} />
+        </div>
+      )} */}
 
       <div>
         <Label htmlFor="pin">PIN/Postal Code</Label>

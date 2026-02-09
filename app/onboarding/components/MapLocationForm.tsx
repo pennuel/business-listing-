@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -16,230 +16,145 @@ interface MapLocationFormProps {
   onPrevious: () => void
 }
 
-// Google Maps types
-declare global {
-  interface Window {
-    google: any
-    initMap: () => void
-  }
-}
-
+// We'll use Leaflet + OpenStreetMap (no API key required) and Nominatim for search/reverse geocoding
 export default function MapLocationForm({ data, onUpdate, onNext, onPrevious }: MapLocationFormProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [isMapReady, setIsMapReady] = useState(false)
-  const [currentPosition, setCurrentPosition] = useState<{ lat: number; lng: number } | null>(null)
-  const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstance = useRef<any>(null)
-  const markerInstance = useRef<any>(null)
-  const searchBoxInstance = useRef<any>(null)
+  const [query, setQuery] = useState("")
+  const [loading, setLoading] = useState(false)
+  const mapRef = useRef<HTMLDivElement | null>(null)
+  const leafletRef = useRef<any | null>(null)
+  const markerRef = useRef<any | null>(null)
 
-  // Initialize Google Maps
-  const initializeMap = useCallback(() => {
-    if (!window.google || !mapRef.current) return
-
-    const defaultCenter = data.coordinates || currentPosition || { lat: -1.286389, lng: 36.817223 } // Nairobi, Kenya
-
-    // Create map
-    mapInstance.current = new window.google.maps.Map(mapRef.current, {
-      center: defaultCenter,
-      zoom: 15,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false,
-    })
-
-    // Create marker
-    markerInstance.current = new window.google.maps.Marker({
-      position: defaultCenter,
-      map: mapInstance.current,
-      draggable: true,
-      title: "Drag to set your business location",
-    })
-
-    // Handle marker drag
-    markerInstance.current.addListener("dragend", () => {
-      const position = markerInstance.current.getPosition()
-      const lat = position.lat()
-      const lng = position.lng()
-
-      // Reverse geocoding to get address
-      const geocoder = new window.google.maps.Geocoder()
-      geocoder.geocode({ location: { lat, lng } }, (results: any[], status: string) => {
-        if (status === "OK" && results[0]) {
-          onUpdate({
-            coordinates: { lat, lng },
-            formattedAddress: results[0].formatted_address,
-            placeId: results[0].place_id,
-          })
-        } else {
-          onUpdate({
-            coordinates: { lat, lng },
-            formattedAddress: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-            placeId: "",
-          })
-        }
-      })
-    })
-
-    // Handle map click
-    mapInstance.current.addListener("click", (event: any) => {
-      const lat = event.latLng.lat()
-      const lng = event.latLng.lng()
-
-      markerInstance.current.setPosition({ lat, lng })
-
-      // Reverse geocoding
-      const geocoder = new window.google.maps.Geocoder()
-      geocoder.geocode({ location: { lat, lng } }, (results: any[], status: string) => {
-        if (status === "OK" && results[0]) {
-          onUpdate({
-            coordinates: { lat, lng },
-            formattedAddress: results[0].formatted_address,
-            placeId: results[0].place_id,
-          })
-        }
-      })
-    })
-
-    setIsMapReady(true)
-    setIsLoading(false)
-  }, [data.coordinates, currentPosition, onUpdate])
-
-  // Load Google Maps script
+  // Load Leaflet CSS and script
   useEffect(() => {
-    if (window.google) {
-      initializeMap()
+    if ((window as any).L) {
+      initMap()
       return
     }
 
+    const css = document.createElement("link")
+    css.rel = "stylesheet"
+    css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    document.head.appendChild(css)
+
     const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places`
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     script.async = true
-    script.defer = true
-
-    window.initMap = initializeMap
-
-    script.onload = () => {
-      if (window.google) {
-        initializeMap()
-      }
-    }
-
-    document.head.appendChild(script)
+    script.onload = () => initMap()
+    document.body.appendChild(script)
 
     return () => {
-      if (script.parentNode) {
-        document.head.removeChild(script)
-      }
+      if (script.parentNode) script.parentNode.removeChild(script)
+      if (css.parentNode) css.parentNode.removeChild(css)
     }
-  }, [initializeMap])
-
-  // Get user's current location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentPosition({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
-        },
-        (error) => {
-          console.log("Geolocation error:", error)
-        },
-      )
-    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Search functionality
-  const handleSearch = () => {
-    if (!window.google || !mapInstance.current || !searchQuery.trim()) return
+  const initMap = () => {
+    const L = (window as any).L
+    if (!L || !mapRef.current) return
 
-    const service = new window.google.maps.places.PlacesService(mapInstance.current)
-    const request = {
-      query: searchQuery,
-      fields: ["name", "geometry", "formatted_address", "place_id"],
-    }
+    const defaultCenter = data.coordinates || { lat: -1.286389, lng: 36.817223 }
 
-    service.textSearch(request, (results: any[], status: string) => {
-      if (status === window.google.maps.places.PlacesServiceStatus.OK && results[0]) {
-        const place = results[0]
-        const location = place.geometry.location
+    // create map
+    leafletRef.current = L.map(mapRef.current).setView([defaultCenter.lat, defaultCenter.lng], 14)
 
-        mapInstance.current.setCenter(location)
-        mapInstance.current.setZoom(17)
-        markerInstance.current.setPosition(location)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(leafletRef.current)
 
-        onUpdate({
-          coordinates: { lat: location.lat(), lng: location.lng() },
-          formattedAddress: place.formatted_address,
-          placeId: place.place_id,
-        })
-      }
+    // marker
+    markerRef.current = L.marker([defaultCenter.lat, defaultCenter.lng], { draggable: true }).addTo(leafletRef.current)
+
+    markerRef.current.on("dragend", async () => {
+      const pos = markerRef.current.getLatLng()
+      await handlePlaceSelected(pos.lat, pos.lng)
+    })
+
+    leafletRef.current.on("click", async (e: any) => {
+      const { lat, lng } = e.latlng
+      markerRef.current.setLatLng([lat, lng])
+      await handlePlaceSelected(lat, lng)
     })
   }
 
-  // Use current location
-  const useCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude
-          const lng = position.coords.longitude
+  const handlePlaceSelected = async (lat: number, lng: number) => {
+    try {
+      setLoading(true)
+      // Use Nominatim reverse geocoding
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+      if (!res.ok) throw new Error("Reverse geocode failed")
+      const json = await res.json()
 
-          if (mapInstance.current && markerInstance.current) {
-            mapInstance.current.setCenter({ lat, lng })
-            mapInstance.current.setZoom(17)
-            markerInstance.current.setPosition({ lat, lng })
-
-            // Reverse geocoding
-            const geocoder = new window.google.maps.Geocoder()
-            geocoder.geocode({ location: { lat, lng } }, (results: any[], status: string) => {
-              if (status === "OK" && results[0]) {
-                onUpdate({
-                  coordinates: { lat, lng },
-                  formattedAddress: results[0].formatted_address,
-                  placeId: results[0].place_id,
-                })
-              }
-            })
-          }
-        },
-        (error) => {
-          console.error("Error getting current location:", error)
-        },
-      )
+      onUpdate({
+        coordinates: { lat, lng },
+        formattedAddress: json.display_name || `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+        placeId: json.place_id ? String(json.place_id) : undefined,
+      })
+    } catch (err) {
+      console.error("Reverse geocode error:", err)
+      onUpdate({
+        coordinates: { lat, lng },
+        formattedAddress: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+        placeId: undefined,
+      })
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleSearch = async () => {
+    if (!query.trim()) return
+    try {
+      setLoading(true)
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=jsonv2&limit=5`)
+      if (!res.ok) throw new Error("Search failed")
+      const results = await res.json()
+      if (results && results.length > 0) {
+        const place = results[0]
+        const lat = parseFloat(place.lat)
+        const lon = parseFloat(place.lon)
+        if (leafletRef.current) {
+          leafletRef.current.setView([lat, lon], 16)
+          markerRef.current.setLatLng([lat, lon])
+        }
+        await handlePlaceSelected(lat, lon)
+      }
+    } catch (err) {
+      console.error("Search error:", err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const useCurrentLocation = () => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const lat = pos.coords.latitude
+      const lng = pos.coords.longitude
+      if (leafletRef.current) {
+        leafletRef.current.setView([lat, lng], 16)
+        markerRef.current.setLatLng([lat, lng])
+      }
+      await handlePlaceSelected(lat, lng)
+    })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (data.coordinates) {
-      onNext()
-    }
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleSearch()
-    }
+    onNext()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Search Box */}
       <div className="space-y-2">
         <Label>Search for your business location</Label>
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Enter your business name or address..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter address or place name"
               className="pr-10"
             />
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -250,30 +165,22 @@ export default function MapLocationForm({ data, onUpdate, onNext, onPrevious }: 
         </div>
       </div>
 
-      {/* Current Location Button */}
       <div className="flex justify-center">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={useCurrentLocation}
-          className="flex items-center gap-2 bg-transparent"
-          size="sm"
-        >
+        <Button type="button" variant="outline" onClick={useCurrentLocation} className="flex items-center gap-2 bg-transparent" size="sm">
           <Navigation className="h-4 w-4" />
           Use My Current Location
         </Button>
       </div>
 
-      {/* Map Container */}
       <Card className="border-2 border-gray-200">
         <CardContent className="p-0">
           <div className="relative">
             <div ref={mapRef} className="w-full h-64 rounded-lg" />
-            {isLoading && (
+            {loading && (
               <div className="absolute inset-0 bg-gray-100 rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
-                  <p className="text-sm text-gray-600">Loading map...</p>
+                  <p className="text-sm text-gray-600">Updating location...</p>
                 </div>
               </div>
             )}
@@ -281,28 +188,24 @@ export default function MapLocationForm({ data, onUpdate, onNext, onPrevious }: 
         </CardContent>
       </Card>
 
-      {/* Selected Location Display */}
       {data.coordinates && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <MapPin className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-medium text-green-900 text-sm">Selected Location:</p>
-              <p className="text-green-700 text-xs">
-                {data.formattedAddress || `${data.coordinates.lat.toFixed(6)}, ${data.coordinates.lng.toFixed(6)}`}
-              </p>
+              <p className="text-green-700 text-xs">{data.formattedAddress || `${data.coordinates.lat.toFixed(6)}, ${data.coordinates.lng.toFixed(6)}`}</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <h4 className="font-medium text-blue-900 text-sm mb-1">How to set your location:</h4>
         <ul className="text-blue-700 text-xs space-y-1">
           <li>• Search for your business or address above</li>
           <li>• Click anywhere on the map to place marker</li>
-          <li>• Drag the red marker to fine-tune position</li>
+          <li>• Drag the marker to fine-tune position</li>
           <li>• Use "Current Location" if you're at your business</li>
         </ul>
       </div>
@@ -311,7 +214,7 @@ export default function MapLocationForm({ data, onUpdate, onNext, onPrevious }: 
         <Button type="button" variant="outline" onClick={onPrevious} className="flex-1 bg-transparent">
           Back
         </Button>
-        <Button type="submit" disabled={!data.coordinates} className="flex-1">
+        <Button type="submit" className="flex-1">
           Continue
         </Button>
       </div>
