@@ -17,9 +17,10 @@ interface Business {
   email: string
   phone: string
   address: string
-  city: string
-  state: string
-  zipCode: string
+  country?: string
+  county?: string
+  subCounty?: string
+  pin?: string
   website?: string
   schedule: {
     [key: string]: { open: string; close: string; closed: boolean }
@@ -59,6 +60,19 @@ export default function DashboardPage() {
       setLoading(false)
     }
   }
+
+  // Poll for business updates every 10 seconds so dashboard reflects edits
+  useEffect(() => {
+    if (status !== "authenticated" || !session?.user?.email) return
+    const interval = setInterval(() => {
+      fetchBusiness()
+    }, 10000)
+
+    // initial fetch already triggered in the other effect, but ensure one now
+    fetchBusiness()
+
+    return () => clearInterval(interval)
+  }, [status, session?.user?.email])
 
   if (status === "loading" || loading) {
     return (
@@ -186,8 +200,11 @@ export default function DashboardPage() {
                         <div className="text-sm">
                           <div>{business.address}</div>
                           <div>
-                            {business.city}, {business.state} {business.zipCode}
+                            {business.subCounty ? `${business.subCounty}, ` : ""}
+                            {business.county ? `${business.county}` : ""}
+                            {business.pin ? ` • ${business.pin}` : ""}
                           </div>
+                          {business.country && <div>{business.country}</div>}
                         </div>
                       </div>
                     </div>
