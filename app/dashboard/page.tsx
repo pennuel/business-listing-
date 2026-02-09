@@ -203,7 +203,7 @@ export default function DashboardPage() {
 
             {/* Quick Actions */}
             <div className="grid md:grid-cols-3 gap-4">
-              <Card>
+              {/* <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Profile Views</CardTitle>
                   <CardDescription>This month</CardDescription>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold">89</div>
                   <p className="text-xs text-muted-foreground">+12.5% from last month</p>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card>
                 <CardHeader>

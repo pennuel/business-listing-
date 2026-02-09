@@ -440,7 +440,7 @@ export default function PreviewPage() {
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Button className="w-full" size="lg">
+                {/* <Button className="w-full" size="lg">
                   <Phone className="h-4 w-4 mr-2" />
                   Call Now
                 </Button>
@@ -454,7 +454,7 @@ export default function PreviewPage() {
                   Send Message
                 </Button>
 
-                <Separator />
+                <Separator /> */}
 
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
@@ -511,10 +511,10 @@ export default function PreviewPage() {
                     )}
                   </div>
 
-                  <Button variant="outline" className="w-full bg-transparent">
+                  {/* <Button variant="outline" className="w-full bg-transparent">
                     <MapPin className="h-4 w-4 mr-2" />
                     Get Directions
-                  </Button>
+                  </Button> */}
                 </div>
               </CardContent>
             </Card>
