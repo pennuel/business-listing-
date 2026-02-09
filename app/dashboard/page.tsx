@@ -271,7 +271,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Quick Actions */}
-                      <div className="mt-4 grid grid-cols-2 gap-2">
+                      {/* <div className="mt-4 grid grid-cols-2 gap-2">
                         <Button
                           className="w-full justify-start px-4 py-2 rounded-md flex items-center gap-3"
                           onClick={() => {
@@ -337,7 +337,7 @@ export default function DashboardPage() {
                             <div className="text-xs text-gray-500">{business.website || "—"}</div>
                           </div>
                         </Button>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
 

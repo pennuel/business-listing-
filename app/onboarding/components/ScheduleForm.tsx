@@ -15,6 +15,8 @@ interface ScheduleFormProps {
   onUpdate: (data: Partial<BusinessData>) => void
   onNext: () => void
   onPrevious: () => void
+  submitLabel?: string
+  isSubmitting?: boolean
 }
 
 const weekdays = [
@@ -30,7 +32,14 @@ const weekends = [
   { key: "sunday", label: "Sunday" },
 ] as const
 
-export default function ScheduleForm({ data, onUpdate, onNext, onPrevious }: ScheduleFormProps) {
+export default function ScheduleForm({ 
+  data, 
+  onUpdate, 
+  onNext, 
+  onPrevious,
+  submitLabel = "Continue",
+  isSubmitting = false
+}: ScheduleFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [scheduleMode, setScheduleMode] = useState<"same" | "individual">("same")
   const [weekendMode, setWeekendMode] = useState<"same" | "individual">("same")
@@ -339,8 +348,8 @@ export default function ScheduleForm({ data, onUpdate, onNext, onPrevious }: Sch
         <Button type="button" variant="outline" onClick={onPrevious} className="flex-1 bg-transparent">
           Back
         </Button>
-        <Button type="submit" className="flex-1">
-          Continue
+        <Button type="submit" className="flex-1" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : submitLabel}
         </Button>
       </div>
     </form>

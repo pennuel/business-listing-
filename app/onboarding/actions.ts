@@ -83,7 +83,10 @@ export async function submitBusinessData(
     };
 
     let business;
-    if (session?.user?.email) {
+    if (businessData.id) {
+       console.log("Updating existing business:", businessData.id);
+       business = await businessService.updateBusiness(businessData.id, payload);
+    } else if (session?.user?.email) {
       business = await businessService.createBusiness({
         ...payload,
         userEmail: session.user.email,

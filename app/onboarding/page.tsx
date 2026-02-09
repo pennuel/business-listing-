@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Navbar } from "@/components/navbar";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import BasicInfoForm from "./components/BasicInfoForm";
 import BusinessTypeForm from "./components/BusinessTypeForm";
@@ -56,6 +58,7 @@ function ScrollIndicator() {
 }
 
 export interface BusinessData {
+  id?: string;
   // Basic Info
   name: string;
   phone: string;
@@ -148,7 +151,8 @@ export default function OnboardingPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const totalSteps = 5;
+  const isEditing = !!businessData.id;
+  const totalSteps = isEditing ? 4 : 5;
   const progress = (currentStep / totalSteps) * 100;
 
   // Redirect to login if not authenticated
@@ -199,6 +203,7 @@ export default function OnboardingPage() {
           weekdaySchedule: b.weekdaySchedule ?? b.schedule ?? initialData.weekdaySchedule,
           weekendSchedule: b.weekendSchedule ?? initialData.weekendSchedule,
           holidayHours: b.holidayHours ?? initialData.holidayHours,
+          id: b.id,
           coordinates: b.coordinates,
           formattedAddress: b.formattedAddress,
           placeId: b.placeId,
@@ -253,7 +258,7 @@ export default function OnboardingPage() {
 
         // Wait for animation to complete before redirecting
         setTimeout(() => {
-          router.push("/dashboard?registration=complete");
+          router.push(isEditing ? "/dashboard?updated=true" : "/dashboard?registration=complete");
         }, 1500);
       } else {
         console.error("Form submission failed:", result.error);
@@ -560,8 +565,10 @@ export default function OnboardingPage() {
           <ScheduleForm
             data={businessData}
             onUpdate={updateBusinessData}
-            onNext={handleNext}
+            onNext={isEditing ? handleSubmit : handleNext}
             onPrevious={handlePrevious}
+            submitLabel={isEditing ? "Save Changes" : "Continue"}
+            isSubmitting={isSubmitting}
           />
         );
       case 5:
@@ -585,12 +592,21 @@ export default function OnboardingPage() {
     >
       <Navbar />
 
+      {businessData.id && (
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <Button variant="ghost" onClick={() => router.push("/dashboard")} className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
+      )}
+
       {isTransitioning && (
         <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              Registration Complete!
+              {isEditing ? "Update Complete!" : "Registration Complete!"}
             </h3>
             <p className="text-gray-600">Redirecting to your dashboard...</p>
           </div>
