@@ -83,8 +83,12 @@ export default function PreviewPage() {
 
   const businessId = params.id as string;
 
+  // Initial fetch (shows loading state) and background polling to
+  // auto-refresh the preview when the business profile changes.
   useEffect(() => {
-    async function fetchBusiness() {
+    let isMounted = true;
+
+    const fetchInitial = async () => {
       try {
         setIsLoading(true);
         setError(null);
@@ -101,18 +105,51 @@ export default function PreviewPage() {
         }
 
         const data = await response.json();
+        if (!isMounted) return;
         setBusiness(data.business);
       } catch (err) {
         console.error("Failed to fetch business:", err);
-        setError("Failed to load business");
+        if (isMounted) setError("Failed to load business");
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
-    }
+    };
 
     if (businessId) {
-      fetchBusiness();
+      fetchInitial();
     }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [businessId]);
+
+  // Poll for updates in the background every 10 seconds.
+  useEffect(() => {
+    if (!businessId) return;
+
+    let stopped = false;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/businesses/${businessId}/preview`);
+        if (!response.ok) return;
+        const data = await response.json();
+        if (!stopped) setBusiness(data.business);
+      } catch (err) {
+        console.error("Polling failed:", err);
+      }
+    };
+
+    const interval = setInterval(poll, 10000);
+
+    // Do an immediate poll after mounting (silent, no loading UI)
+    poll();
+
+    return () => {
+      stopped = true;
+      clearInterval(interval);
+    };
   }, [businessId]);
 
   if (isLoading) {

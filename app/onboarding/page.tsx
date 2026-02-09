@@ -165,6 +165,58 @@ export default function OnboardingPage() {
     }
   }, [user, businessData.email]);
 
+  // If the user already has a business, prefill the form for editing.
+  useEffect(() => {
+    let mounted = true;
+    const fetchExisting = async () => {
+      try {
+        if (!user?.email) return;
+        const res = await fetch(`/api/businesses?email=${encodeURIComponent(
+          user.email
+        )}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const businesses = json.businesses || json.businesses || json.businesses;
+        if (!mounted || !businesses || businesses.length === 0) return;
+
+        // Use the first business as the one to edit
+        const b = businesses[0];
+
+        // Map API fields to BusinessData shape
+        const mapped = {
+          name: b.name ?? "",
+          phone: b.phone ?? "",
+          email: b.email ?? "",
+          website: b.website ?? "",
+          offeringType: b.offeringType ?? "",
+          category: b.category ?? "",
+          description: b.description ?? "",
+          country: b.country ?? "",
+          county: b.county ?? "",
+          subCounty: b.subCounty ?? "",
+          address: b.address ?? "",
+          pin: b.pin ?? "",
+          weekdaySchedule: b.weekdaySchedule ?? b.schedule ?? initialData.weekdaySchedule,
+          weekendSchedule: b.weekendSchedule ?? initialData.weekendSchedule,
+          holidayHours: b.holidayHours ?? initialData.holidayHours,
+          coordinates: b.coordinates,
+          formattedAddress: b.formattedAddress,
+          placeId: b.placeId,
+        };
+
+        setBusinessData((prev) => ({ ...prev, ...mapped }));
+      } catch (err) {
+        console.error("Failed to fetch existing business for edit:", err);
+      }
+    };
+
+    fetchExisting();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
   const updateBusinessData = (data: Partial<BusinessData>) => {
     setBusinessData((prev) => ({ ...prev, ...data }));
   };
