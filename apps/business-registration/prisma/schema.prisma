@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// NextAuth.js required models
+
+
+// User model
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  businesses    Business[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+
+// Business models
+model Business {
+  id          String   @id @default(cuid())
+  name             String
+  description      String?
+  email            String
+  phone            String
+  website          String?
+  category         String
+  offeringType     String
+  country          String
+  county           String
+  subCounty        String
+  address          String
+  pin              String?
+  formattedAddress String?
+  latitude         Float?
+  longitude        Float?
+  placeId          String?
+  paymentStatus   String   @default("pending")
+  weekdaySchedule  Json
+  weekendSchedule  Json
+  holidayHours     Json
+  status           String   @default("pending")
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([email])
+  @@index([country, county])
+}
