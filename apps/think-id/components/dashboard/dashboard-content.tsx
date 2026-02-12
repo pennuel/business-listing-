@@ -26,65 +26,6 @@ import {
 } from "lucide-react";
 import { useUserStore } from "@/stores/userStore";
 
-// Add this new applications data after the existing imports:
-const applicationsData = [
-  {
-    name: "Analytics Pro",
-    icon: BarChart3,
-    status: "active",
-    users: 2847,
-    revenue: "$12,450",
-    growth: "+15%",
-    description: "Advanced analytics and reporting platform",
-    lastActivity: "2 hours ago",
-    color: "bg-blue-500",
-  },
-  {
-    name: "Task Manager",
-    icon: Database,
-    status: "active",
-    users: 892,
-    revenue: "$5,230",
-    growth: "+8%",
-    description: "Project and task management system",
-    lastActivity: "1 hour ago",
-    color: "bg-green-500",
-  },
-  {
-    name: "Website Builder",
-    icon: Globe,
-    status: "maintenance",
-    users: 1234,
-    revenue: "$8,900",
-    growth: "-2%",
-    description: "Drag-and-drop website creation tool",
-    lastActivity: "6 hours ago",
-    color: "bg-orange-500",
-  },
-  {
-    name: "Code Editor",
-    icon: Code,
-    status: "active",
-    users: 567,
-    revenue: "$3,120",
-    growth: "+22%",
-    description: "Online collaborative code editor",
-    lastActivity: "30 minutes ago",
-    color: "bg-purple-500",
-  },
-  {
-    name: "Mobile App",
-    icon: Smartphone,
-    status: "beta",
-    users: 234,
-    revenue: "$1,890",
-    growth: "+45%",
-    description: "Cross-platform mobile application",
-    lastActivity: "4 hours ago",
-    color: "bg-pink-500",
-  },
-];
-
 interface DashboardContentProps {
   onViewProfile: () => void;
   onApplicationsSelect?: () => void;
