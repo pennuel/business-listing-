@@ -37,7 +37,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useUserStore } from "@/stores/userStore";
-import { useToast } from "@think-id/ui/components/ui/use-toast";
+import { useToast } from "@think-id/ui/hooks/use-toast";
 import { useRef, useState, useTransition } from "react";
 import { updateProfile } from "@/app/actions/profile/updateProfile";
 import { uploadImage } from "@/app/actions/profile/uploadImage";

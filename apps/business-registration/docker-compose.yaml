@@ -13,12 +13,12 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
       # Optional: mount custom Postgres config files here (create ./db/conf/ if used)
-      - ./db/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
-      - ./db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
+      # - ./db/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
+      # - ./db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
     ports:
       # Configure host binding and external port via .env (safer defaults: localhost)
       # Set BIND_HOST=0.0.0.0 to allow external connections (use with caution).
-      - "${BIND_HOST:-127.0.0.1}:${DB_PORT:-5432}:5432"
+      - "5432 :5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U myuser -d think_business_registration || exit 1"]
       interval: 10s

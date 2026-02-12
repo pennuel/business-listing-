@@ -8,6 +8,9 @@
 # Ignore Next.js build output for the think-id app
 /apps/think-id/.next/
 
+# Ignore Next.js build output at repo root
+/.next/
+
 # production
 /build
 

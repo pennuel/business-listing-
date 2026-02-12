@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { AppSidebar } from "../sidebar/app-sidebar";
 import { DashboardContent } from "./dashboard-content";
 import { ProfilePage } from "../profile/profile-page";
-import { ApplicationsPage } from "../applications/applications-page";
 import { SecurityPage } from "../settings/security-page";
 import { BillingPage } from "../settings/billing/billing-page";
 import { AccountSettingsPage } from "../settings/account-settings/account-settings-page";
+import { BusinessList } from "./business-list";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,19 +24,37 @@ import {
   SidebarTrigger,
 } from "@think-id/ui/components/ui/sidebar";
 import { ProfileEditPage } from "../profile/profile-edit-page";
-import { ApplicationDetailPage } from "../applications/application-detail-page";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@think-id/ui/components/ui/button";
 // Add these imports at the top
 import { ApplicationGroupBillingPage } from "../settings/billing/application-group-billing-page";
 import { ApplicationBillingManagementPage } from "../settings/billing/application-billing-management-page";
+import { BusinessProfile } from "./business-profile";
 
 export default function ProfileDashboard() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [activeSection, setActiveSection] = useState("dashboard");
+
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const section = searchParams.get("section");
+    const businessId = searchParams.get("id");
+    
+    if (section) {
+      setActiveSection(section);
+      if (section === "business-profile" && businessId) {
+        setSelectedBusinessId(businessId);
+      }
+      
+      // Clean up URL without reload
+      router.replace("/", { scroll: false });
+    }
+  }, [searchParams, router]);
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<string | null>(
-    null
-  );
+  const [selectedApplication, setSelectedApplication] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(
     undefined
   );
@@ -47,7 +66,7 @@ export default function ProfileDashboard() {
   const [selectedBillingApp, setSelectedBillingApp] = useState<string | null>(
     null
   );
-
+  
   const handleApplicationsSelect = useCallback(() => {
     setSelectedCategory(undefined);
     setActiveSection("applications");
@@ -58,39 +77,35 @@ export default function ProfileDashboard() {
       return <ProfileEditPage onBack={() => setIsEditingProfile(false)} />;
     }
 
-    if (selectedApplication) {
-      return (
-        <ApplicationDetailPage
-          appKey={selectedApplication}
-          onBack={() => setSelectedApplication(null)}
-        />
-      );
-    }
-
     switch (activeSection) {
       case "dashboard":
         return (
           <DashboardContent 
-            onApplicationsSelect={handleApplicationsSelect}
             onViewProfile={() => setActiveSection("profile")}
           />
         );
+      case "businesses":
+        return <BusinessList onManageBusiness={(id) => {
+          setSelectedBusinessId(id);
+          setActiveSection("business-profile");
+        }} />;
+      case "business-profile":
+          return selectedBusinessId ? (
+            <BusinessProfile 
+              businessId={selectedBusinessId} 
+              onBack={() => {
+                setSelectedBusinessId(null);
+                setActiveSection("businesses");
+              }} 
+            />
+          ) : (
+            <div className="p-4">Business not selected</div> // Should not happen
+          );
       case "profile":
         return (
           <ProfilePage
             onEditProfile={() => setIsEditingProfile(true)}
             onBack={() => setActiveSection("dashboard")}
-          />
-        );
-      case "applications":
-        return (
-          <ApplicationsPage
-            onApplicationSelect={setSelectedApplication}
-            onBack={() => {
-              setSelectedCategory(undefined);
-              setActiveSection("dashboard");
-            }}
-            selectedCategory={selectedCategory}
           />
         );
       case "security":
@@ -206,6 +221,10 @@ export default function ProfileDashboard() {
     switch (activeSection) {
       case "dashboard":
         return "Dashboard";
+      case "businesses":
+        return "My Businesses";
+      case "business-profile":
+        return "Business Profile";
       case "profile":
         return "Profile";
       case "applications":

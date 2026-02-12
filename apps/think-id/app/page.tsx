@@ -1,14 +1,23 @@
 "use client";
 
 import ProfileDashboard from "../components/dashboard/profile-dashboard";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { fetchUser } from "./actions/profile/fetchuser";
 import { useUserStore } from "../stores/userStore";
+import { useSession, signIn } from "next-auth/react";
 
 export default function Page() {
+  const { data: session, status } = useSession();
   const { setUser, setLoading, setError } = useUserStore();
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      signIn("fusionauth");
+      return;
+    }
+
+    if (status === "loading") return;
+
     const initializeUser = async () => {
       setLoading(true);
       try {
@@ -25,7 +34,15 @@ export default function Page() {
     };
 
     initializeUser();
-  }, [setUser, setLoading, setError]);
+  }, [setUser, setLoading, setError, status]);
 
-  return <ProfileDashboard />;
+  if (status === "loading" || status === "unauthenticated") {
+    return <div>Loading authentication...</div>;
+  }
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProfileDashboard />
+    </Suspense>
+  );
 }

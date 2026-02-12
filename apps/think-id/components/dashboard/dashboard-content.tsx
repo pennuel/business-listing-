@@ -364,44 +364,7 @@ export function DashboardContent({
           </CardContent>
         </Card>
 
-        {/* Application Status Overview */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Application Status</CardTitle>
-            <CardDescription>
-              Current status of all your applications
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              {applicationsData.map((app) => (
-                <div
-                  key={app.name}
-                  className="flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <app.icon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm truncate">{app.name}</span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge
-                      variant={
-                        app.status === "active"
-                          ? "default"
-                          : app.status === "maintenance"
-                          ? "destructive"
-                          : "secondary"
-                      }
-                      className="text-xs"
-                    >
-                      {app.status}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {/* Application Status Overview - Removed */}
       </div>
 
       {/* Application Performance Metrics */}

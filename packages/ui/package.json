@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     "./lib/utils": "./src/lib/utils.ts",
-    "./hooks/*": "./src/hooks/*.tsx",
+    "./hooks/*": "./src/hooks/*",
     "./components/ui/*": "./src/ui/*"
   },
   "scripts": {

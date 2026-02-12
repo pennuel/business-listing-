@@ -20,6 +20,7 @@ import {
   Code,
   Smartphone,
   Users,
+  Building2,
 } from "lucide-react"
 
 import {
@@ -46,8 +47,13 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onSectionChange: (section: string) => void
 }
 
-// User Profile Section
-const userProfileItems = [
+// My Profile Section
+const myProfileItems = [
+  {
+    title: "Dashboard",
+    key: "dashboard",
+    icon: Activity,
+  },
   {
     title: "My Profile",
     key: "profile",
@@ -58,29 +64,18 @@ const userProfileItems = [
     key: "security",
     icon: Shield,
   },
-]
-
-// Application Studio Section
-const applicationStudioItems = [
-  {
-    title: "Dashboard",
-    key: "dashboard",
-    icon: BarChart3,
-  },
-  {
-    title: "Applications",
-    key: "applications",
-    icon: Grid3X3,
-  },
-  {
-    title: "Teams",
-    key: "teams", // Feature for later
-    icon: Users,
-  },
   {
     title: "Account Settings",
     key: "account",
     icon: Settings,
+  },
+]
+
+const myBusinessItems = [
+  {
+    title: "My Businesses",
+    key: "businesses",
+    icon: Building2,
   },
   {
     title: "Billing",
@@ -130,12 +125,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {/* User Profile Section */}
+        {/* My Profile Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>User Profile</SidebarGroupLabel>
+          <SidebarGroupLabel>My Profile</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {userProfileItems.map((item) => (
+              {myProfileItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
@@ -151,12 +146,12 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Application Studio Section */}
+        {/* My Business Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Application Studio</SidebarGroupLabel>
+          <SidebarGroupLabel>My Business</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {applicationStudioItems.map((item) => (
+              {myBusinessItems.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     isActive={activeSection === item.key}
