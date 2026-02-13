@@ -1,13 +1,14 @@
 {
-  "name": "my-v0-project",
+  "name": "business-registration",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "db:generate": "prisma generate --schema=../../packages/database/prisma/schema.prisma",
+    "build": "pnpm db:generate && next build",
     "dev": "next dev",
     "lint": "next lint",
-  "start": "next start",
-  "generate-secret": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+    "start": "next start",
+    "generate-secret": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

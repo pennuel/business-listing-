@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "  pnpm prisma generate && next build",
+    "db:generate": "prisma generate --schema=../../packages/database/prisma/schema.prisma",
+    "build": "pnpm db:generate && next build",
     "dev": "next dev --turbopack",
     "lint": "next lint",
     "start": "next start"
