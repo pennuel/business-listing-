@@ -33,7 +33,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 
 interface Business {
   id: string
@@ -49,6 +49,7 @@ interface BusinessSwitcherProps {
 
 export function BusinessSwitcher({ businesses, currentBusinessId, className }: BusinessSwitcherProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [open, setOpen] = React.useState(false)
   const [showNewBusinessDialog, setShowNewBusinessDialog] = React.useState(false)
@@ -59,7 +60,7 @@ export function BusinessSwitcher({ businesses, currentBusinessId, className }: B
     setOpen(false)
     const params = new URLSearchParams(searchParams.toString())
     params.set("businessId", business.id)
-    router.push(`/dashboard?${params.toString()}`)
+    router.push(`${pathname}?${params.toString()}`)
   }
 
   return (
