@@ -12,6 +12,12 @@ export const metadata: Metadata = {
     generator: 'v0.app'
 }
 
+metadata.icons = {
+  icon: "/favicon.ico",
+  shortcut: "/favicon.ico",
+  apple: "/apple-touch-icon.png",
+}
+
 export default function RootLayout({
   children,
 }: {
