@@ -257,6 +257,12 @@ export default function OnboardingPage() {
 
         // Wait for animation to complete before redirecting
         setTimeout(() => {
+          const returnTo = searchParams.get("returnTo");
+          if (returnTo) {
+            window.location.href = returnTo;
+            return;
+          }
+
           if (isEditing && businessData.id) {
             router.push(`/?section=business-profile&id=${businessData.id}`);
           } else {
@@ -595,11 +601,22 @@ export default function OnboardingPage() {
     >
       <Navbar />
 
-      {businessData.id && (
+      {(businessData.id || searchParams.get("returnTo")) && (
         <div className="max-w-7xl mx-auto px-4 py-3">
-          <Button variant="ghost" onClick={() => router.push("/")} className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              const returnTo = searchParams.get("returnTo");
+              if (returnTo) {
+                window.location.href = returnTo;
+              } else {
+                router.push("/");
+              }
+            }} 
+            className="flex items-center gap-2"
+          >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            {searchParams.get("returnTo") ? "Back to Listing" : "Back to Dashboard"}
           </Button>
         </div>
       )}
