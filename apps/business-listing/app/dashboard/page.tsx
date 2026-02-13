@@ -247,7 +247,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
               <div className="space-y-2">
                  <div className="flex items-center justify-between">
                     <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cover Photo</label>
-                    <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 border">Change</Button>
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 border">
+                       <Link href={`/dashboard/profile?businessId=${business.id}`}>
+                       Change
+                       </Link>
+                      </Button>
                  </div>
                  <div className="aspect-video w-full rounded-lg bg-muted relative group overflow-hidden border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
                     {business.coverImage ? (
