@@ -269,7 +269,7 @@ export default function ProfileDashboard() {
                     href="#"
                     onClick={() => setActiveSection("dashboard")}
                   >
-                    Profile
+                    Dashboard
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />

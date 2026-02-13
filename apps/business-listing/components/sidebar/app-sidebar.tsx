@@ -149,15 +149,17 @@ export function AppSidebar({ businesses, currentBusinessId, user, ...props }: Ap
                 sideOffset={4}
               >
                 <DropdownMenuItem asChild>
-                  <Link href="/">
+                  <a href={process.env.NEXT_PUBLIC_THINK_ID_URL || "http://localhost:3000"}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Back to Mall Directory
-                  </Link>
+                    Back to THiNK ID
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  Account Settings
+                <DropdownMenuItem asChild>
+                  <a href={`${process.env.NEXT_PUBLIC_THINK_ID_URL || "http://localhost:3000"}/?section=account`}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    Account Settings
+                  </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="text-red-500">
                   <LogOut className="mr-2 h-4 w-4" />

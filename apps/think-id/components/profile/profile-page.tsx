@@ -23,6 +23,7 @@ import {
   GraduationCap,
   Award,
   ArrowLeft,
+  LayoutDashboard,
 } from "lucide-react";
 
 import { useUserStore } from "@/stores/userStore";
@@ -44,7 +45,7 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Profile
+          Back to Dashboard
         </Button>
       </div>
 
@@ -73,6 +74,15 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => onBack()}
+                className="w-full sm:w-auto"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Go to Dashboard
               </Button>
             </div>
             <p className="text-lg text-muted-foreground mb-3">
