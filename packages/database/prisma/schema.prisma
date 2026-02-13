@@ -52,6 +52,55 @@ model Business {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // New Storefront Fields
+  isManuallyOpen Boolean?
+  tagline        String?
+  coverImage     String?
+  gallery        Json?
+  amenities      Json?
+  verificationDoc String?
+  
+  services       Service[]
+  reviews        Review[]
+  analytics      Analytics[]
+
   @@index([email])
   @@index([country, county])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  name        String
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("KES")
+  duration    Int
+  description String?
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int
+  comment     String?
+  authorName  String
+  reply       String?
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Analytics {
+  id            String   @id @default(cuid())
+  date          DateTime @db.Date
+  views         Int      @default(0)
+  calls         Int      @default(0)
+  directions    Int      @default(0)
+  websiteClicks Int      @default(0)
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([businessId, date])
 }

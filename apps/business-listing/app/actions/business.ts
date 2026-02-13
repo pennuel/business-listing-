@@ -1,0 +1,57 @@
+"use server"
+
+import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
+
+export async function toggleStoreStatus(businessId: string, isOpen: boolean) {
+  try {
+    await (prisma.business.update({
+      where: { id: businessId },
+      data: { isManuallyOpen: isOpen } as any,
+    }) as any)
+    revalidatePath("/dashboard")
+    revalidatePath(`/window/${businessId}`)
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to toggle store status:", error)
+    return { success: false, error: "Failed to update status" }
+  }
+}
+
+export async function updateBusinessProfile(businessId: string, data: any) {
+  try {
+    // Collect only the fields that are present in data to avoid overwriting with undefined
+    const updateData: any = {}
+    if (data.name !== undefined) updateData.name = data.name
+    if (data.tagline !== undefined) updateData.tagline = data.tagline
+    if (data.description !== undefined) updateData.description = data.description
+    if (data.phone !== undefined) updateData.phone = data.phone
+    if (data.email !== undefined) updateData.email = data.email
+    if (data.website !== undefined) updateData.website = data.website
+    if (data.category !== undefined) updateData.category = data.category
+    if (data.coverImage !== undefined) updateData.coverImage = data.coverImage
+    if (data.amenities !== undefined) updateData.amenities = data.amenities
+    if (data.gallery !== undefined) updateData.gallery = data.gallery
+    if (data.country !== undefined) updateData.country = data.country
+    if (data.county !== undefined) updateData.county = data.county
+    if (data.subCounty !== undefined) updateData.subCounty = data.subCounty
+    if (data.address !== undefined) updateData.address = data.address
+    if (data.pin !== undefined) updateData.pin = data.pin
+    if (data.weekdaySchedule !== undefined) updateData.weekdaySchedule = data.weekdaySchedule
+    if (data.weekendSchedule !== undefined) updateData.weekendSchedule = data.weekendSchedule
+
+    await (prisma.business.update({
+      where: { id: businessId },
+      data: updateData,
+    }) as any)
+    
+    revalidatePath("/dashboard")
+    revalidatePath("/dashboard/profile")
+    revalidatePath(`/window/${businessId}`)
+    
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to update business profile:", error)
+    return { success: false, error: "Failed to update profile" }
+  }
+}

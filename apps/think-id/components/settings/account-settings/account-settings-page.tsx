@@ -19,6 +19,7 @@ import {
   Upload,
   AlertTriangle,
   ArrowLeft,
+  LayoutDashboard,
 } from "lucide-react"
 
 export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
@@ -28,14 +29,25 @@ export function AccountSettingsPage({ onBack }: { onBack: () => void }) {
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Profile
+          Back to Dashboard
         </Button>
       </div>
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold">Account Settings</h1>
-        <p className="text-muted-foreground">Manage your account preferences and personal information</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold">Account Settings</h1>
+          <p className="text-muted-foreground">Manage your account preferences and personal information</p>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onBack}
+          className="w-full sm:w-auto"
+        >
+          <LayoutDashboard className="h-4 w-4 mr-2" />
+          Go to Dashboard
+        </Button>
       </div>
 
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">

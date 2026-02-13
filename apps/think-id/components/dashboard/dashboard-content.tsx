@@ -142,7 +142,7 @@ export function DashboardContent({
 
       {/* Applications Overview - Category Based */}
       <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h2 className="text-xl sm:text-2xl font-bold">My Applications</h2>
           <Button
             variant="outline"
@@ -153,12 +153,12 @@ export function DashboardContent({
             <ExternalLink className="h-4 w-4 mr-2" />
             View All
           </Button>
-        </div>
+        </div> */}
 
         {/* Application Categories */}
         <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
           {/* Analytics & Data Category */}
-          <Card
+          {/* <Card
             className="hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => onApplicationsSelect?.()}
           >
@@ -200,10 +200,10 @@ export function DashboardContent({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Productivity Category */}
-          <Card
+          {/* <Card
             className="hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => onApplicationsSelect?.()}
           >
@@ -245,10 +245,10 @@ export function DashboardContent({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Development Category */}
-          <Card
+          {/* <Card
             className="hover:shadow-md transition-shadow cursor-pointer"
             onClick={() => onApplicationsSelect?.()}
           >
@@ -294,14 +294,14 @@ export function DashboardContent({
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
 
       {/* Application Activity & Quick Stats */}
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
         {/* Recent Application Activity */}
-        <Card className="lg:col-span-4">
+        {/* <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Recent Application Activity</CardTitle>
             <CardDescription>
@@ -362,13 +362,13 @@ export function DashboardContent({
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Application Status Overview - Removed */}
       </div>
 
       {/* Application Performance Metrics */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -420,7 +420,7 @@ export function DashboardContent({
             <p className="text-xs text-muted-foreground">Last 30 days</p>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }
