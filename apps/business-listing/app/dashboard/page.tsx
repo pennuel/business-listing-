@@ -2,11 +2,13 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { StoreStatusToggle } from "@/components/dashboard/store-status-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Phone, MapPin, MousePointerClick, MessageSquare, Plus, Upload, Globe, Mail, Clock, ExternalLink, Edit } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Phone, MapPin, MousePointerClick, MessageSquare, Plus, Upload, Globe, Mail, Clock, ExternalLink, Edit, LayoutDashboard, Wifi, ParkingCircle } from "lucide-react"
 
 function formatSchedule(business: any) {
   const weekday = business.weekdaySchedule as any
@@ -81,7 +83,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     redirect("/login")
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await (prisma.user.findUnique({
     where: { email: session.user.email },
     include: { 
       businesses: {
@@ -98,12 +100,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         }
       } 
     }
-  })
+  }) as any)
 
   // Select business based on URL or default to first
   const selectedBusinessId = searchParams.businessId
   const business = selectedBusinessId 
-    ? user?.businesses.find(b => b.id === selectedBusinessId) 
+    ? user?.businesses.find((b: any) => b.id === selectedBusinessId) 
     : user?.businesses[0]
 
   if (!business) {
@@ -119,10 +121,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
   }
 
   // Calculate generic stats (mock logic for now if no analytics data)
-  const totalViews = business.analytics.reduce((acc, curr) => acc + curr.views, 0)
-  const totalCalls = business.analytics.reduce((acc, curr) => acc + curr.calls, 0)
-  const totalDirections = business.analytics.reduce((acc, curr) => acc + curr.directions, 0)
-  const totalClicks = business.analytics.reduce((acc, curr) => acc + curr.websiteClicks, 0)
+  const totalViews = business.analytics.reduce((acc: any, curr: any) => acc + curr.views, 0)
+  const totalCalls = business.analytics.reduce((acc: any, curr: any) => acc + curr.calls, 0)
+  const totalDirections = business.analytics.reduce((acc: any, curr: any) => acc + curr.directions, 0)
+  const totalClicks = business.analytics.reduce((acc: any, curr: any) => acc + curr.websiteClicks, 0)
 
   // Effectively determine open/closed
   const isOpen = business.isManuallyOpen ?? false 
@@ -167,16 +169,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
-              <a href={`/preview/${business.id}`}>
+              <a href={`/window/${business.id}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
-                Preview
+                Visit Window
               </a>
             </Button>
             <Button size="sm" asChild>
-              <a href={`${process.env.NEXT_PUBLIC_THINK_ID_URL}/onboarding?businessId=${business.id}&returnTo=${encodeURIComponent(process.env.NEXT_PUBLIC_BUSINESS_LISTING_URL + '/dashboard?businessId=' + business.id)}`}>
+              <Link href={`/dashboard/profile?businessId=${business.id}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Profile
-              </a>
+              </Link>
             </Button>
           </div>
           <div className="h-px w-full sm:h-10 sm:w-px bg-border" />
@@ -237,40 +239,110 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
              <CardTitle className="text-lg font-bold">Window Display</CardTitle>
              <Badge variant="outline">80% Complete</Badge>
            </CardHeader>
-           <CardContent className="space-y-4 pt-4">
-              <div className="aspect-video w-full rounded-md bg-muted relative group overflow-hidden border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
-                 {business.coverImage ? (
-                    <img src={business.coverImage} className="w-full h-full object-cover" />
-                 ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                       <Upload className="h-8 w-8" />
-                       <span className="text-xs">Add Cover Photo</span>
-                    </div>
-                 )}
-                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button variant="secondary" size="sm">Edit Photo</Button>
+           <CardContent className="space-y-6 pt-4">
+              <p className="text-xs text-muted-foreground italic leading-relaxed">
+                "Dressing the mannequin" — control how your business appears in the public mall directory.
+              </p>
+
+              <div className="space-y-2">
+                 <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cover Photo</label>
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 border">Change</Button>
+                 </div>
+                 <div className="aspect-video w-full rounded-lg bg-muted relative group overflow-hidden border-2 border-dashed border-muted-foreground/25 flex items-center justify-center">
+                    {business.coverImage ? (
+                       <img src={business.coverImage} className="w-full h-full object-cover" />
+                    ) : (
+                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <Upload className="h-8 w-8" />
+                          <span className="text-xs">Upload Hero Image</span>
+                       </div>
+                    )}
+                 </div>
+              </div>
+
+              <div className="space-y-2">
+                 <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Gallery</label>
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2 border" asChild>
+                       <Link href={`/dashboard/profile?businessId=${business.id}`}>Manage</Link>
+                    </Button>
+                 </div>
+                 <div className="grid grid-cols-3 gap-2">
+                    {Array.isArray(business.gallery) && (business.gallery as any).length > 0 ? (
+                       (business.gallery as any).slice(0, 6).map((img: string, i: number) => (
+                          <div key={i} className="aspect-square rounded-md overflow-hidden bg-muted border">
+                             <img src={img} className="w-full h-full object-cover" />
+                          </div>
+                       ))
+                    ) : (
+                       [1, 2, 3, 4, 5, 6].map((i) => (
+                          <div key={i} className="aspect-square rounded-md bg-muted/50 flex items-center justify-center border border-dashed border-muted-foreground/20 text-muted-foreground/40">
+                             <Plus className="h-4 w-4" />
+                          </div>
+                       ))
+                    )}
                  </div>
               </div>
               
               <div className="space-y-2">
-                 <label className="text-sm font-medium">Elevator Pitch</label>
-                 <div className="p-3 bg-muted/50 rounded-md text-sm italic">
-                    {business.tagline || "Describe your business in 2 lines..."}
+                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Elevator Pitch</label>
+                 <div className="p-3 bg-muted/30 rounded-lg text-sm italic border border-muted-foreground/10">
+                    "{business.tagline || "Describe your business in 2 lines... e.g. Best coffee in Kilimani. Free Wi-Fi."}"
                  </div>
               </div>
 
-              <Button className="w-full" variant="outline">
-                 Manage Gallery
-              </Button>
+              <div className="space-y-2">
+                 <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Amenities</label>
+                 <div className="flex flex-wrap gap-2">
+                    {Array.isArray(business.amenities) && (business.amenities as any).length > 0 ? (
+                       (business.amenities as any).map((amenity: string) => (
+                          <Badge key={amenity} variant="secondary" className="font-normal text-[10px]">
+                             {amenity}
+                          </Badge>
+                       ))
+                    ) : (
+                       ['Wi-Fi', 'Parking', 'Wheelchair Access'].map((amenity) => (
+                          <Badge key={amenity} variant="outline" className="font-normal text-[10px] text-muted-foreground/50 border-dashed">
+                             {amenity}
+                          </Badge>
+                       ))
+                    )}
+                 </div>
+              </div>
+
+              <Separator className="my-2" />
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button className="w-full gap-2 shadow-sm" variant="default" asChild>
+                   <Link href={`/dashboard/profile?businessId=${business.id}`}>
+                      <Edit className="h-4 w-4" />
+                      Dress Mannequin
+                   </Link>
+                </Button>
+                <Button className="w-full gap-2 shadow-sm" variant="outline" asChild>
+                   <a href={`/window/${business.id}`}>
+                      <ExternalLink className="h-4 w-4" />
+                      View Live
+                   </a>
+                </Button>
+              </div>
            </CardContent>
         </Card>
 
         {/* The Lease (Contact & Hours) */}
         <div className="lg:col-span-1 space-y-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-bold">The Lease</CardTitle>
-              <p className="text-xs text-muted-foreground">Your contact and location details</p>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle className="text-lg font-bold">The Lease</CardTitle>
+                <p className="text-xs text-muted-foreground">Your contact and location details</p>
+              </div>
+              <Button variant="ghost" size="sm" className="h-8 border" asChild>
+                <Link href={`/dashboard/profile?businessId=${business.id}`}>
+                  Edit <Edit className="ml-1 h-3 w-3" />
+                </Link>
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
@@ -321,15 +393,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                     <CardTitle className="text-lg font-bold">The Shelves</CardTitle>
                     <p className="text-xs text-muted-foreground">What are you selling today?</p>
                  </div>
-                 <Button size="sm" className="gap-1">
-                    <Plus className="h-4 w-4" /> Add Service
+                 <Button size="sm" variant="ghost" className="gap-1 h-8" asChild>
+                    <Link href={`/dashboard/services?businessId=${business.id}`}>
+                      View All <ExternalLink className="h-3 w-3" />
+                    </Link>
                  </Button>
               </CardHeader>
               <CardContent>
                  <div className="space-y-4">
                     {business.services.length > 0 ? (
                        <div className="grid gap-3">
-                          {business.services.map((service: any) => (
+                          {business.services.slice(0, 3).map((service: any) => (
                              <div key={service.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                                 <div>
                                    <div className="font-medium text-sm">{service.name}</div>
@@ -340,12 +414,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
                                 </div>
                              </div>
                           ))}
+                          {business.services.length > 3 && (
+                            <p className="text-[10px] text-center text-muted-foreground">
+                              + {business.services.length - 3} more services
+                            </p>
+                          )}
                        </div>
                     ) : (
                        <div className="rounded-md border border-dashed p-8 text-center text-muted-foreground text-sm">
                           No services listed yet. Add your first item.
                        </div>
                     )}
+                    <Button className="w-full gap-2" asChild>
+                       <Link href={`/dashboard/services?businessId=${business.id}`}>
+                         <Plus className="h-4 w-4" /> Manage Shelves
+                       </Link>
+                    </Button>
                  </div>
               </CardContent>
            </Card>
