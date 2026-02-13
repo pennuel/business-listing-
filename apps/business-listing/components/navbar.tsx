@@ -44,7 +44,7 @@ export function Navbar() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => router.push("/")}>
             <Building2 className="h-8 w-8 text-blue-600" />
-            <span className="text-xl font-bold">Business Platform</span>
+            <span className="text-xl font-bold tracking-tight">Business <span className="text-blue-600">Listing</span></span>
           </div>
 
           {session ? (

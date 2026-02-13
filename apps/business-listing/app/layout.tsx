@@ -7,8 +7,8 @@ import { Providers } from "@/components/providers/session-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Business Platform",
-  description: "Register and manage your business listings",
+  title: "THINK Business Listing",
+  description: "The digital directory for verified local business .",
     generator: 'v0.app'
 }
 
