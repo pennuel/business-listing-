@@ -12,48 +12,45 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login")
   }
 
-  const user = await prisma.user.findUnique({
+  const user = await (prisma.user.findUnique({
     where: { email: session.user.email },
     select: {
       name: true,
       email: true,
+      id: true,
       image: true,
       businesses: {
         select: {
           id: true,
           name: true,
-          // We need an image/logo for the business. 
-          // Previous schema check showed 'image' on User but 'coverImage' on Business?
-          // Let's check schema again. Business has 'tags', 'coverImage'?
-          // Wait, the Business model I updated has 'coverImage'.
-          // Does it have a logo? I don't recall adding a 'logo' field.
-          // I will use coverImage for now or just name.
           coverImage: true, 
         }
       }
     }
-  })
+  }) as any)
+
+  if (!user) {
+    // If we have a session but no Prisma user, we still need to show the layout
+    // but with an empty business list. The page within will handle the "No Business" state.
+    const emptyUser = { name: session.user.name, email: session.user.email, id: "", businesses: [] }
+    return (
+      <SidebarProvider>
+        <AppSidebar businesses={[]} currentBusinessId={""} user={session.user as any} />
+        <SidebarInset>
+          <main className="flex-1 w-full bg-gray-50/50">
+            {children}
+          </main>
+        </SidebarInset>
+      </SidebarProvider>
+    )
+  }
 
   // Normalize for the switcher
-  const businesses = user?.businesses.map(b => ({
+  const businesses = user.businesses.map((b: any) => ({
     id: b.id,
     name: b.name,
-    image: b.coverImage // Using coverImage as the icon for now
-  })) || []
-
-  // Default to first business if available, but passing "" as current is fine 
-  // because the switcher handles defaults or page handles it.
-  // Actually sidebar needs to know which one is selected to show checkmark.
-  // We can't access searchParams in Layout easily in Next.js 13 (it's tricky in layouts).
-  // But purely for the switcher visual, we can default to the first one 
-  // or let the switcher client component handle the "read from URL" logic.
-  // The switcher I wrote:
-  // const searchParams = useSearchParams()
-  // const selectedBusiness = businesses.find((b) => b.id === currentBusinessId) || businesses[0]
-  // So if I pass "" as currentBusinessId, it defaults to first.
-  // Ideally, I should pass the true ID if I can.
-  // But Layouts don't receive searchParams. 
-  // So I'll pass "" and let the client component read the URL.
+    image: b.coverImage
+  }))
 
   return (
     <SidebarProvider>
