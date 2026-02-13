@@ -18,9 +18,11 @@ import {
   ExternalLink,
   CheckCircle,
   XCircle,
+  ImageIcon,
 } from "lucide-react"
 
 function formatTime(time: string) {
+  if (!time || typeof time !== 'string' || !time.includes(":")) return time
   const [hours, minutes] = time.split(":")
   const hour = parseInt(hours)
   const ampm = hour >= 12 ? "PM" : "AM"
@@ -35,6 +37,11 @@ function getCurrentStatus(business: any) {
   }
   if (business.isManuallyOpen === false) {
     return { isOpen: false, message: "Closed (Owner set)" }
+  }
+
+  // Fallback for simple string-based schedules
+  if (typeof business.weekdaySchedule === 'string') {
+      return { isOpen: true, message: business.weekdaySchedule }
   }
 
   const now = new Date()
@@ -72,7 +79,7 @@ function getCurrentStatus(business: any) {
   }
 }
 
-export default async function PreviewPage({ params }: { params: { id: string } }) {
+export default async function WindowPage({ params }: { params: { id: string } }) {
   const business = await prisma.business.findUnique({
     where: { id: params.id },
     include: {
@@ -118,10 +125,10 @@ export default async function PreviewPage({ params }: { params: { id: string } }
             </a>
           </Button>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="hidden sm:flex">Owner Preview Mode</Badge>
-            <Button size="sm" className="gap-2">
+            <Badge variant="outline" className="hidden sm:flex bg-blue-50 text-blue-700 border-blue-200">Window Display Mode</Badge>
+            <Button size="sm" className="gap-2 bg-blue-600 hover:bg-blue-700">
               <Share2 className="h-4 w-4" />
-              Share
+              Share Window
             </Button>
           </div>
         </div>
@@ -178,6 +185,39 @@ export default async function PreviewPage({ params }: { params: { id: string } }
                 {business.description || "No description provided."}
               </p>
             </section>
+
+            {/* Gallery Section */}
+            {Array.isArray(business.gallery) && (business.gallery as any).length > 0 && (
+              <section>
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <ImageIcon className="h-5 w-5 text-blue-600" />
+                  Visual Showcase
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-white p-4 rounded-xl border shadow-sm">
+                  {(business.gallery as any).map((url: string, i: number) => (
+                    <div key={i} className="aspect-square rounded-lg overflow-hidden border">
+                      <img src={url} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Amenities Section */}
+            {Array.isArray(business.amenities) && (business.amenities as any).length > 0 && (
+              <section>
+                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    Amenities & Perks
+                 </h2>
+                 <div className="flex flex-wrap gap-2 bg-white p-6 rounded-xl border shadow-sm">
+                    {(business.amenities as any).map((amenity: string, i: number) => (
+                      <Badge key={i} variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 px-3 py-1">
+                        {amenity}
+                      </Badge>
+                    ))}
+                 </div>
+              </section>
+            )}
 
             {/* Services/Products */}
             <section>
@@ -288,18 +328,31 @@ export default async function PreviewPage({ params }: { params: { id: string } }
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {scheduleDays.map((day) => (
-                    <div key={day.name} className="flex justify-between items-center text-sm">
-                      <span className={day.name === new Date().toLocaleDateString('en-US', {weekday: 'long'}) ? "font-bold" : ""}>
-                        {day.name}
-                      </span>
-                      <span className="text-gray-500">
-                        {day.isOpen ? `${formatTime(day.open)} - ${formatTime(day.close)}` : <span className="text-red-400">Closed</span>}
-                      </span>
+                {typeof business.weekdaySchedule === 'object' && business.weekdaySchedule !== null ? (
+                  <div className="space-y-3">
+                    {scheduleDays.map((day) => (
+                      <div key={day.name} className="flex justify-between items-center text-sm">
+                        <span className={day.name === new Date().toLocaleDateString('en-US', {weekday: 'long'}) ? "font-bold" : ""}>
+                          {day.name}
+                        </span>
+                        <span className="text-gray-500">
+                          {day.isOpen ? `${formatTime(day.open)} - ${formatTime(day.close)}` : <span className="text-red-400">Closed</span>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Weekdays:</span>
+                      <span className="text-gray-500">{business.weekdaySchedule || "Not set"}</span>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Weekends:</span>
+                      <span className="text-gray-500">{business.weekendSchedule || "Not set"}</span>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
