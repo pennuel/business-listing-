@@ -13,7 +13,7 @@ import {
   User2
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 
 import {
   Sidebar,
@@ -28,25 +28,33 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BusinessSwitcher } from "@/components/dashboard/business-switcher"
 
-// Mock user data for now, ideally passed via props or context
-const user = {
-  name: "Business Owner",
-  email: "owner@example.com",
-  avatar: "/avatars/shadcn.jpg",
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  businesses: {
+    id: string
+    name: string
+    image: string | null
+  }[]
+  currentBusinessId: string
+  user: {
+    name: string
+    email: string
+    image: string | null
+  }
 }
 
 const navItems = [
   {
-    title: "Mall Directory",
+    title: "Foot Traffic",
     url: "/dashboard",
     icon: LayoutDashboard,
-    description: "Foot Traffic Analytics"
+    description: "Analytics"
   },
   {
-    title: "Window Display",
+    title: "Public Profile",
     url: "/dashboard/profile",
     icon: Store,
     description: "Manage Profile"
@@ -57,39 +65,36 @@ const navItems = [
     icon: Package,
     description: "Service Menu"
   },
-  {
-    title: "Suggestion Box",
-    url: "/dashboard/reviews",
-    icon: MessageSquare,
-    description: "Reviews & Reputation"
-  },
-  {
-    title: "The Lease",
-    url: "/dashboard/settings",
-    icon: ShieldCheck,
-    description: "Verification & Settings"
-  },
+//   {
+//     title: "Suggestion Box",
+//     url: "/dashboard/reviews",
+//     icon: MessageSquare,
+//     description: "Reviews & Reputation"
+//   },
+//   {
+//     title: "The Lease",
+//     url: "/dashboard/settings",
+//     icon: ShieldCheck,
+//     description: "Verification & Settings"
+//   },
 ]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ businesses, currentBusinessId, user, ...props }: AppSidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  // Use prop if provided, otherwise try search params, otherwise fallback to first business
+  const businessId = currentBusinessId || searchParams.get("businessId") || (businesses.length > 0 ? businesses[0].id : "")
 
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Store className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">My Business</span>
-                  <span className="truncate text-xs">Dashboard</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <BusinessSwitcher 
+              businesses={businesses} 
+              currentBusinessId={businessId} 
+            />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -99,16 +104,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const url = `${item.url}?businessId=${businessId}`
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
+                      <Link href={url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -140,6 +148,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 align="end"
                 sideOffset={4}
               >
+                <DropdownMenuItem asChild>
+                  <Link href="/">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Back to Mall Directory
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
                   Account Settings
