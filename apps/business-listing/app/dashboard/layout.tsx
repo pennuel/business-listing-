@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
+import { Suspense } from "react"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
@@ -35,7 +36,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     const emptyUser = { name: session.user.name, email: session.user.email, id: "", businesses: [] }
     return (
       <SidebarProvider>
-        <AppSidebar businesses={[]} currentBusinessId={""} user={session.user as any} />
+        <Suspense fallback={<div className="w-64 h-screen bg-gray-100 animate-pulse" />}>
+          <AppSidebar businesses={[]} currentBusinessId={""} user={session.user as any} />
+        </Suspense>
         <SidebarInset>
           <main className="flex-1 w-full bg-gray-50/50">
             {children}
@@ -54,15 +57,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <SidebarProvider>
-      <AppSidebar 
-         businesses={businesses} 
-         currentBusinessId="" 
-         user={{
-            name: user?.name || "User",
-            email: user?.email || "",
-            image: user?.image || null
-         }} 
-      />
+      <Suspense fallback={<div className="w-64 h-screen bg-gray-100 animate-pulse" />}>
+        <AppSidebar 
+           businesses={businesses} 
+           currentBusinessId="" 
+           user={{
+              name: user?.name || "User",
+              email: user?.email || "",
+              image: user?.image || null
+           }} 
+        />
+      </Suspense>
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
