@@ -5,7 +5,7 @@ import { userService } from "./services/user.service"
 import { authService } from "./services/auth.service"
 import { reviewService } from "./services/review.service"
 import { serviceService } from "./services/service.service"
-import type { Business } from "@prisma/client"
+import { BusinessInfo } from "@think-id/types"
 
 export interface DatabaseInterface {
   // Service access
@@ -16,15 +16,15 @@ export interface DatabaseInterface {
   offerings: typeof serviceService
 
   // Top-level operations (delegated to services)
-  createBusiness(data: any): Promise<Business>
-  getBusinessById(id: string): Promise<Business | null>
-  getBusinessesByEmail(email: string): Promise<Business[]>
-  getBusinessesByUserId(userId: string): Promise<Business[]>
-  updateBusiness(id: string, data: any): Promise<Business | null>
-  deleteBusiness(id: string): Promise<Business | null>
+  createBusiness(data: any): Promise<BusinessInfo>
+  getBusinessById(id: string): Promise<BusinessInfo | null>
+  getBusinessesByEmail(email: string): Promise<BusinessInfo[]>
+  getBusinessesByUserId(userId: string): Promise<BusinessInfo[]>
+  updateBusiness(id: string, data: any): Promise<BusinessInfo | null>
+  deleteBusiness(id: string): Promise<any>
   getAllBusinesses(
     options?: any,
-  ): Promise<Business[] | { businesses: Business[]; total: number; page: number; totalPages: number }>
+  ): Promise<BusinessInfo[] | { businesses: BusinessInfo[]; total: number; page: number; totalPages: number }>
 }
 
 export async function checkDatabaseConnection(): Promise<boolean> {
@@ -73,61 +73,39 @@ class DatabaseManager implements DatabaseInterface {
     }
   }
 
-  async createBusiness(data: any): Promise<Business> {
+  async createBusiness(data: any): Promise<BusinessInfo> {
     await this.checkConnection()
-    // Fallback logic omitted for now to keep it clean, but can be added back if needed
-    return await businessService.createBusiness({
-      userEmail: data.email,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      website: data.website,
-      category: data.category,
-      offeringType: data.offeringType,
-      description: data.description,
-      country: data.country,
-      county: data.county,
-      subCounty: data.subCounty,
-      address: data.address,
-      pin: data.pin,
-      formattedAddress: data.formattedAddress,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      placeId: data.placeId,
-      weekdaySchedule: data.weekdaySchedule,
-      weekendSchedule: data.weekendSchedule,
-      holidayHours: data.holidayHours,
-    })
+    return await businessService.createBusiness(data)
   }
 
-  async getBusinessById(id: string): Promise<Business | null> {
+  async getBusinessById(id: string): Promise<BusinessInfo | null> {
     await this.checkConnection()
     return await businessService.getBusinessById(id)
   }
 
-  async getBusinessesByEmail(email: string): Promise<Business[]> {
+  async getBusinessesByEmail(email: string): Promise<BusinessInfo[]> {
     await this.checkConnection()
     return await businessService.getBusinessesByEmail(email)
   }
 
-  async getBusinessesByUserId(userId: string): Promise<Business[]> {
+  async getBusinessesByUserId(userId: string): Promise<BusinessInfo[]> {
     await this.checkConnection()
     return await businessService.getBusinessesByUserId(userId)
   }
 
-  async updateBusiness(id: string, data: any): Promise<Business | null> {
+  async updateBusiness(id: string, data: any): Promise<BusinessInfo | null> {
     await this.checkConnection()
     return await businessService.updateBusiness(id, data)
   }
 
-  async deleteBusiness(id: string): Promise<Business | null> {
+  async deleteBusiness(id: string): Promise<any> {
     await this.checkConnection()
     return await businessService.deleteBusiness(id)
   }
 
   async getAllBusinesses(
     options?: any,
-  ): Promise<Business[] | { businesses: Business[]; total: number; page: number; totalPages: number }> {
+  ): Promise<BusinessInfo[] | { businesses: BusinessInfo[]; total: number; page: number; totalPages: number }> {
     await this.checkConnection()
 
     if (options?.page) {

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { database } from "@think-id/database";
 import type { BusinessData } from "./page";
+import { BusinessInfoRequest, BusinessInfo } from "@think-id/types";
 
 export async function submitBusinessData(
   businessData: BusinessData & { userId?: string }
@@ -53,14 +54,16 @@ export async function submitBusinessData(
     // Prepare the payload for business creation
     const payload = {
       // Basic Information
-      name: businessData.name.trim(),
-      phone: businessData.phone.trim(),
+      businessName: businessData.name.trim(),
+      phoneNumber: businessData.phone.trim(),
       email: businessData.email.trim(),
       website: businessData.website?.trim() || "",
 
-      // Business Type
-      offeringType: businessData.offeringType,
-      category: businessData.category.trim(),
+      // Mapping IDs - Placeholder values for category and size
+      categoryId: 1, // Professional Services (could be mapped from category string)
+      sizeId: 2,     // SME (could be mapped from other data)
+
+      // Description
       description: businessData.description?.trim() || "",
 
       // Location
@@ -69,38 +72,58 @@ export async function submitBusinessData(
       subCounty: businessData.subCounty?.trim() || "",
       address: businessData.address.trim(),
       pin: businessData.pin?.trim() || undefined,
-      // Full location helpers
       formattedAddress: businessData.formattedAddress || undefined,
       latitude: businessData.coordinates?.lat,
       longitude: businessData.coordinates?.lng,
       placeId: businessData.placeId || undefined,
 
-      // Schedule - Store as JSON
-      weekdaySchedule: businessData.weekdaySchedule,
-      weekendSchedule: businessData.weekendSchedule,
-      holidayHours: businessData.holidayHours,
+      // Schedule - Format it correctly for the new nested structure
+      schedule: {
+        weekday: Object.fromEntries(
+          Object.entries(businessData.weekdaySchedule).map(([day, hrs]) => [
+            day.charAt(0).toUpperCase() + day.slice(1),
+            hrs.isOpen ? `${hrs.open} - ${hrs.close}` : "Closed",
+          ])
+        ),
+        weekend: Object.fromEntries(
+          Object.entries(businessData.weekendSchedule).map(([day, hrs]) => [
+            day.charAt(0).toUpperCase() + day.slice(1),
+            hrs.isOpen ? `${hrs.open} - ${hrs.close}` : "Closed",
+          ])
+        ),
+        holiday: {
+          "Default Holiday": businessData.holidayHours.isOpen
+            ? `${businessData.holidayHours.open} - ${businessData.holidayHours.close}`
+            : "Closed",
+        },
+      },
+
+      // Documents and assets
+      businessDocuments: {},
+      gallery: [],
+      amenities: [],
     };
 
-    let business;
+    let business: BusinessInfo;
     if (businessData.id) {
        console.log("Updating existing business:", businessData.id);
        business = await database.businesses.updateBusiness(businessData.id, payload);
-    } else if (session?.user?.email) {
-      business = await database.businesses.createBusiness({
-        ...payload,
-        userEmail: session.user.email,
-      });
     } else {
-      business = await database.businesses.createBusiness({
+      // For creation, add the user ID if available
+      const createData: BusinessInfoRequest = {
         ...payload,
-        userEmail: businessData.email, // Use email from data if no session
-      });
+        userId: (session?.user as any)?.id || undefined,
+      };
+      
+      business = await database.businesses.createBusiness(createData);
     }
 
-    console.log("Business created successfully:", business.id);
+    // Success response should use the bizId or id from the new BusinessInfo interface
+    const businessId = business.bizId?.toString() || (business as any).id || "";
+    console.log("Business operation successful:", businessId);
 
     // Return success and let the client handle the redirect
-    return { success: true, businessId: business.id };
+    return { success: true, businessId };
   } catch (error) {
     console.error("Business creation failed:", error);
     return {

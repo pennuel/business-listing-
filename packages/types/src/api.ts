@@ -113,14 +113,18 @@ export interface BusinessInfoRequest {
   phoneNumber?: string;
   email?: string;
   website?: string;
-  schedule?: string;
-  businessDocuments?: string;
+  schedule?: {
+    weekday?: Record<string, string>;
+    weekend?: Record<string, string>;
+    holiday?: Record<string, string>;
+  };
+  businessDocuments?: Record<string, string>;
   categoryId?: number; // int64
   sizeId?: number; // int64
   description?: string;
   coverImage?: string;
-  gallery?: string;
-  amenities?: string;
+  gallery?: string[];
+  amenities?: string[];
   weekdaySchedule?: string;
   weekendSchedule?: string;
   holidayHours?: string;
@@ -165,12 +169,16 @@ export interface BusinessInfo {
   phoneNumber?: string;
   email?: string;
   website?: string;
-  schedule?: string;
-  businessDocuments?: string;
+  schedule?: {
+    weekday?: Record<string, string>;
+    weekend?: Record<string, string>;
+    holiday?: Record<string, string>;
+  };
+  businessDocuments?: Record<string, string>;
   description?: string;
   coverImage?: string;
-  gallery?: string;
-  amenities?: string;
+  gallery?: string[];
+  amenities?: string[];
   weekdaySchedule?: string;
   weekendSchedule?: string;
   holidayHours?: string;

@@ -7,31 +7,14 @@ import {
 import { userRepository } from "../repositories/user.repository";
 import { BusinessInfo } from "@think-id/types";
 
-export interface BusinessServiceCreateData
-  extends Omit<CreateBusinessData, "userId"> {
-  userEmail: string;
-  authUserId?: string;
-}
+export type BusinessServiceCreateData = CreateBusinessData;
 
 export class BusinessService {
   async createBusiness(data: BusinessServiceCreateData): Promise<BusinessInfo> {
     // Validate required fields
     this.validateBusinessData(data);
 
-    // Find or create user using the provided userEmail and optional auth ID
-    const user = await userRepository.findOrCreate({ 
-      email: data.userEmail,
-      id: data.authUserId 
-    }) as any;
-
-    // Create business - exclude the runtime-only properties before saving
-    const { userEmail, authUserId, ...rest } = data;
-    const businessData: CreateBusinessData = {
-      ...rest,
-      userId: user.id || "user-1", // Fallback if user creation didn't return an id
-    };
-
-    return await businessRepository.create(businessData);
+    return await businessRepository.create(data);
   }
 
   async getBusinessById(id: string): Promise<BusinessInfo | null> {
