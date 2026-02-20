@@ -1,25 +1,5 @@
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { notFound } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import {
-  Building2,
-  Phone,
-  Mail,
-  Globe,
-  MapPin,
-  Clock,
-  Star,
-  MessageCircle,
-  Share2,
-  ArrowLeft,
-  ExternalLink,
-  CheckCircle,
-  XCircle,
-  ImageIcon,
-} from "lucide-react"
 
 function formatTime(time: string) {
   if (!time || typeof time !== 'string' || !time.includes(":")) return time
@@ -80,15 +60,11 @@ function getCurrentStatus(business: any) {
 }
 
 export default async function WindowPage({ params }: { params: { id: string } }) {
-  const business = await prisma.business.findUnique({
-    where: { id: params.id },
-    include: {
-      services: true,
-      reviews: {
-        orderBy: { createdAt: 'desc' }
-      }
-    }
-  })
+  
+
+  const business = await database.businesses.getBusinessById(params.id)
+
+  
 
   if (!business) {
     notFound()
@@ -220,7 +196,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
             )}
 
             {/* Services/Products */}
-            <section>
+            {/* <section>
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                 Our Offerings
               </h2>
@@ -246,7 +222,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
                    <p className="text-muted-foreground text-sm italic col-span-2 text-center py-8 border-2 border-dashed rounded-xl">No services listed yet.</p>
                 )}
               </div>
-            </section>
+            </section> */}
 
             {/* Reviews */}
             <section>
@@ -257,7 +233,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
                     <span>4.8 (24 reviews)</span>
                 </div>
               </div>
-              <div className="space-y-4">
+              {/* <div className="space-y-4">
                 {business.reviews.map((review : any) => (
                   <Card key={review.id} className="bg-white">
                     <CardContent className="p-6">
@@ -286,7 +262,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
                       <p>No reviews yet. Be the first to share your experience!</p>
                    </div>
                 )}
-              </div>
+              </div> */}
             </section>
           </div>
 

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { database } from "@/lib/database"
+import { database } from "@think-id/database"
 
 // Mock business data (same as main API)
 const mockBusinesses = [

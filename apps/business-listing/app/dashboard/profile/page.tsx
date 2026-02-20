@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { notFound, redirect } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -72,9 +72,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
     redirect("/login")
   }
 
-  const user = await (prisma.user.findUnique({
-    where: { email: session.user.email },
-  }) as any)
+  const user = await database.users.getUserByEmail(session.user.email)
 
   if (!user) {
     // If user is authenticated but not in our DB, they need to go to technical onboarding 
@@ -82,21 +80,16 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
     redirect("/dashboard")
   }
 
-  const selectedBusinessId = searchParams.businessId
+  const selectedBusinessId = (searchParams as any).businessId
   
-  const business = await (prisma.business.findFirst({
-    where: { 
-        id: selectedBusinessId, // If undefined, it will just match userId
-        userId: user.id
-    },
-    orderBy: { createdAt: 'desc' }, // Get the newest one if none specified
-    include: {
-      services: true,
-      reviews: {
-        orderBy: { createdAt: 'desc' }
-      }
-    }
-  }) as any)
+  let business;
+  if (selectedBusinessId) {
+    business = await database.businesses.getBusinessById(selectedBusinessId)
+  } else {
+    // Get all businesses and pick the most recent
+    const businesses = await database.businesses.getBusinessesByUserId(user.id)
+    business = businesses[0];
+  }
 
   if (!business) {
     redirect("/dashboard")

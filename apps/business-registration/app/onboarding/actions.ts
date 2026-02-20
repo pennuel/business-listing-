@@ -1,8 +1,7 @@
 "use server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { businessService } from "@/lib/database/services/business.service";
-import { database } from "@/lib/database";
+import { database } from "@think-id/database";
 import type { BusinessData } from "./page";
 
 export async function submitBusinessData(
@@ -85,16 +84,16 @@ export async function submitBusinessData(
     let business;
     if (businessData.id) {
        console.log("Updating existing business:", businessData.id);
-       business = await businessService.updateBusiness(businessData.id, payload);
+       business = await database.businesses.updateBusiness(businessData.id, payload);
     } else if (session?.user?.email) {
-      business = await businessService.createBusiness({
+      business = await database.businesses.createBusiness({
         ...payload,
         userEmail: session.user.email,
       });
     } else {
-      business = await database.createBusiness({
+      business = await database.businesses.createBusiness({
         ...payload,
-        userId: businessData.userId || "user-1",
+        userEmail: businessData.email, // Use email from data if no session
       });
     }
 

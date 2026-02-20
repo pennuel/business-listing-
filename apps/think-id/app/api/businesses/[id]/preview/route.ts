@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { database } from "@/lib/database"
+import { database } from "@think-id/database"
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +8,7 @@ export async function GET(
   const { id } = params;
 
   try {
-    const business = await database.getBusinessById(id)
+    const business = await database.businesses.getBusinessById(id)
 
     if (!business) {
       return NextResponse.json({ error: "Business not found" }, { status: 404 })

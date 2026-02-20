@@ -1,6 +1,4 @@
-// Main database interface - provides unified access to database operations
-import { checkDatabaseConnection } from "./config"
-import { businessService } from "./services/business.service"
+import { database as coreDatabase, businessService, userService, authService, reviewService, serviceService as offerings, checkDatabaseConnection as coreCheckConnection, disconnectDatabase as coreDisconnect } from "@think-id/database"
 import { fallbackService } from "./fallback"
 import type { Business } from "@prisma/client"
 
@@ -26,16 +24,9 @@ class DatabaseManager implements DatabaseInterface {
     }
 
     try {
-      const isConnected = await checkDatabaseConnection()
+      const isConnected = await coreCheckConnection()
       this.useFallback = !isConnected
       this.connectionChecked = true
-
-      if (this.useFallback) {
-        console.warn("Database connection failed, using fallback service")
-      } else {
-        console.log("Database connection successful")
-      }
-
       return isConnected
     } catch (error) {
       console.error("Database connection check failed:", error)
@@ -54,26 +45,8 @@ class DatabaseManager implements DatabaseInterface {
 
     try {
       return await businessService.createBusiness({
-        userEmail: data.email,
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        website: data.website,
-        category: data.category,
-        offeringType: data.offeringType,
-        description: data.description,
-        country: data.country,
-        county: data.county,
-        subCounty: data.subCounty,
-        address: data.address,
-        pin: data.pin,
-        formattedAddress: data.formattedAddress,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        placeId: data.placeId,
-        weekdaySchedule: data.weekdaySchedule,
-        weekendSchedule: data.weekendSchedule,
-        holidayHours: data.holidayHours,
+        ...data,
+        userEmail: data.email
       })
     } catch (error) {
       console.error("Database operation failed, falling back:", error)
@@ -187,24 +160,14 @@ class DatabaseManager implements DatabaseInterface {
     }
   }
 
-  // Utility methods
   async isUsingFallback(): Promise<boolean> {
     await this.checkConnection()
     return this.useFallback
   }
-
-  async resetConnection(): Promise<void> {
-    this.connectionChecked = false
-    this.useFallback = false
-  }
 }
 
-// Export singleton instance
 export const database = new DatabaseManager()
 
-// Re-export types and services for convenience
 export type { Business } from "@prisma/client"
-export { businessService } from "./services/business.service"
-export { businessRepository } from "./repositories/business.repository"
-export { userRepository } from "./repositories/user.repository"
-export { checkDatabaseConnection, disconnectDatabase } from "./config"
+export { businessService, userService, authService, reviewService, offerings }
+export { coreCheckConnection as checkDatabaseConnection, coreDisconnect as disconnectDatabase }

@@ -14,7 +14,7 @@ import { Button } from "@think-id/ui/components/ui/button";
 import { Badge } from "@think-id/ui/components/ui/badge";
 import { Skeleton } from "@think-id/ui/components/ui/skeleton";
 import { Building2, Plus, MapPin, Phone, Mail, Globe, AlertCircle } from "lucide-react";
-import type { Business } from "@/lib/database";
+import type { Business } from "@prisma/client";
 
 export function BusinessList({ onManageBusiness }: { onManageBusiness?: (id: string) => void }) {
   const { data: session, status } = useSession();

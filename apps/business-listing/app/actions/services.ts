@@ -1,6 +1,6 @@
 "use server"
 
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { revalidatePath } from "next/cache"
 
 export async function addService(data: {
@@ -12,16 +12,7 @@ export async function addService(data: {
   description?: string
 }) {
   try {
-    const service = await prisma.service.create({
-      data: {
-        name: data.name,
-        price: data.price,
-        currency: data.currency,
-        duration: data.duration,
-        description: data.description,
-        businessId: data.businessId,
-      },
-    })
+    const service = await database.offerings.addService(data)
     revalidatePath(`/dashboard/services?businessId=${data.businessId}`)
     revalidatePath(`/dashboard?businessId=${data.businessId}`)
     revalidatePath(`/window/${data.businessId}`)
@@ -34,12 +25,15 @@ export async function addService(data: {
 
 export async function deleteService(id: string) {
   try {
-    const service = await prisma.service.delete({
-      where: { id },
-    })
-    revalidatePath(`/dashboard/services?businessId=${service.businessId}`)
-    revalidatePath(`/dashboard?businessId=${service.businessId}`)
-    revalidatePath(`/window/${service.businessId}`)
+    // We need the businessId to revalidate paths
+    const serviceDetails = await database.offerings.getServiceById(id)
+    if (!serviceDetails) return { success: false, error: "Service not found" }
+    
+    await database.offerings.deleteService(id)
+    
+    revalidatePath(`/dashboard/services?businessId=${serviceDetails.businessId}`)
+    revalidatePath(`/dashboard?businessId=${serviceDetails.businessId}`)
+    revalidatePath(`/window/${serviceDetails.businessId}`)
     return { success: true }
   } catch (error) {
     console.error("Error deleting service:", error)
@@ -47,18 +41,9 @@ export async function deleteService(id: string) {
   }
 }
 
-export async function updateService(id: string, data: {
-  name?: string
-  price?: number
-  currency?: string
-  duration?: number
-  description?: string
-}) {
+export async function updateService(id: string, data: any) {
   try {
-    const service = await prisma.service.update({
-      where: { id },
-      data,
-    })
+    const service = await database.offerings.updateService(id, data)
     revalidatePath(`/dashboard/services?businessId=${service.businessId}`)
     revalidatePath(`/dashboard?businessId=${service.businessId}`)
     revalidatePath(`/window/${service.businessId}`)

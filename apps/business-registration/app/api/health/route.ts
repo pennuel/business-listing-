@@ -1,16 +1,14 @@
 import { NextResponse } from "next/server"
-import { database, checkDatabaseConnection } from "@/lib/database"
+import { checkDatabaseConnection } from "@think-id/database"
 
 export async function GET() {
   try {
     const isDbConnected = await checkDatabaseConnection()
-    const isUsingFallback = await database.isUsingFallback()
 
     return NextResponse.json({
       status: "healthy",
       database: {
         connected: isDbConnected,
-        usingFallback: isUsingFallback,
       },
       timestamp: new Date().toISOString(),
     })

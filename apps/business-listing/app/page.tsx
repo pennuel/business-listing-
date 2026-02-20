@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,14 +7,16 @@ import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/navbar"
 
 export default async function HomePage() {
-  const businesses = await prisma.business.findMany({
-    where: { status: "active" },
-    include: {
-      reviews: true,
-      services: true,
-    },
-    take: 12,
-  })
+  let businesses: any[] = []
+  try {
+    const result = await database.businesses.getAllBusinesses({
+      status: "active",
+      limit: 12
+    })
+    businesses = Array.isArray(result) ? result : (result?.businesses || [])
+  } catch (error) {
+    console.error("Failed to fetch businesses:", error)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

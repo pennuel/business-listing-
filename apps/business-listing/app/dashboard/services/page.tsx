@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { redirect } from "next/navigation"
 import { ServicesList } from "@/components/dashboard/services-list"
 import { Button } from "@/components/ui/button"
@@ -14,20 +14,15 @@ export default async function ServicesPage({ searchParams }: { searchParams: { b
     redirect("/login")
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-  })
+  // Use the package-based user service
+  const user = await database.users.getUserByEmail(session.user.email)
 
   if (!user) {
     redirect("/login")
   }
 
-  const businesses = await prisma.business.findMany({
-    where: { userId: user.id },
-    include: {
-      services: true
-    }
-  })
+  // Use the package-based business service
+  const businesses = await database.businesses.getBusinessesByUserId(user.id)
 
   // Select business based on URL or default to first
   const selectedBusinessId = searchParams.businessId

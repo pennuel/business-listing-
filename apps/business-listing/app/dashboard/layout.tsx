@@ -2,9 +2,10 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { database, userService } from "@think-id/database"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
+
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
@@ -13,27 +14,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login")
   }
 
-  const user = await (prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: {
-      name: true,
-      email: true,
-      id: true,
-      image: true,
-      businesses: {
-        select: {
-          id: true,
-          name: true,
-          coverImage: true, 
-        }
-      }
-    }
-  }) as any)
+  // Use the userService singleton from the database package
+  const user = await userService.getUserByEmail(session.user.email)
 
   if (!user) {
     // If we have a session but no Prisma user, we still need to show the layout
     // but with an empty business list. The page within will handle the "No Business" state.
-    const emptyUser = { name: session.user.name, email: session.user.email, id: "", businesses: [] }
     return (
       <SidebarProvider>
         <Suspense fallback={<div className="w-64 h-screen bg-gray-100 animate-pulse" />}>
@@ -48,11 +34,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
     )
   }
 
+  // Fetch businesses for this user
+  const userBusinesses = await database.businesses.getBusinessesByUserId(user.id)
+
   // Normalize for the switcher
-  const businesses = user.businesses.map((b: any) => ({
+  const businesses = userBusinesses.map((b: any) => ({
     id: b.id,
     name: b.name,
-    image: b.coverImage
+    image: (b as any).coverImage
   }))
 
   return (

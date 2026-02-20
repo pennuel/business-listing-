@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import { StoreStatusToggle } from "@/components/dashboard/store-status-toggle"
@@ -83,30 +83,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
     redirect("/login")
   }
 
-  const user = await (prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { 
-      businesses: {
-        include: {
-          services: true,
-          reviews: {
-            orderBy: { createdAt: 'desc' },
-            take: 5
-          },
-          analytics: {
-            orderBy: { date: 'desc' },
-            take: 30
-          }
-        }
-      } 
-    }
-  }) as any)
+  // Use the package-based database manager
+  const user = await database.users.getUserByEmail(session.user.email)
 
+  // Fetch businesses for this user to match the previous include functionality
+  const userBusinesses = user ? await database.businesses.getBusinessesByUserId(user.id) : []
+  
   // Select business based on URL or default to first
-  const selectedBusinessId = searchParams.businessId
+  const selectedBusinessId = (searchParams as any).businessId
   const business = selectedBusinessId 
-    ? user?.businesses.find((b: any) => b.id === selectedBusinessId) 
-    : user?.businesses[0]
+    ? userBusinesses.find((b: any) => b.id === selectedBusinessId) 
+    : userBusinesses[0]
 
   if (!business) {
     return (

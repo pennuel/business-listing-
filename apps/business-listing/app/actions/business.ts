@@ -1,14 +1,11 @@
 "use server"
 
-import { prisma } from "@/lib/prisma"
+import { database } from "@think-id/database"
 import { revalidatePath } from "next/cache"
 
 export async function toggleStoreStatus(businessId: string, isOpen: boolean) {
   try {
-    await (prisma.business.update({
-      where: { id: businessId },
-      data: { isManuallyOpen: isOpen } as any,
-    }) as any)
+    await database.businesses.updateBusiness(businessId, { isManuallyOpen: isOpen })
     revalidatePath("/dashboard")
     revalidatePath(`/window/${businessId}`)
     return { success: true }
@@ -40,10 +37,7 @@ export async function updateBusinessProfile(businessId: string, data: any) {
     if (data.weekdaySchedule !== undefined) updateData.weekdaySchedule = data.weekdaySchedule
     if (data.weekendSchedule !== undefined) updateData.weekendSchedule = data.weekendSchedule
 
-    await (prisma.business.update({
-      where: { id: businessId },
-      data: updateData,
-    }) as any)
+    await database.businesses.updateBusiness(businessId, updateData)
     
     revalidatePath("/dashboard")
     revalidatePath("/dashboard/profile")

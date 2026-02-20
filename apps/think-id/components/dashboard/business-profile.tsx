@@ -25,7 +25,7 @@ import {
   Calendar,
   CreditCard,
 } from "lucide-react";
-import type { Business } from "@/lib/database";
+import type { Business } from "@prisma/client";
 
 interface BusinessProfileProps {
   businessId: string;
