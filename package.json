@@ -12,9 +12,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "prettier": "latest",
     "prisma": "6.3.1",
-    "turbo": "latest",
-    "prettier": "latest"
+    "turbo": "^2.8.10"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
