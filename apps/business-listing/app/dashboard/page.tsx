@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Phone, MapPin, MousePointerClick, MessageSquare, Plus, Upload, Globe, Mail, Clock, ExternalLink, Edit, LayoutDashboard, Wifi, ParkingCircle } from "lucide-react"
+import { StoreHydrator } from "@/lib/redux/store-hydrator"
 
 function formatSchedule(business: any) {
   const weekday = business.weekdaySchedule as any
@@ -119,21 +120,22 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto">
+      <StoreHydrator user={user} business={business} userBusinesses={userBusinesses} />
       
       {/* 1. The Header: Store Status */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card p-6 rounded-xl border shadow-sm">
         <div className="flex items-center gap-4">
           <div className="h-16 w-16 rounded-lg bg-primary/10 flex items-center justify-center overflow-hidden">
-             {business.image ? (
-                <img src={business.image} alt={business.name} className="h-full w-full object-cover" />
+             {business.logo ? (
+                <img src={business.logo} alt={business.businessName} className="h-full w-full object-cover" />
              ) : (
-                <span className="text-2xl font-bold text-primary">{business.name.charAt(0)}</span>
+                <span className="text-2xl font-bold text-primary">{business.businessName?.charAt(0)}</span>
              )}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold sm:text-3xl">{business.name}</h1>
-              <Badge variant="secondary">{business.category}</Badge>
+              <h1 className="text-2xl font-bold sm:text-3xl">{business.businessName}</h1>
+              <Badge variant="secondary">{business.category?.categoryName}</Badge>
               <Badge
                 variant={
                   business.status === "active"
@@ -156,13 +158,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
-              <a href={`/window/${business.id}`}>
+              <a href={`/window/${business.bizId}`}>
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Visit Window
               </a>
             </Button>
             <Button size="sm" asChild>
-              <Link href={`/dashboard/profile?businessId=${business.id}`}>
+              <Link href={`/dashboard/profile?businessId=${business.bizId}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Profile
               </Link>
@@ -170,7 +172,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
           </div>
           <div className="h-px w-full sm:h-10 sm:w-px bg-border" />
           <div className="flex flex-col items-center gap-1">
-              <StoreStatusToggle businessId={business.id} initialStatus={isOpen} />
+              <StoreStatusToggle businessId={business?.bizId} initialStatus={isOpen} />
               <div className="flex flex-col items-center">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Store Status</span>
                 <span className={`text-[9px] font-medium ${scheduleStatus.isOpen ? 'text-green-500' : 'text-red-500'}`}>

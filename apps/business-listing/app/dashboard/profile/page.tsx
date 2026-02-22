@@ -28,6 +28,7 @@ import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
 import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
 import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
 import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
+import { StoreHydrator } from "@/lib/redux/store-hydrator"
 
 function formatTime(time: string) {
   if (!time || typeof time !== 'string' || !time.includes(":")) return time
@@ -68,11 +69,14 @@ function getCurrentStatus(business: any) {
 export default async function ProfilePage({ searchParams }: { searchParams: { businessId?: string } }) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     redirect("/login")
   }
 
-  const user = await database.users.getUserByEmail(session.user.email)
+  const user = session.user 
+
+  console.log("User session:", session)
+  console.log("User from DB:", user)
 
   if (!user) {
     // If user is authenticated but not in our DB, they need to go to technical onboarding 
@@ -87,7 +91,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
     business = await database.businesses.getBusinessById(selectedBusinessId)
   } else {
     // Get all businesses and pick the most recent
-    const businesses = await database.businesses.getBusinessesByUserId(user.id)
+    const businesses = await database.businesses.getBusinessesByUserId(user.id as string )
     business = businesses[0];
   }
 
@@ -112,6 +116,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
+      <StoreHydrator user={user} business={business as any} />
       {/* Header with back button */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -120,7 +125,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
             asChild
             className="flex items-center gap-2"
           >
-            <Link href={`/dashboard?businessId=${business.id}`}>
+            <Link href={`/dashboard?businessId=${business.bizId}`}>
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
             </Link>
@@ -131,7 +136,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
                Live Editing Mode
             </Badge>
             <Button size="sm" variant="outline" className="gap-2" asChild>
-              <a href={`/window/${business.id}`} target="_blank">
+              <a href={`/window/${business.bizId}`} target="_blank">
                 <ExternalLink className="h-4 w-4" />
                 View Public Window
               </a>
@@ -146,7 +151,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
           {business.coverImage ? (
             <img 
               src={business.coverImage} 
-              alt={business.name} 
+              alt={business.businessName} 
               className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
             />
           ) : (
@@ -166,14 +171,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Badge className="bg-blue-500 hover:bg-blue-600 cursor-default">{business.category}</Badge>
+                    <Badge className="bg-blue-500 hover:bg-blue-600 cursor-default">{business.category?.categoryName}</Badge>
                     <Badge variant="outline" className={`bg-white/10 text-white border-white/20 backdrop-blur-md flex items-center gap-1.5 cursor-default`}>
                       <div className={`h-2 w-2 rounded-full ${liveStatus.isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
                       {liveStatus.message}
                     </Badge>
                   </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{business.name}</h1>
-                  <p className="text-blue-100 italic">{business.tagline || "Providing quality " + business.offeringType + " to the community."}</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{business.businessName}</h1>
+                  <p className="text-blue-100 italic">{business.tagline || "Providing quality " + business.category?.offeringEntity?.offeringName + " to the community."}</p>
                 </div>
               </div>
             </div>
@@ -263,7 +268,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
                   Our Offerings
                 </h2>
                 <Button variant="outline" size="sm" asChild className="gap-2">
-                   <a href={`/dashboard/services?businessId=${business.id}`}>
+                   <a href={`/dashboard/services?businessId=${business.bizId}`}>
                       <Edit className="h-3.5 w-3.5" /> Manage Shelves
                    </a>
                 </Button>
@@ -289,7 +294,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
                    <div className="col-span-full py-12 bg-white rounded-xl border border-dashed flex flex-col items-center gap-4">
                       <p className="text-muted-foreground text-sm italic">No services listed yet.</p>
                       <Button asChild variant="secondary" size="sm">
-                         <a href={`/dashboard/services?businessId=${business.id}`}>Manage Shelves</a>
+                         <a href={`/dashboard/services?businessId=${business.bizId}`}>Manage Shelves</a>
                       </Button>
                    </div>
                 )}
@@ -316,7 +321,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: { bu
                        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
                           <Phone className="h-4 w-4" />
                        </div>
-                       <span>{business.phone}</span>
+                       <span>{business.phoneNumber}</span>
                      </div>
                      <div className="flex items-center gap-3">
                        <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
