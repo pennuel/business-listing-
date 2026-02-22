@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth"
 import { database, userService } from "@think-id/database"
 import { redirect } from "next/navigation"
 import { Suspense } from "react"
+import { StoreHydrator } from "@/lib/redux/store-hydrator"
 
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -46,6 +47,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <SidebarProvider>
+      <StoreHydrator user={user} userBusinesses={userBusinesses as any} />
       <Suspense fallback={<div className="w-64 h-screen bg-gray-100 animate-pulse" />}>
         <AppSidebar 
            businesses={businesses} 
