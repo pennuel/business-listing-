@@ -1,4 +1,8 @@
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { database } from "@think-id/database"
+import { ArrowLeft, Building2, Clock, ExternalLink, Globe, ImageIcon, Mail, MapPin, Phone, Share2, Star } from "lucide-react"
 import { notFound } from "next/navigation"
 
 function formatTime(time: string) {
@@ -95,7 +99,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
             asChild
             className="flex items-center gap-2"
           >
-            <a href={`/dashboard?businessId=${business.id}`}>
+            <a href={`/dashboard?businessId=${business.bizId}`}>
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
             </a>
@@ -116,7 +120,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
           {business.coverImage ? (
             <img 
               src={business.coverImage} 
-              alt={business.name} 
+              alt={business.businessName} 
               className="w-full h-full object-cover"
             />
           ) : (
@@ -129,14 +133,14 @@ export default async function WindowPage({ params }: { params: { id: string } })
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Badge className="bg-blue-500 hover:bg-blue-600">{business.category}</Badge>
+                    <Badge className="bg-blue-500 hover:bg-blue-600">{business.category?.categoryName}</Badge>
                     <Badge variant="outline" className={`bg-white/10 text-white border-white/20 backdrop-blur-md flex items-center gap-1.5`}>
                       <div className={`h-2 w-2 rounded-full ${liveStatus.isOpen ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
                       {liveStatus.message}
                     </Badge>
                   </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{business.name}</h1>
-                  <p className="text-blue-100 italic">{business.tagline || "Providing quality " + business.offeringType + " to the community."}</p>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{business.businessName}</h1>
+                  <p className="text-blue-100 italic">{business.tagline || "Providing quality " + business.category?.offeringEntity?.offeringName + " to the community."}</p>
                 </div>
                 <div className="flex gap-2">
                     <Button className="bg-white text-blue-700 hover:bg-blue-50 gap-2">
@@ -277,7 +281,7 @@ export default async function WindowPage({ params }: { params: { id: string } })
                     <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
                        <Phone className="h-4 w-4" />
                     </div>
-                    <span>{business.phone}</span>
+                    <span>{business.phoneNumber}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
