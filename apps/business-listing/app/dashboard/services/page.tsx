@@ -10,24 +10,18 @@ import Link from "next/link"
 export default async function ServicesPage({ searchParams }: { searchParams: { businessId?: string } }) {
   const session = await getServerSession(authOptions)
   
-  if (!session?.user?.email) {
+  if (!session?.user) {
     redirect("/login")
   }
 
-  // Use the package-based user service
-  const user = await database.users.getUserByEmail(session.user.email)
-
-  if (!user) {
-    redirect("/login")
-  }
 
   // Use the package-based business service
-  const businesses = await database.businesses.getBusinessesByUserId(user.id)
+  const businesses = await database.businesses.getBusinessesByUserId((session.user.id) as string)
 
   // Select business based on URL or default to first
   const selectedBusinessId = searchParams.businessId
   const business = selectedBusinessId 
-    ? businesses.find((b: any) => b.id === selectedBusinessId) 
+    ? businesses.find((b: any) => b.bizId === selectedBusinessId) 
     : businesses[0] as any
 
   if (!business) {

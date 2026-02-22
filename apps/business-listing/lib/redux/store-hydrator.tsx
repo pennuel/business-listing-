@@ -14,31 +14,30 @@ interface HydratorProps {
 
 export function StoreHydrator({ user, business, userBusinesses }: HydratorProps) {
   const dispatch = useAppDispatch();
-  const hydrated = useRef(false);
 
   useEffect(() => {
-    if (!hydrated.current) {
-      if (user) {
-        dispatch(setUser({
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          dbUser: user
-        }));
-      }
-
-      if (business) {
-        dispatch(setCurrentBusiness(business));
-      }
-
-      if (userBusinesses) {
-        dispatch(setUserBusinesses(userBusinesses));
-      }
-
-      hydrated.current = true;
+    if (user) {
+      dispatch(setUser({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+        dbUser: user
+      }));
     }
-  }, [user, business, userBusinesses, dispatch]);
+  }, [user, dispatch]);
+
+  useEffect(() => {
+    if (business) {
+      dispatch(setCurrentBusiness(business));
+    }
+  }, [business, dispatch]);
+
+  useEffect(() => {
+    if (userBusinesses) {
+      dispatch(setUserBusinesses(userBusinesses));
+    }
+  }, [userBusinesses, dispatch]);
 
   return null;
 }

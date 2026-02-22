@@ -13,6 +13,7 @@ export class BusinessRepository {
     return result
   }
 
+  // finding the necessary data needed to make fetch the right data needed to run on the app.. 
   async findById(id: string): Promise<BusinessInfo | null> {
     try {
       const result = await apiRequest<BusinessInfo>(`/api/BusinessInfo/${id}`, "GET")
@@ -30,8 +31,10 @@ export class BusinessRepository {
     return result.item || []
   }
 
+
+  // TO DO: update to match the new summary api
   async findByUserId(userId: string): Promise<BusinessInfo[]> {
-    const result = await apiRequest<PagedResponseListBusinessInfo>("/api/BusinessInfo/getBusinessInfos", "GET", undefined, {
+    const result = await apiRequest<PagedResponseListBusinessInfo>("/api/BusinessInfo/user/" + userId, "GET", undefined, {
       params: { userId }
     })
     return result.item || []

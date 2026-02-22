@@ -33,3 +33,6 @@ next-env.d.ts
 # misc
 dist.turbo
 .turbo
+
+**dist
+**node_modules

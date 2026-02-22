@@ -5,10 +5,10 @@ import { revalidatePath } from "next/cache"
 
 export async function toggleStoreStatus(businessId: string, isOpen: boolean) {
   try {
-    await database.businesses.updateBusiness(businessId, { isManuallyOpen: isOpen })
+    const updated = await database.businesses.updateBusiness(businessId, { isManuallyOpen: isOpen })
     revalidatePath("/dashboard")
     revalidatePath(`/window/${businessId}`)
-    return { success: true }
+    return { success: true, business: updated }
   } catch (error) {
     console.error("Failed to toggle store status:", error)
     return { success: false, error: "Failed to update status" }
@@ -37,15 +37,35 @@ export async function updateBusinessProfile(businessId: string, data: any) {
     if (data.weekdaySchedule !== undefined) updateData.weekdaySchedule = data.weekdaySchedule
     if (data.weekendSchedule !== undefined) updateData.weekendSchedule = data.weekendSchedule
 
-    await database.businesses.updateBusiness(businessId, updateData)
+    const updated = await database.businesses.updateBusiness(businessId, updateData)
     
     revalidatePath("/dashboard")
     revalidatePath("/dashboard/profile")
     revalidatePath(`/window/${businessId}`)
     
-    return { success: true }
+    return { success: true, business: updated }
   } catch (error) {
     console.error("Failed to update business profile:", error)
     return { success: false, error: "Failed to update profile" }
+  }
+}
+
+export async function getBusinessByIdAction(id: string) {
+  try {
+    const business = await database.businesses.getBusinessById(id)
+    return { success: true, business }
+  } catch (error) {
+    console.error("Failed to fetch business:", error)
+    return { success: false, error: "Failed to fetch business" }
+  }
+}
+
+export async function getBusinessesByUserIdAction(userId: string) {
+  try {
+    const businesses = await database.businesses.getBusinessesByUserId(userId)
+    return { success: true, businesses }
+  } catch (error) {
+    console.error("Failed to fetch businesses:", error)
+    return { success: false, error: "Failed to fetch businesses" }
   }
 }
