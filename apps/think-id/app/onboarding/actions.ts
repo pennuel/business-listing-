@@ -43,9 +43,6 @@ export async function submitBusinessData(
     return { success: false, error: "Address is required" };
   }
 
-  console.log("Validation passed, attempting to save business data...");
-
-  console.log("Business data:", businessData);
 
   try {
     // fetch the session to get user information
@@ -60,6 +57,7 @@ export async function submitBusinessData(
 
       // Business Type/Description
       description: businessData.description?.trim() || "",
+      categoryId: businessData.categoryId,
 
       // Location
       country: businessData.country.trim(),
@@ -93,12 +91,9 @@ export async function submitBusinessData(
             : "Closed",
         },
       },
-      // Keep legacy fields if needed by backend, though types were updated
-      weekdaySchedule: JSON.stringify(businessData.weekdaySchedule),
-      weekendSchedule: JSON.stringify(businessData.weekendSchedule),
-      holidayHours: JSON.stringify(businessData.holidayHours),
     };
 
+    console.log("Payload prepared for business creation/update:", payload);
     let business: BusinessInfo;
     if (businessData.id) {
        console.log("Updating existing business:", businessData.id);
@@ -155,5 +150,16 @@ export async function updateBusinessStatus(id: string, status: string) {
   } catch (error) {
     console.error("Failed to update business status:", error);
     return null;
+  }
+}
+
+// Category related functions
+export async function getCategories() {
+  try {
+    const result = await database.categories.getCategories({ size: 100 });
+    return result.categories;
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    return [];
   }
 }

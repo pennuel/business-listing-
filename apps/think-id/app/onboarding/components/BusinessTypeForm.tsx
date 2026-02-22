@@ -1,12 +1,18 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@think-id/ui/components/ui/button"
 import { Label } from "@think-id/ui/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@think-id/ui/components/ui/select"
 import { Textarea } from "@think-id/ui/components/ui/textarea"
 import type { BusinessData } from "../page"
+import { getCategories } from "../actions"
+
+interface Category {
+  categoryName?: string;
+  categoryId?: number;
+}
 
 interface BusinessTypeFormProps {
   data: BusinessData
@@ -15,35 +21,25 @@ interface BusinessTypeFormProps {
   onPrevious: () => void
 }
 
-const businessCategories = {
-  goods: [
-    "Electronics & Technology",
-    "Clothing & Fashion",
-    "Food & Beverages",
-    "Home & Garden",
-    "Sports & Recreation",
-    "Books & Media",
-    "Health & Beauty",
-    "Automotive",
-    "Arts & Crafts",
-    "Jewelry & Accessories",
-  ],
-  services: [
-    "Professional Services",
-    "Health & Medical",
-    "Education & Training",
-    "Home Services",
-    "Business Services",
-    "Personal Services",
-    "Financial Services",
-    "Technology Services",
-    "Legal Services",
-    "Consulting",
-  ],
-}
-
 export default function BusinessTypeForm({ data, onUpdate, onNext, onPrevious }: BusinessTypeFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [categories, setCategories] = useState<Category[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const fetchedCategories = await getCategories()
+        setCategories(fetchedCategories)
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
@@ -64,7 +60,10 @@ export default function BusinessTypeForm({ data, onUpdate, onNext, onPrevious }:
     }
   }
 
-  const availableCategories = data.offeringType ? businessCategories[data.offeringType] : []
+  // Filter categories based on offering type if the API supports it, 
+  // or just show all for now if their structure doesn't distinguish yet.
+  // The old static list had "goods" and "services" groupings.
+  const availableCategories = categories;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,14 +89,24 @@ export default function BusinessTypeForm({ data, onUpdate, onNext, onPrevious }:
       {data.offeringType && (
         <div>
           <Label>Business Category *</Label>
-          <Select value={data.category} onValueChange={(value) => onUpdate({ category: value })}>
+          <Select 
+            value={data.category} 
+            onValueChange={(value) => {
+              const selectedCat = categories.find(c => c.categoryName === value)
+              onUpdate({ 
+                category: value, 
+                categoryId: selectedCat?.categoryId 
+              })
+            }}
+            disabled={isLoading}
+          >
             <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-              <SelectValue placeholder="Select a category" />
+              <SelectValue placeholder={isLoading ? "Loading categories..." : "Select a category"} />
             </SelectTrigger>
             <SelectContent>
-              {availableCategories.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {category}
+              {availableCategories.map((cat) => (
+                <SelectItem key={cat.categoryId} value={cat.categoryName || ""}>
+                  {cat.categoryName}
                 </SelectItem>
               ))}
             </SelectContent>

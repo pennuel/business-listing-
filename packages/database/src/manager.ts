@@ -5,6 +5,7 @@ import { userService } from "./services/user.service"
 import { authService } from "./services/auth.service"
 import { reviewService } from "./services/review.service"
 import { serviceService } from "./services/service.service"
+import { categoryService } from "./services/category.service"
 import { BusinessInfo } from "@think-id/types"
 
 export interface DatabaseInterface {
@@ -14,6 +15,7 @@ export interface DatabaseInterface {
   auth: typeof authService
   reviews: typeof reviewService
   offerings: typeof serviceService
+  categories: typeof categoryService
 
   // Top-level operations (delegated to services)
   createBusiness(data: any): Promise<BusinessInfo>
@@ -47,6 +49,7 @@ class DatabaseManager implements DatabaseInterface {
   public readonly auth = authService
   public readonly reviews = reviewService
   public readonly offerings = serviceService
+  public readonly categories = categoryService
 
   private async checkConnection(): Promise<boolean> {
     if (this.connectionChecked) {

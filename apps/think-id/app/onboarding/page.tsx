@@ -68,6 +68,7 @@ export interface BusinessData {
   // Business Type
   offeringType: "goods" | "services" | "";
   category: string;
+  categoryId?: number;
   description: string;
 
   // Location
