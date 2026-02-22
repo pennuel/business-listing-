@@ -31,15 +31,16 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BusinessSwitcher } from "@/components/dashboard/business-switcher"
+import { useAppSelector } from "@/lib/redux/hooks"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  businesses: {
+  businesses?: {
     id: string
     name: string
     image: string | null
   }[]
-  currentBusinessId: string
-  user: {
+  currentBusinessId?: string
+  user?: {
     name: string
     email: string
     image: string | null
@@ -79,12 +80,28 @@ const navItems = [
 //   },
 ]
 
-export function AppSidebar({ businesses, currentBusinessId, user, ...props }: AppSidebarProps) {
+export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: propsBusinessId, user: propsUser, ...props }: AppSidebarProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const reduxUser = useAppSelector(state => state.user)
+  const reduxBusinesses = useAppSelector(state => state.business.userBusinesses)
+  const reduxCurrentBusinessId = useAppSelector(state => state.business.currentBusiness?.id)
+
+  const user = propsUser || {
+    name: reduxUser?.name || "User",
+    email: reduxUser?.email || "",
+    image: reduxUser?.image || null
+  }
+
+  const businesses = propsBusinesses || reduxBusinesses.map(b => ({
+    id: b.id,
+    name: b.name,
+    image: (b as any).coverImage || null
+  }))
   
   // Use prop if provided, otherwise try search params, otherwise fallback to first business
-  const businessId = currentBusinessId || searchParams.get("businessId") || (businesses.length > 0 ? businesses[0].id : "")
+  const businessId = propsBusinessId || searchParams.get("businessId") || reduxCurrentBusinessId || (businesses.length > 0 ? businesses[0].id : "")
 
   return (
     <Sidebar collapsible="icon" {...props}>

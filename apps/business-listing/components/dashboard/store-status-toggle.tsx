@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { toggleStoreStatus } from "@/app/actions/business"
+import { useState, useTransition, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
+import { toggleStoreStatusAction } from "@/lib/redux/slices/businessSlice"
 
 interface StoreStatusToggleProps {
   businessId: string
@@ -13,24 +14,32 @@ interface StoreStatusToggleProps {
 }
 
 export function StoreStatusToggle({ businessId, initialStatus, className }: StoreStatusToggleProps) {
-  const [isOpen, setIsOpen] = useState(initialStatus)
-  const [isPending, startTransition] = useTransition()
+  const dispatch = useAppDispatch()
+  const reduxBusinessStatus = useAppSelector(state => 
+    state.business.currentBusiness?.id === businessId 
+      ? state.business.currentBusiness.isManuallyOpen 
+      : null
+  )
+
+  const [isOpen, setIsOpen] = useState(reduxBusinessStatus ?? initialStatus)
+  const [isPending, setIsPending] = useState(false)
   const { toast } = useToast()
 
-  const handleToggle = () => {
-    const newState = !isOpen
-    setIsOpen(newState) // Optimistic update
+  // Update local state when Redux updates
+  useEffect(() => {
+    if (reduxBusinessStatus !== null) {
+      setIsOpen(reduxBusinessStatus)
+    }
+  }, [reduxBusinessStatus])
 
-    startTransition(async () => {
-      const result = await toggleStoreStatus(businessId, newState)
-      if (!result.success) {
-        setIsOpen(!newState) // Revert on failure
-        toast({
-          title: "Error",
-          description: "Failed to update store status. Please try again.",
-          variant: "destructive",
-        })
-      } else {
+  const handleToggle = async () => {
+    const newState = !isOpen
+    setIsPending(true)
+
+    try {
+      const resultAction = await dispatch(toggleStoreStatusAction({ id: businessId, isOpen: newState }))
+      
+      if (toggleStoreStatusAction.fulfilled.match(resultAction)) {
         toast({
           title: newState ? "You are now OPEN" : "You are now CLOSED",
           description: newState 
@@ -38,8 +47,22 @@ export function StoreStatusToggle({ businessId, initialStatus, className }: Stor
             : "Customers will see you as closed.",
           variant: "default",
         })
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update store status. Please try again.",
+          variant: "destructive",
+        })
       }
-    })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsPending(false)
+    }
   }
 
   return (

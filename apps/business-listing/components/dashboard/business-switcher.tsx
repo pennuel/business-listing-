@@ -34,6 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
+import { useAppSelector } from "@/lib/redux/hooks"
 
 interface Business {
   id: string
@@ -42,17 +43,29 @@ interface Business {
 }
 
 interface BusinessSwitcherProps {
-  businesses: Business[]
-  currentBusinessId: string
+  businesses?: Business[] // Now optional, defaults to Redux
+  currentBusinessId?: string // Now optional, defaults to Redux
   className?: string
 }
 
-export function BusinessSwitcher({ businesses, currentBusinessId, className }: BusinessSwitcherProps) {
+export function BusinessSwitcher({ businesses: propsBusinesses, currentBusinessId: propsBusinessId, className }: BusinessSwitcherProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [open, setOpen] = React.useState(false)
   const [showNewBusinessDialog, setShowNewBusinessDialog] = React.useState(false)
+
+  // Use Redux if props not provided
+  const reduxBusinesses = useAppSelector(state => state.business.userBusinesses)
+  const reduxCurrentBusinessId = useAppSelector(state => state.business.currentBusiness?.id)
+
+  const businesses = propsBusinesses || reduxBusinesses.map(b => ({
+    id: b.id,
+    name: b.name,
+    image: (b as any).coverImage || null
+  }))
+
+  const currentBusinessId = propsBusinessId || searchParams.get("businessId") || reduxCurrentBusinessId || (businesses.length > 0 ? businesses[0].id : "")
   
   const selectedBusiness = businesses.find((b) => b.id === currentBusinessId) || businesses[0]
 
