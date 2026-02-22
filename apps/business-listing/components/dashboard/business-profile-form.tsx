@@ -17,9 +17,10 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
 import { Loader2, Store, Phone, Mail, Globe, Tag, Image as ImageIcon, Wifi, ParkingCircle, CreditCard, Clock, Trash2 } from "lucide-react"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { updateBusiness } from "@/lib/redux/slices/businessSlice"
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -39,6 +40,7 @@ interface BusinessProfileFormProps {
 }
 
 export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
+  const dispatch = useAppDispatch()
   const [isLoading, setIsLoading] = useState(false)
   const [amenityInput, setAmenityInput] = useState("")
   const [galleryInput, setGalleryInput] = useState("")
@@ -89,11 +91,12 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsLoading(true)
-    try {
-      const result = await updateBusinessProfile(business.id, values)
-      if (result.success) {
+    try {Action = await dispatch(updateBusiness({ id: business.id, data: values }))
+      
+      if (updateBusiness.fulfilled.match(resultAction)) {
         toast.success("Window display updated successfully!")
       } else {
+        toast.error(
         toast.error(result.error || "Failed to update profile")
       }
     } catch (error) {

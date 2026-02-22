@@ -12,9 +12,10 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
 import { Loader2, Edit, Wifi, X } from "lucide-react"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { updateBusiness } from "@/lib/redux/slices/businessSlice"
 
 interface EditAmenitiesDialogProps {
   business: any
@@ -22,6 +23,7 @@ interface EditAmenitiesDialogProps {
 }
 
 export function EditAmenitiesDialog({ business, trigger }: EditAmenitiesDialogProps) {
+  const dispatch = useAppDispatch()
   const [open, setOpen] = useState(false)
   const [amenities, setAmenities] = useState<string[]>(Array.isArray(business.amenities) ? (business.amenities as string[]) : [])
   const [newAmenity, setNewAmenity] = useState("")
@@ -41,11 +43,12 @@ export function EditAmenitiesDialog({ business, trigger }: EditAmenitiesDialogPr
   const handleSave = async () => {
     setIsLoading(true)
     try {
-      const result = await updateBusinessProfile(business.id, {
-        ...business,
-        amenities: amenities
-      })
-      if (result.success) {
+      const resultAction = await dispatch(updateBusiness({ 
+        id: business.id, 
+        data: { amenities: amenities } 
+      }))
+      
+      if (updateBusiness.fulfilled.match(resultAction)) {
         toast.success("Amenities updated!")
         setOpen(false)
       } else {

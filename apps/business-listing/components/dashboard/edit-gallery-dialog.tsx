@@ -4,8 +4,9 @@ import { useState } from "react"
 import { Plus, Package, Edit, Trash2, Clock, ImageIcon, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { updateBusiness } from "@/lib/redux/slices/businessSlice"
 import {
     Dialog,
     DialogContent,
@@ -23,6 +24,7 @@ interface EditGalleryDialogProps {
 }
 
 export function EditGalleryDialog({ business, trigger }: EditGalleryDialogProps) {
+  const dispatch = useAppDispatch()
   const [open, setOpen] = useState(false)
   const [gallery, setGallery] = useState<string[]>(Array.isArray(business.gallery) ? (business.gallery as string[]) : [])
   const [newImageUrl, setNewImageUrl] = useState("")
@@ -41,11 +43,12 @@ export function EditGalleryDialog({ business, trigger }: EditGalleryDialogProps)
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {
-      const result = await updateBusinessProfile(business.id, {
-        ...business,
-        gallery: gallery
-      })
+    try {Action = await dispatch(updateBusiness({ 
+        id: business.id, 
+        data: { gallery: gallery } 
+      }))
+      
+      if (updateBusiness.fulfilled.match(resultAction)
       if (result.success) {
         toast.success("Gallery updated!")
         setOpen(false)

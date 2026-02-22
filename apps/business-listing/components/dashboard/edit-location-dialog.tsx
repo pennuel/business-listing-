@@ -13,9 +13,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
 import { Loader2, MapPin } from "lucide-react"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { updateBusiness } from "@/lib/redux/slices/businessSlice"
 
 interface EditLocationDialogProps {
   business: any
@@ -23,6 +24,7 @@ interface EditLocationDialogProps {
 }
 
 export function EditLocationDialog({ business, trigger }: EditLocationDialogProps) {
+  const dispatch = useAppDispatch()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -35,8 +37,9 @@ export function EditLocationDialog({ business, trigger }: EditLocationDialogProp
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {
-      const result = await updateBusinessProfile(business.id, formData)
+    try {Action = await dispatch(updateBusiness({ id: business.id, data: formData }))
+      
+      if (updateBusiness.fulfilled.match(resultAction)it updateBusinessProfile(business.id, formData)
       if (result.success) {
         toast.success("Location updated!")
         setOpen(false)

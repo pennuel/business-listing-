@@ -13,9 +13,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
 import { Loader2, Clock } from "lucide-react"
+import { useAppDispatch } from "@/lib/redux/hooks"
+import { updateBusiness } from "@/lib/redux/slices/businessSlice"
 
 interface EditHoursDialogProps {
   business: any
@@ -23,6 +24,7 @@ interface EditHoursDialogProps {
 }
 
 export function EditHoursDialog({ business, trigger }: EditHoursDialogProps) {
+  const dispatch = useAppDispatch()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   
@@ -32,11 +34,15 @@ export function EditHoursDialog({ business, trigger }: EditHoursDialogProps) {
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {
-      const result = await updateBusinessProfile(business.id, {
-        weekdaySchedule: weekday,
-        weekendSchedule: weekend,
-      })
+    try {Action = await dispatch(updateBusiness({
+        id: business.id,
+        data: {
+          weekdaySchedule: weekday as any,
+          weekendSchedule: weekend as any,
+        }
+      }))
+      
+      if (updateBusiness.fulfilled.match(resultAction)
       if (result.success) {
         toast.success("Business hours updated!")
         setOpen(false)
