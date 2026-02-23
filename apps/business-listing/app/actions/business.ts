@@ -1,11 +1,11 @@
 "use server"
 
-import { database } from "@think-id/database"
+import { businessService } from "@think-id/database"
 import { revalidatePath } from "next/cache"
 
 export async function toggleStoreStatus(businessId: string, isOpen: boolean) {
   try {
-    const updated = await database.businesses.updateBusiness(businessId, { isManuallyOpen: isOpen })
+    const updated = await businessService.updateBusiness(businessId, { isManuallyOpen: isOpen })
     revalidatePath("/dashboard")
     revalidatePath(`/window/${businessId}`)
     return { success: true, business: updated }
@@ -37,7 +37,7 @@ export async function updateBusinessProfile(businessId: string, data: any) {
     if (data.weekdaySchedule !== undefined) updateData.weekdaySchedule = data.weekdaySchedule
     if (data.weekendSchedule !== undefined) updateData.weekendSchedule = data.weekendSchedule
 
-    const updated = await database.businesses.updateBusiness(businessId, updateData)
+    const updated = await businessService.updateBusiness(businessId, updateData)
     
     revalidatePath("/dashboard")
     revalidatePath("/dashboard/profile")
@@ -52,7 +52,7 @@ export async function updateBusinessProfile(businessId: string, data: any) {
 
 export async function getBusinessByIdAction(id: string) {
   try {
-    const business = await database.businesses.getBusinessById(id)
+    const business = await businessService.getBusinessById(id)
     return { success: true, business }
   } catch (error) {
     console.error("Failed to fetch business:", error)
@@ -62,8 +62,9 @@ export async function getBusinessByIdAction(id: string) {
 
 export async function getBusinessesByUserIdAction(userId: string) {
   try {
-    const businesses = await database.businesses.getBusinessesByUserId(userId)
-    return { success: true, businesses }
+    // Fetch directly - TanStack Query on client will handle caching
+    const user = await businessService.getBusinessesByUserId(userId)
+    return { success: true, businesses: user?.businesses || [] }
   } catch (error) {
     console.error("Failed to fetch businesses:", error)
     return { success: false, error: "Failed to fetch businesses" }

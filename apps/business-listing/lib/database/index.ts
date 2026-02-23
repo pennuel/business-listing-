@@ -1,4 +1,4 @@
-import { database as coreDatabase, businessService, userService, authService, reviewService, serviceService as offerings, checkDatabaseConnection as coreCheckConnection, disconnectDatabase as coreDisconnect } from "@think-id/database"
+import { businessService, userService, authService, reviewService, serviceService as offerings } from "@think-id/database"
 import { fallbackService } from "./fallback"
 import type { Business } from "@prisma/client"
 
@@ -24,10 +24,11 @@ class DatabaseManager implements DatabaseInterface {
     }
 
     try {
-      const isConnected = await coreCheckConnection()
-      this.useFallback = !isConnected
+      // Try a simple operation to check if services are working
+      await businessService.getAllBusinesses({ limit: 1 })
+      this.useFallback = false
       this.connectionChecked = true
-      return isConnected
+      return true
     } catch (error) {
       console.error("Database connection check failed:", error)
       this.useFallback = true
@@ -170,4 +171,3 @@ export const database = new DatabaseManager()
 
 export type { Business } from "@prisma/client"
 export { businessService, userService, authService, reviewService, offerings }
-export { coreCheckConnection as checkDatabaseConnection, coreDisconnect as disconnectDatabase }

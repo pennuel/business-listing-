@@ -1,4 +1,4 @@
-import { database } from "@think-id/database"
+import { BusinessInfo, businessService } from "@think-id/database"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/navbar"
 
 export default async function HomePage() {
-  let businesses: any[] = []
+  let businesses: BusinessInfo[] = []
   try {
-    const result = await database.businesses.getAllBusinesses({
+    const result = await businessService.getAllBusinesses({
       status: "active",
       limit: 12
     })
@@ -60,8 +60,8 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {businesses.map((business) => (
             <a 
-              key={business.id} 
-              href={`/window/${business.id}`}
+              key={business.bizId} 
+              href={`/window/${business.bizId}`}
               className="group block"
             >
               <Card className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 rounded-2xl bg-white">
@@ -71,7 +71,7 @@ export default async function HomePage() {
                       <img 
                         src={business.coverImage} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        alt={business.name}
+                        alt={business.businessName}
                       />
                    ) : (
                       <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -80,7 +80,7 @@ export default async function HomePage() {
                    )}
                    <div className="absolute top-4 left-4">
                       <Badge className="bg-white/95 text-blue-700 hover:bg-white border-none shadow-sm font-bold uppercase text-[10px]">
-                        {business.category}
+                        {business.category?.categoryName}
                       </Badge>
                    </div>
                    
@@ -97,7 +97,7 @@ export default async function HomePage() {
 
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{business.name}</h3>
+                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{business.businessName}</h3>
                     <div className="flex items-center gap-1 text-sm bg-yellow-400/10 text-yellow-700 px-2 py-0.5 rounded-md">
                        <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                        <span className="font-bold">4.8</span>
@@ -113,12 +113,12 @@ export default async function HomePage() {
                       <MapPin className="h-3.5 w-3.5" />
                       {business.subCounty}, {business.county}
                     </div>
-                    {business.services.length > 0 && (
+                    {/* {business.services.length > 0 && (
                       <div className="flex items-center gap-1">
                         <Clock className="h-3.5 w-3.5" />
-                        {business.services[0].name}
+                        {business.services[0].serviceName}
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </CardContent>
               </Card>

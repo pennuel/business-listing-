@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { database } from "@think-id/database"
+import { businessService } from "@think-id/database"
 import { ArrowLeft, Building2, Clock, ExternalLink, Globe, ImageIcon, Mail, MapPin, Phone, Share2, Star } from "lucide-react"
 import { notFound } from "next/navigation"
 
@@ -66,7 +66,7 @@ function getCurrentStatus(business: any) {
 export default async function WindowPage({ params }: { params: { id: string } }) {
   
 
-  const business = await database.businesses.getBusinessById(params.id)
+  const business = await businessService.getBusinessById(params.id)
 
   
 

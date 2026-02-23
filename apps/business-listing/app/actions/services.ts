@@ -1,6 +1,6 @@
 "use server"
 
-import { database } from "@think-id/database"
+import { serviceService } from "@think-id/database"
 import { revalidatePath } from "next/cache"
 
 export async function addService(data: {
@@ -12,7 +12,7 @@ export async function addService(data: {
   description?: string
 }) {
   try {
-    const service = await database.offerings.addService(data)
+    const service = await serviceService.createService(data)
     revalidatePath(`/dashboard/services?businessId=${data.businessId}`)
     revalidatePath(`/dashboard?businessId=${data.businessId}`)
     revalidatePath(`/window/${data.businessId}`)
@@ -26,10 +26,10 @@ export async function addService(data: {
 export async function deleteService(id: string) {
   try {
     // We need the businessId to revalidate paths
-    const serviceDetails = await database.offerings.getServiceById(id)
+    const serviceDetails:any = await serviceService.getServiceById(id)
     if (!serviceDetails) return { success: false, error: "Service not found" }
     
-    await database.offerings.deleteService(id)
+    await serviceService.deleteService(id)
     
     revalidatePath(`/dashboard/services?businessId=${serviceDetails.businessId}`)
     revalidatePath(`/dashboard?businessId=${serviceDetails.businessId}`)
@@ -43,7 +43,7 @@ export async function deleteService(id: string) {
 
 export async function updateService(id: string, data: any) {
   try {
-    const service = await database.offerings.updateService(id, data)
+    const service :any = await serviceService.updateService(id, data)
     revalidatePath(`/dashboard/services?businessId=${service.businessId}`)
     revalidatePath(`/dashboard?businessId=${service.businessId}`)
     revalidatePath(`/window/${service.businessId}`)

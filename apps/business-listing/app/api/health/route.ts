@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
-import { checkDatabaseConnection } from "@think-id/database"
+import { businessService } from "@think-id/database"
 
 export async function GET() {
   try {
-    const isDbConnected = await checkDatabaseConnection()
+    // Check database connection by attempting a simple query
+    await businessService.getAllBusinesses({ limit: 1 })
+    const isDbConnected = true
 
     return NextResponse.json({
       status: "healthy",
@@ -16,6 +18,9 @@ export async function GET() {
     return NextResponse.json(
       {
         status: "unhealthy",
+        database: {
+          connected: false,
+        },
         error: error instanceof Error ? error.message : "Unknown error",
         timestamp: new Date().toISOString(),
       },
