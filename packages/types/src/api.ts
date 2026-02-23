@@ -197,7 +197,7 @@ export interface BusinessInfo {
   subCounty?: string;
   country?: string;
   bizId?: number; // int64
-  user?: User;
+  user?: string | User;
   analytics: Analytics[];
   complaints: ComplaintsEntity[];
   reviews: Reviews[];
@@ -230,14 +230,24 @@ export interface SizeEntity {
 }
 
 export interface User {
-  createdAt: string; // date-time
-  updatedAt: string; // date-time
-  name?: string;
-  email?: string;
-  emailVerified?: string; // date-time
-  image?: string;
-  id?: string;
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: string | null;
+  image: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  username: string;
+  mobilePhone: string;
+  birthDate: string | null;
+  genderState: string | null;
+  nationalId: string | null;
+  countyId: number | null;
+  constituency: string | null;
+  languageId: number | null;
+  ageGroup: string | null;
   businesses: BusinessInfo[];
+
 }
 
 export interface BusinessTypeRequest {
