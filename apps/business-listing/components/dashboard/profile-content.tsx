@@ -1,6 +1,49 @@
 "use client"
 
-import { useAppSelector } from "@/lib/redux/hooks"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { Separator } from "@/components/ui/separator"
+// import {
+//   Building2,
+//   Phone,
+//   Mail,
+//   Globe,
+//   MapPin,
+//   Clock,
+//   ExternalLink,
+//   Edit,
+//   ArrowLeft,
+// } from "lucide-react"
+// import Link from "next/link"
+// import { EditBrandingDialog } from "@/components/dashboard/edit-branding-dialog"
+// import { EditContactDialog } from "@/components/dashboard/edit-contact-dialog"
+// import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
+// import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
+// import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
+// import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { Separator } from "@/components/ui/separator"
+// import {
+//   Building2,
+//   Phone,
+//   Mail,
+//   Globe,
+//   MapPin,
+//   Clock,
+//   ExternalLink,
+//   Edit,
+//   ArrowLeft,
+// } from "lucide-react"
+// import Link from "next/link"
+// import { EditBrandingDialog } from "@/components/dashboard/edit-branding-dialog"
+// import { EditContactDialog } from "@/components/dashboard/edit-contact-dialog"
+// import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
+// import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
+// import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
+// import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -59,9 +102,7 @@ function getCurrentStatus(business: any) {
   return { isOpen: false, message: currentTime < daySchedule.open ? `Opens at ${formatTime(daySchedule.open)}` : "Closed" }
 }
 
-export function ProfileContent() {
-  const business = useAppSelector(state => state.business.currentBusiness)
-
+export function ProfileContent({ business }: { business: any }) {
   if (!business) return null
 
   const weekday = business.weekdaySchedule as any
@@ -112,7 +153,7 @@ export function ProfileContent() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative h-64 sm:h-80 w-full rounded-xl overflow-hidden mb-8 shadow-lg group">
-          {business.coverImage ? (
+          {/* {business.coverImage ? (
             <img 
               src={business.coverImage} 
               alt={business.name} 
@@ -122,7 +163,7 @@ export function ProfileContent() {
             <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center">
               <Building2 className="h-24 w-24 text-white opacity-20" />
             </div>
-          )}
+          )} */}
           
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end">
             <div className="p-6 sm:p-8 w-full relative">
@@ -182,7 +223,7 @@ export function ProfileContent() {
               </h2>
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {Array.isArray(business.gallery) && (business.gallery as any).length > 0 ? (
+                  {/* {Array.isArray(business.gallery) && (business.gallery as any).length > 0 ? (
                     (business.gallery as any).map((img: string, i: number) => (
                       <div key={i} className="aspect-square rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
                         <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
@@ -195,7 +236,7 @@ export function ProfileContent() {
                         Add Photos
                       </Button>
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             </section>
@@ -210,7 +251,7 @@ export function ProfileContent() {
               </h2>
               <div className="bg-white rounded-xl border border-gray-200 p-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {Array.isArray(business.amenities) && (business.amenities as any).length > 0 ? (
+                  {/* {Array.isArray(business.amenities) && (business.amenities as any).length > 0 ? (
                     (business.amenities as any).map((amenity: string) => (
                       <div key={amenity} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
                         <div className="h-2 w-2 rounded-full bg-blue-500" />
@@ -219,7 +260,7 @@ export function ProfileContent() {
                     ))
                   ) : (
                     <p className="text-gray-400 italic">No amenities listed yet.</p>
-                  )}
+                  )} */}
                 </div>
               </div>
             </section>

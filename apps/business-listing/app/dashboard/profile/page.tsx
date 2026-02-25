@@ -1,29 +1,28 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { auth } from "@/lib/auth"
 import { businessRepository } from "@think-id/database"
 import { redirect } from "next/navigation"
-import { StoreHydrator } from "@/lib/redux/store-hydrator"
 import { ProfileContent } from "@/components/dashboard/profile-content"
 
 export default async function ProfilePage({ 
     searchParams 
 }: { 
-    searchParams: { businessId?: string } 
+    searchParams: Promise<{ businessId?: string }>
 }) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   if (!session?.user?.id) {
     redirect("/login")
   }
 
-  const selectedBusinessId = searchParams.businessId
+  const params = await searchParams
+  const selectedBusinessId = params.businessId
   
   let business;
   if (selectedBusinessId) {
     business = await businessRepository.findById(selectedBusinessId)
   } else {
     const businesses = await businessRepository.findByUserId(session.user.id)
-    business = businesses[0];
+    business = businesses?.[0];
   }
 
   if (!business) {
@@ -32,8 +31,7 @@ export default async function ProfilePage({
 
   return (
     <div className="flex-1 space-y-4">
-      <StoreHydrator business={business as any} />
-      <ProfileContent />
+      <ProfileContent business={business} />
     </div>
   )
 }
