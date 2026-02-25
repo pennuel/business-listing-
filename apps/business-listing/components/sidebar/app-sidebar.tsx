@@ -31,7 +31,8 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BusinessSwitcher } from "@/components/dashboard/business-switcher"
-import { useAppSelector } from "@/lib/redux/hooks"
+// Note: Redux removed from sidebar; prefer passing `user` and `businesses` via props
+import { useSession } from "next-auth/react"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   businesses?: {
@@ -84,33 +85,38 @@ export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: pro
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  const reduxUser = useAppSelector(state => state.user)
-  const reduxBusinesses = useAppSelector(state => state.business.userBusinesses)
-  const reduxCurrentBusinessId = useAppSelector(state => state.business.currentBusiness?.id)
+  // Use provided props; if not provided, fall back to session user or safe defaults
+  const { data: session } = useSession();
+  const sessionUser = session?.user;
 
-  const user = propsUser || {
-    name: reduxUser?.name || "User",
-    email: reduxUser?.email || "",
-    image: reduxUser?.image || null
-  }
+  // Prefer a `user` passed via props (server-side fetch). Fall back to session user.
+  const userData = propsUser
+    ? propsUser
+    : sessionUser
+    ? {
+        name: (sessionUser as any).name || "User",
+        email: (sessionUser as any).email || "",
+        image: (sessionUser as any).image || null,
+      }
+    : { name: "User", email: "", image: null };
 
-  const businesses = propsBusinesses || reduxBusinesses.map(b => ({
-    id: b.id,
-    name: b.name,
-    image: (b as any).coverImage || null
-  }))
-  
-  // Use prop if provided, otherwise try search params, otherwise fallback to first business
-  const businessId = propsBusinessId || searchParams.get("businessId") || reduxCurrentBusinessId || (businesses.length > 0 ? businesses[0].id : "")
+  // If `propsBusinesses` is not provided, pass `undefined` to `BusinessSwitcher` so it
+  // can fetch businesses itself. But for local fallbacks (URL generation), build a
+  // small list to inspect the first business when available from props only.
+  const fallbackBusinesses = propsBusinesses ?? []
+
+  // Use prop if provided, otherwise try search params, otherwise fallback to first business from props
+  const businessId = propsBusinessId || searchParams.get("businessId") || (fallbackBusinesses.length > 0 ? fallbackBusinesses[0].id : "")
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b">
         <SidebarMenu>
           <SidebarMenuItem>
-            <BusinessSwitcher 
-              businesses={businesses} 
-              currentBusinessId={businessId} 
+            <BusinessSwitcher
+              businesses={propsBusinesses}
+              currentBusinessId={businessId}
+              className="h-9"
             />
           </SidebarMenuItem>
         </SidebarMenu>
@@ -149,12 +155,12 @@ export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: pro
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={user.image || ""} alt={user.name} />
-                    <AvatarFallback className="rounded-lg">{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={userData.image || ""} alt={userData.name} />
+                    {/* <AvatarFallback className="rounded-lg">{userData.name.charAt(0)}</AvatarFallback> */}
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{user.name}</span>
-                    <span className="truncate text-xs">{user.email}</span>
+                    <span className="truncate font-semibold">{userData.name}</span>
+                    <span className="truncate text-xs">{userData.email}</span>
                   </div>
                   <ChevronUp className="ml-auto size-4" />
                 </SidebarMenuButton>
