@@ -1,9 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Inter, Roboto } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers/session-provider"
-import { ReduxProvider } from "@/lib/redux/provider"
+import { cn } from "@/lib/utils";
+
+const roboto = Roboto({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,11 +27,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <ReduxProvider>
-          <Providers>{children}</Providers>
-        </ReduxProvider>
+    <html lang="en" className={cn("h-full", roboto.variable)}>
+      <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
