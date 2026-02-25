@@ -1,6 +1,6 @@
 "use client"
 
-import { useAppSelector } from "@/lib/redux/hooks"
+
 import { StoreStatusToggle } from "@/components/dashboard/store-status-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -99,10 +99,8 @@ function getLiveStatus(business: any) {
   }
 }
 
-export function DashboardContent() {
-  const business = useAppSelector(state => state.business.currentBusiness)
-
-  if (!business) return null
+export function DashboardContent({ business }: { business: any }) {
+   if (!business) return null
 
   // Calculate generic stats
   const analytics = (business as any).analytics || []
