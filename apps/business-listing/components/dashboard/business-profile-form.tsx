@@ -19,8 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "sonner"
 import { Loader2, Store, Phone, Mail, Globe, Tag, Image as ImageIcon, Wifi, ParkingCircle, CreditCard, Clock, Trash2 } from "lucide-react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -40,7 +39,7 @@ interface BusinessProfileFormProps {
 }
 
 export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [isLoading, setIsLoading] = useState(false)
   const [amenityInput, setAmenityInput] = useState("")
   const [galleryInput, setGalleryInput] = useState("")
@@ -91,16 +90,11 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     setIsLoading(true)
-    try {Action = await dispatch(updateBusiness({ id: business.id, data: values }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)) {
-        toast.success("Window display updated successfully!")
-      } else {
-        toast.error(
-        toast.error(result.error || "Failed to update profile")
-      }
-    } catch (error) {
-      toast.error("An unexpected error occurred")
+    try {
+      await updateMutation.mutateAsync({ id: business.id, data: values })
+      toast.success("Window display updated successfully!")
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to update profile")
     } finally {
       setIsLoading(false)
     }

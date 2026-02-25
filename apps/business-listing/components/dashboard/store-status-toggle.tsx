@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useTransition, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useAppDispatch, useAppSelector } from "@/lib/redux/hooks"
-import { toggleStoreStatusAction } from "@/lib/redux/slices/businessSlice"
+import { useToggleStoreStatus } from '@/lib/hooks/useBusinesses'
 
 interface StoreStatusToggleProps {
   businessId: string
@@ -14,50 +13,31 @@ interface StoreStatusToggleProps {
 }
 
 export function StoreStatusToggle({ businessId, initialStatus, className }: StoreStatusToggleProps) {
-  const dispatch = useAppDispatch()
-  const reduxBusinessStatus = useAppSelector(state => 
-    state.business.currentBusiness?.id === businessId 
-      ? state.business.currentBusiness.isManuallyOpen 
-      : null
-  )
+  const toggleMutation = useToggleStoreStatus()
 
-  const [isOpen, setIsOpen] = useState(reduxBusinessStatus ?? initialStatus)
+  const [isOpen, setIsOpen] = useState(initialStatus)
   const [isPending, setIsPending] = useState(false)
   const { toast } = useToast()
 
-  // Update local state when Redux updates
-  useEffect(() => {
-    if (reduxBusinessStatus !== null) {
-      setIsOpen(reduxBusinessStatus)
-    }
-  }, [reduxBusinessStatus])
-
   const handleToggle = async () => {
     const newState = !isOpen
+    // optimistic UI
+    setIsOpen(newState)
     setIsPending(true)
 
     try {
-      const resultAction = await dispatch(toggleStoreStatusAction({ id: businessId, isOpen: newState }))
-      
-      if (toggleStoreStatusAction.fulfilled.match(resultAction)) {
-        toast({
-          title: newState ? "You are now OPEN" : "You are now CLOSED",
-          description: newState 
-            ? "Customers can now see you as open." 
-            : "Customers will see you as closed.",
-          variant: "default",
-        })
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to update store status. Please try again.",
-          variant: "destructive",
-        })
-      }
+      await toggleMutation.mutateAsync({ id: businessId, isOpen: newState })
+      toast({
+        title: newState ? "You are now OPEN" : "You are now CLOSED",
+        description: newState ? "Customers can now see you as open." : "Customers will see you as closed.",
+        variant: "default",
+      })
     } catch (error) {
+      // rollback optimistic update
+      setIsOpen(!newState)
       toast({
         title: "Error",
-        description: "An unexpected error occurred.",
+        description: "Failed to update store status. Please try again.",
         variant: "destructive",
       })
     } finally {
