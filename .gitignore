@@ -1,15 +1,13 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules/
-**/node_modules/** # next.js /.next/ **/.next/ /out/
-# Explicitly ignore node_modules for the think-id app
-/apps/think-id/node_modules/
-# Ignore Next.js build output for the think-id app
-/apps/think-id/.next/
+node_modules/
+**/node_modules/
 
-# Ignore Next.js build output at repo root
-/.next/
+# Next.js build output
+.next/
+**/.next/
+/out/
 
 # production
 /build
@@ -31,8 +29,5 @@ yarn-error.log*
 next-env.d.ts
 
 # misc
-dist.turbo
 .turbo
-
-**dist
-**node_modules
+**/dist
