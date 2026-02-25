@@ -58,10 +58,10 @@ export default async function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {businesses.map((business) => (
-            <a 
-              key={business.bizId} 
-              href={`/window/${business.bizId}`}
+          {businesses.map((business, index) => (
+            <a
+              key={business.bizId ?? (business as any).id ?? index}
+              href={`/window/${business.bizId ?? (business as any).id}`}
               className="group block"
             >
               <Card className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 rounded-2xl bg-white">
