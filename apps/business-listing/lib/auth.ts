@@ -1,11 +1,9 @@
-import type { NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import GitHubProvider from "next-auth/providers/github"
+import NextAuth from "next-auth"
 import FusionAuthProvider from "next-auth/providers/fusionauth"
+import { userService } from "@think-id/database"
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    // FusionAuth (OpenID Connect/OAuth2) provider
     ...(process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
       ? [
           FusionAuthProvider({
@@ -18,7 +16,6 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
-    
   ],
   session: {
     strategy: "jwt",
@@ -30,7 +27,6 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, profile }) {
       if (user) {
-        // Try to set token.id from multiple possible sources (OAuth/OIDC subject, user id)
         token.id = (user as any).id ?? (profile as any)?.sub ?? token.sub
       }
       return token
@@ -38,9 +34,22 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string
+
+        // console.log("Session callback - session.user:", session.user)
+
+        if (!session.user.id) {
+          try {
+            const dbUser = await userService.syncUserWithDB(token.id as string)
+            // session.user.dbUser = dbUser
+            // session.user.dbSynced = true
+          } catch (error) {
+            console.error("Failed to sync user on login:", error)
+          }
+        }
       }
+      console.log("Session callback - final session:", session)
       return session
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+})
