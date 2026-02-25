@@ -5,8 +5,7 @@ import { Plus, Package, Edit, Trash2, Clock, ImageIcon, Trash } from "lucide-rea
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { toast } from "sonner"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 import {
     Dialog,
     DialogContent,
@@ -24,7 +23,7 @@ interface EditGalleryDialogProps {
 }
 
 export function EditGalleryDialog({ business, trigger }: EditGalleryDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [gallery, setGallery] = useState<string[]>(Array.isArray(business.gallery) ? (business.gallery as string[]) : [])
   const [newImageUrl, setNewImageUrl] = useState("")
@@ -43,20 +42,12 @@ export function EditGalleryDialog({ business, trigger }: EditGalleryDialogProps)
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {Action = await dispatch(updateBusiness({ 
-        id: business.id, 
-        data: { gallery: gallery } 
-      }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)
-      if (result.success) {
-        toast.success("Gallery updated!")
-        setOpen(false)
-      } else {
-        toast.error("Failed to update gallery")
-      }
+    try {
+      await updateMutation.mutateAsync({ id: business.id, data: { gallery } })
+      toast.success("Gallery updated!")
+      setOpen(false)
     } catch (error) {
-       toast.error("Error saving gallery")
+      toast.error("Error saving gallery")
     } finally {
       setIsLoading(false)
     }

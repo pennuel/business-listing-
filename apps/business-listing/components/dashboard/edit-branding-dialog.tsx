@@ -30,8 +30,7 @@ import { toast } from "sonner"
 import { Loader2, Edit, Upload, Link, Grid } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusinessLocally } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 const brandingSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -47,7 +46,7 @@ interface EditBrandingDialogProps {
 }
 
 export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -82,14 +81,9 @@ export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProp
   async function onSubmit(values: z.infer<typeof brandingSchema>) {
     setIsLoading(true)
     try {
-      const result = await updateBusinessProfile(business.id, values)
-      if (result.success) {
-        toast.success("Branding updated!")
-        dispatch(updateBusinessLocally({ id: business.id, ...values }))
-        setOpen(false)
-      } else {
-        toast.error(result.error || "Failed to update branding")
-      }
+      await updateMutation.mutateAsync({ id: business.id, data: values })
+      toast.success("Branding updated!")
+      setOpen(false)
     } catch (error) {
       toast.error("An unexpected error occurred")
     } finally {

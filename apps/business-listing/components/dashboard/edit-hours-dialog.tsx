@@ -15,8 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Loader2, Clock } from "lucide-react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 interface EditHoursDialogProps {
   business: any
@@ -24,7 +23,7 @@ interface EditHoursDialogProps {
 }
 
 export function EditHoursDialog({ business, trigger }: EditHoursDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   
@@ -34,23 +33,12 @@ export function EditHoursDialog({ business, trigger }: EditHoursDialogProps) {
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {Action = await dispatch(updateBusiness({
-        id: business.id,
-        data: {
-          weekdaySchedule: weekday as any,
-          weekendSchedule: weekend as any,
-        }
-      }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)
-      if (result.success) {
-        toast.success("Business hours updated!")
-        setOpen(false)
-      } else {
-        toast.error("Failed to update hours")
-      }
-    } catch (error) {
-       toast.error("Error saving hours")
+    try {
+      await updateMutation.mutateAsync({ id: business.id, data: { weekdaySchedule: weekday as any, weekendSchedule: weekend as any } })
+      toast.success("Business hours updated!")
+      setOpen(false)
+    } catch (err) {
+      toast.error("Error saving hours")
     } finally {
       setIsLoading(false)
     }

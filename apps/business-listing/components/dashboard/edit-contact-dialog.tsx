@@ -25,8 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Loader2, Edit, Phone, Mail, Globe } from "lucide-react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 const contactSchema = z.object({
   phone: z.string().min(8, "Valid phone number required"),
@@ -40,7 +39,7 @@ interface EditContactDialogProps {
 }
 
 export function EditContactDialog({ business, trigger }: EditContactDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -56,14 +55,9 @@ export function EditContactDialog({ business, trigger }: EditContactDialogProps)
   async function onSubmit(values: z.infer<typeof contactSchema>) {
     setIsLoading(true)
     try {
-      const resultAction = await dispatch(updateBusiness({ id: business.id, data: values }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)) {
-        toast.success("Contact info updated!")
-        setOpen(false)
-      } else {
-        toast.error("Failed to update contact info")
-      }
+      await updateMutation.mutateAsync({ id: business.id, data: values })
+      toast.success("Contact info updated!")
+      setOpen(false)
     } catch (error) {
       toast.error("An unexpected error occurred")
     } finally {

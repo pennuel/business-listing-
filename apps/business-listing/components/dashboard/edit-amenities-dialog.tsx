@@ -14,8 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Loader2, Edit, Wifi, X } from "lucide-react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 interface EditAmenitiesDialogProps {
   business: any
@@ -23,7 +22,7 @@ interface EditAmenitiesDialogProps {
 }
 
 export function EditAmenitiesDialog({ business, trigger }: EditAmenitiesDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [amenities, setAmenities] = useState<string[]>(Array.isArray(business.amenities) ? (business.amenities as string[]) : [])
   const [newAmenity, setNewAmenity] = useState("")
@@ -43,19 +42,11 @@ export function EditAmenitiesDialog({ business, trigger }: EditAmenitiesDialogPr
   const handleSave = async () => {
     setIsLoading(true)
     try {
-      const resultAction = await dispatch(updateBusiness({ 
-        id: business.id, 
-        data: { amenities: amenities } 
-      }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)) {
-        toast.success("Amenities updated!")
-        setOpen(false)
-      } else {
-        toast.error("Failed to update amenities")
-      }
-    } catch (error) {
-       toast.error("Error saving amenities")
+      await updateMutation.mutateAsync({ id: business.id, data: { amenities } })
+      toast.success("Amenities updated!")
+      setOpen(false)
+    } catch (err) {
+      toast.error("Error saving amenities")
     } finally {
       setIsLoading(false)
     }

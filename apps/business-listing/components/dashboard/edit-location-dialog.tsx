@@ -15,8 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { Loader2, MapPin } from "lucide-react"
-import { useAppDispatch } from "@/lib/redux/hooks"
-import { updateBusiness } from "@/lib/redux/slices/businessSlice"
+import { useUpdateBusiness } from '@/lib/hooks/useBusinesses'
 
 interface EditLocationDialogProps {
   business: any
@@ -24,7 +23,7 @@ interface EditLocationDialogProps {
 }
 
 export function EditLocationDialog({ business, trigger }: EditLocationDialogProps) {
-  const dispatch = useAppDispatch()
+  const updateMutation = useUpdateBusiness()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -37,17 +36,12 @@ export function EditLocationDialog({ business, trigger }: EditLocationDialogProp
 
   const handleSave = async () => {
     setIsLoading(true)
-    try {Action = await dispatch(updateBusiness({ id: business.id, data: formData }))
-      
-      if (updateBusiness.fulfilled.match(resultAction)it updateBusinessProfile(business.id, formData)
-      if (result.success) {
-        toast.success("Location updated!")
-        setOpen(false)
-      } else {
-        toast.error("Failed to update location")
-      }
-    } catch (error) {
-       toast.error("Error saving location")
+    try {
+      await updateMutation.mutateAsync({ id: business.id, data: formData })
+      toast.success("Location updated!")
+      setOpen(false)
+    } catch (err) {
+      toast.error("Error saving location")
     } finally {
       setIsLoading(false)
     }
