@@ -5,8 +5,6 @@ import { DashboardClient } from "./dashboard-client"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-
-  console.log("DashboardLayout session:", session)
   
   if (!session?.user?.email) {
     redirect("/login")

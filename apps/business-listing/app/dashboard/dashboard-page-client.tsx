@@ -22,11 +22,6 @@ export function DashboardPageClient({
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
 
-  console.log("💻 DashboardPageClient mounted, userId:", userId)
-  console.log("💻 DashboardPageClient - businesses:", businesses)
-  console.log("💻 DashboardPageClient - selectedBusiness:", selectedBusiness)
-  console.log("💻 DashboardPageClient - businessId:", businessId)
-
   // Auto-redirect to first business if none selected
   useEffect(() => {
     if (!businessId && businesses && businesses.length > 0) {

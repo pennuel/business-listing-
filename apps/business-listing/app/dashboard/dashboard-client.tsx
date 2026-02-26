@@ -23,7 +23,7 @@ export function DashboardClient({ userId, initialBusinesses, children }: Dashboa
 
   // Initialize Redux with user data from server using userId
   useUserSync({ userId });
-  console.log('DashboardClient mounted, userId:', userId);
+ 
   
   
   // Fetch businesses with TanStack Query - uses initialData for instant render
@@ -37,14 +37,11 @@ export function DashboardClient({ userId, initialBusinesses, children }: Dashboa
   }
                                                  
 
-  console.log('DashboardClient - businesses:', data);
-
   const businessesList = (Array.isArray(data) ? data : []).map((b: any) => {
-    const normalized = normalizeBusiness(b);
     return {
-      id: normalized.id,
-      name: normalized.name,
-      image: null,
+      id: b.id,
+      name: b.name || b.businessName || "Unnamed Business",
+      image: b.coverImage || b.logo || null,
     };
   });
 
