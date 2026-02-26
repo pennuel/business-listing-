@@ -1,44 +1,44 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { database } from "@think-id/database"
+import { auth } from "@/lib/auth"
+import { getBusinessByIdAction, getBusinessesByUserIdAction } from "@/app/actions/business"
 import { redirect } from "next/navigation"
-import { ServicesList } from "@/components/dashboard/services-list"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft } from "lucide-react"
-import Link from "next/link"
+import { ServicesPageClient } from "@/components/dashboard/services-page-client"
 
-export default async function ServicesPage({ searchParams }: { searchParams: { businessId?: string } }) {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user) {
+export default async function ServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ businessId?: string }>
+}) {
+  const session = await auth()
+
+  if (!session?.user?.id) {
     redirect("/login")
   }
 
+  const params = await searchParams
+  let businessId = params.businessId
 
-  // Use the package-based business service
-  const businesses = await database.businesses.getBusinessesByUserId((session.user.id) as string)
+  // If no businessId in URL, fall back to the first business for this user
+  if (!businessId) {
+    const listResult = await getBusinessesByUserIdAction(session.user.id)
+    const firstBusiness = listResult.success ? listResult.businesses?.[0] : null
+    businessId = firstBusiness?.id?.toString()
+  }
 
-  // Select business based on URL or default to first
-  const selectedBusinessId = searchParams.businessId
-  const business = selectedBusinessId 
-    ? businesses.find((b: any) => b.bizId === selectedBusinessId) 
-    : businesses[0] as any
+  if (!businessId) {
+    redirect("/dashboard")
+  }
 
-  if (!business) {
+  // Server-prefetch the full business (normalized) for instant render + pass as initialData
+  const result = await getBusinessByIdAction(businessId)
+  const initialBusiness = result.success ? result.business : null
+
+  if (!initialBusiness) {
     redirect("/dashboard")
   }
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Button variant="ghost" size="sm" asChild className="gap-1 -ml-2">
-          <Link href={`/dashboard?businessId=${business.id}`}>
-            <ChevronLeft className="h-4 w-4" /> Back to Dashboard
-          </Link>
-        </Button>
-      </div>
-
-      <ServicesList businessId={business.id} services={business.services} />
+    <div className="flex-1 space-y-4">
+      <ServicesPageClient businessId={businessId} initialBusiness={initialBusiness} />
     </div>
   )
 }
