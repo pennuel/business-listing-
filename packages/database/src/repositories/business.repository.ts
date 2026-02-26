@@ -1,6 +1,6 @@
 // Business repository - handles all business-related API operations
 import { apiRequest } from "../api-client"
-import { BusinessInfo, BusinessInfoRequest, Unit, PagedResponseListBusinessInfo } from "@think-id/types"
+import { BusinessInfo, BusinessInfoRequest, Unit, PagedResponseListBusinessInfo, User } from "@think-id/types"
 
 export type CreateBusinessData = BusinessInfoRequest
 export type UpdateBusinessData = Partial<BusinessInfoRequest> & {
@@ -33,12 +33,18 @@ export class BusinessRepository {
 
 
   // TO DO: update to match the new summary api
-  async findByUserId(userId: string): Promise<BusinessInfo[]> {
-    const result = await apiRequest<PagedResponseListBusinessInfo>("/api/BusinessInfo/user/" + userId, "GET", undefined, {
+  async findByUserId(userId: string): Promise<BusinessInfo[] | null> {
+    const result = await apiRequest<BusinessInfo[] >("/api/BusinessInfo/user/" + userId, "GET", undefined, {
       params: { userId }
     })
-    return result.item || []
+
+    if (!result) {
+      console.error(`Error finding user ${userId}:`, result)
+      return null
+    }
+    return result 
   }
+    
 
   async findByUser(userId: string, email: string): Promise<BusinessInfo[]> {
     const result = await apiRequest<PagedResponseListBusinessInfo>("/api/BusinessInfo/getBusinessInfos", "GET", undefined, {

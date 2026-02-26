@@ -5,7 +5,7 @@ import {
   type UpdateBusinessData,
 } from "../repositories/business.repository";
 import { userRepository } from "../repositories/user.repository";
-import { BusinessInfo } from "@think-id/types";
+import { BusinessInfo, User } from "@think-id/types";
 
 export type BusinessServiceCreateData = CreateBusinessData;
 
@@ -25,7 +25,7 @@ export class BusinessService {
     return await businessRepository.findByEmail(email);
   }
 
-  async getBusinessesByUserId(userId: string): Promise<BusinessInfo[]> {
+  async getBusinessesByUserId(userId: string): Promise<BusinessInfo[] | null> {
     return await businessRepository.findByUserId(userId);
   }
 

@@ -1,31 +1,34 @@
 import { userRepository, type CreateUserData } from "../repositories/user.repository";
+import { User } from "@think-id/types";
 
 export class UserService {
-  async createUser(data: CreateUserData) {
+  async createUser(data: CreateUserData): Promise<User | null> {
     return await userRepository.create(data);
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<User | null> {
     const user = await userRepository.findById(id);
-    if (!user) return null;
     return user;
   }
+  async syncUserWithDB(userId: string): Promise<User > {
+    return await userRepository.sync_with_db(userId);
+  }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User | null> {
     const user = await userRepository.findByEmail(email);
     if (!user) return null;
     return user;
   }
 
-  async findOrCreateUser(data: Partial<CreateUserData>) {
+  async findOrCreateUser(data: Partial<CreateUserData>): Promise<User | null> {
     return await userRepository.findOrCreate(data);
   }
 
-  async getAllUsers() {
+  async getAllUsers(): Promise<User[]> {
     return await userRepository.findAll();
   }
 
-  async updateUser(id: string, data: any) {
+  async updateUser(id: string, data: any): Promise<User | null> {
     return await userRepository.update(id, data);
   }
 
