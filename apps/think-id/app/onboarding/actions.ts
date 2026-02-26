@@ -1,7 +1,7 @@
 "use server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { database } from "@think-id/database";
+import { businessService, categoryService } from "@think-id/database";
 import type { BusinessData } from "./page";
 import { BusinessInfoRequest, BusinessInfo } from "@think-id/types";
 
@@ -97,7 +97,7 @@ export async function submitBusinessData(
     let business: BusinessInfo;
     if (businessData.id) {
        console.log("Updating existing business:", businessData.id);
-       business = await database.businesses.updateBusiness(businessData.id, payload);
+       business = await businessService.updateBusiness(businessData.id, payload);
     } else {
       // For creation, add the user ID if available
       const createData: BusinessInfoRequest = {
@@ -105,7 +105,7 @@ export async function submitBusinessData(
         userId: (session?.user as any)?.id || undefined,
       };
       
-      business = await database.businesses.createBusiness(createData);
+      business = await businessService.createBusiness(createData);
     }
 
     const businessId = business.bizId?.toString() || (business as any).id || "";
@@ -126,7 +126,7 @@ export async function submitBusinessData(
 // Helper function to get business by ID
 export async function getBusinessById(id: string) {
   try {
-    return await database.getBusinessById(id);
+    return await businessService.getBusinessById(id);
   } catch (error) {
     console.error("Failed to get business by ID:", error);
     return null;
@@ -136,7 +136,7 @@ export async function getBusinessById(id: string) {
 // Helper function to get businesses by email
 export async function getBusinessesByEmail(email: string) {
   try {
-    return await database.getBusinessesByEmail(email);
+    return await businessService.getBusinessesByEmail(email);
   } catch (error) {
     console.error("Failed to get businesses by email:", error);
     return [];
@@ -146,7 +146,7 @@ export async function getBusinessesByEmail(email: string) {
 // Helper function to update business status
 export async function updateBusinessStatus(id: string, status: string) {
   try {
-    return await database.updateBusiness(id, { status });
+    return await businessService.updateBusiness(id, { status });
   } catch (error) {
     console.error("Failed to update business status:", error);
     return null;
@@ -156,7 +156,7 @@ export async function updateBusinessStatus(id: string, status: string) {
 // Category related functions
 export async function getCategories() {
   try {
-    const result = await database.categories.getCategories({ size: 100 });
+    const result = await categoryService.getCategories({ size: 100 });
     return result.categories;
   } catch (error) {
     console.error("Failed to fetch categories:", error);
