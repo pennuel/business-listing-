@@ -36,16 +36,12 @@ import {
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useUserBusinesses } from '@/lib/hooks/useBusinesses'
+import { normalizeBusiness } from "@/lib/utils/normalize"
 
 
-interface Business {
-  id: string
-  name: string
-  image: string | null
-}
 
 interface BusinessSwitcherProps {
-  businesses?: Business[] // Now optional, defaults to Redux
+  businesses?: any[] // Now optional, defaults to Redux
   currentBusinessId?: string // Now optional, defaults to Redux
   className?: string
 }
@@ -64,18 +60,22 @@ export function BusinessSwitcher({ businesses: propsBusinesses, currentBusinessI
   // Use props if provided, otherwise fetch businesses for session user
   const userId = session?.user?.id || null
   const userBusinessesQuery = useUserBusinesses(userId)
-  const businessesFromQuery = (userBusinessesQuery.data || []) as Business[]
+  const businessesFromQuery = (userBusinessesQuery.data || []) as any[]
 
-  const businesses: Business[] = propsBusinesses || businessesFromQuery || []
+  const businesses: any[] = propsBusinesses || businessesFromQuery || []
 
   const currentBusinessId = propsBusinessId || searchParams.get("businessId") || (businesses.length > 0 ? businesses[0].id : "")
   
   const selectedBusiness = businesses.find((b) => b.id === currentBusinessId) || businesses[0]
 
-  const onBusinessSelect = (business: Business) => {
-    setOpen(false)
+  const onBusinessSelect = (business: any) => {
+    setOpen(false)  
+
+    console.log("business switcher", business)
+    const normalizedBusiness = normalizeBusiness(business)
+    console.log("normalized business", normalizedBusiness)
     const params = new URLSearchParams(searchParams.toString())
-    params.set("businessId", business.id)
+    params.set("businessId", normalizedBusiness.id)
     router.push(`${pathname}?${params.toString()}`)
   }
 
@@ -112,6 +112,7 @@ export function BusinessSwitcher({ businesses: propsBusinesses, currentBusinessI
                 {businesses.map((business) => (
                   <CommandItem
                     key={business.id}
+                    value={`${business.id} ${business.name}`}
                     onSelect={() => onBusinessSelect(business)}
                     className="text-sm"
                   >
