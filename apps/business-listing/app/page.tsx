@@ -5,15 +5,17 @@ import { Badge } from "@/components/ui/badge"
 import { Building2, Search, MapPin, Star, ArrowRight, Clock } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/navbar"
+import { normalizeBusiness } from "@/lib/utils/normalize"
 
 export default async function HomePage() {
-  let businesses: BusinessInfo[] = []
+  let businesses: any[] = []
   try {
     const result = await businessService.getAllBusinesses({
       status: "active",
       limit: 12
     })
-    businesses = Array.isArray(result) ? result : (result?.businesses || [])
+    const rawBusinesses = Array.isArray(result) ? result : (result?.businesses || [])
+    businesses = rawBusinesses.map((b: any) => normalizeBusiness(b))
   } catch (error) {
     console.error("Failed to fetch businesses:", error)
   }
@@ -60,8 +62,8 @@ export default async function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {businesses.map((business, index) => (
             <a
-              key={business.bizId ?? (business as any).id ?? index}
-              href={`/window/${business.bizId ?? (business as any).id}`}
+              key={business.id ?? index}
+              href={`/window/${business.id}`}
               className="group block"
             >
               <Card className="overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 rounded-2xl bg-white">
@@ -71,7 +73,7 @@ export default async function HomePage() {
                       <img 
                         src={business.coverImage} 
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                        alt={business.businessName}
+                        alt={business.name}
                       />
                    ) : (
                       <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -80,7 +82,7 @@ export default async function HomePage() {
                    )}
                    <div className="absolute top-4 left-4">
                       <Badge className="bg-white/95 text-blue-700 hover:bg-white border-none shadow-sm font-bold uppercase text-[10px]">
-                        {business.category?.categoryName}
+                        {typeof business.category === 'object' ? business.category?.categoryName : business.category || "Store"}
                       </Badge>
                    </div>
                    
@@ -97,7 +99,7 @@ export default async function HomePage() {
 
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{business.businessName}</h3>
+                    <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors">{business.name}</h3>
                     <div className="flex items-center gap-1 text-sm bg-yellow-400/10 text-yellow-700 px-2 py-0.5 rounded-md">
                        <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
                        <span className="font-bold">4.8</span>
