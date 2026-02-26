@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
@@ -14,18 +14,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form"
+  Field,
+  FieldTitle,
+  FieldError,
+  FieldDescription,
+  FieldGroup,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { updateBusinessProfile } from "@/app/actions/business"
 import { toast } from "sonner"
 import { Loader2, Edit, Upload, Link, Grid } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -57,19 +54,20 @@ export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProp
       name: business.name || "",
       tagline: business.tagline || "",
       description: business.description || "",
-      category: business.category || "",
+      category: typeof business.category === 'object' ? business.category?.categoryName || "" : business.category || "",
       coverImage: business.coverImage || "",
     },
   })
 
+  const { control, handleSubmit, watch, setValue, getValues, formState: { errors } } = form
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     setUploading(true)
     const reader = new FileReader()
     reader.onloadend = () => {
-      form.setValue("coverImage", reader.result as string)
+      setValue("coverImage", reader.result as string)
       setUploading(false)
       toast.success("Image uploaded (locally)")
     }
@@ -105,80 +103,68 @@ export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProp
           <DialogTitle>Edit Brand Identity</DialogTitle>
           <DialogDescription>Change how your storefront looks to people in the mall.</DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <FieldGroup>
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Business Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <Field>
+                <FieldTitle>Business Name</FieldTitle>
+                <Controller
+                  control={control}
+                  name="name"
+                  render={({ field }) => <Input {...field} />}
+                />
+                <FieldError errors={[errors.name]} />
+              </Field>
+
+              <Field>
+                <FieldTitle>Category</FieldTitle>
+                <Controller
+                  control={control}
+                  name="category"
+                  render={({ field }) => <Input {...field} />}
+                />
+                <FieldError errors={[errors.category]} />
+              </Field>
             </div>
 
-            <FormField
-              control={form.control}
-              name="tagline"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tagline</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Short catchy phrase" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>About Us / Story</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} className="min-h-[100px]" placeholder="Tell the mall about your shop..." />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Field>
+              <FieldTitle>Tagline</FieldTitle>
+              <Controller
+                control={control}
+                name="tagline"
+                render={({ field }) => <Input {...field} placeholder="Short catchy phrase" />}
+              />
+              <FieldError errors={[errors.tagline]} />
+            </Field>
+
+            <Field>
+              <FieldTitle>About Us / Story</FieldTitle>
+              <Controller
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <Textarea {...field} className="min-h-[100px]" placeholder="Tell the mall about your shop..." />
+                )}
+              />
+              <FieldError errors={[errors.description]} />
+            </Field>
 
             <div className="space-y-4">
-              <FormLabel>Storefront Hero Image</FormLabel>
+              <FieldTitle>Storefront Hero Image</FieldTitle>
               <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-dashed bg-muted mb-4 group">
-                 {form.watch("coverImage") ? (
-                   <img src={form.getValues("coverImage")} className="w-full h-full object-cover" alt="Cover" />
-                 ) : (
-                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
-                      <Upload className="h-8 w-8 opacity-20" />
-                      <span className="text-xs">No image selected</span>
-                   </div>
-                 )}
-                 {uploading && (
-                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <Loader2 className="h-6 w-6 text-white animate-spin" />
-                   </div>
-                 )}
+                {watch("coverImage") ? (
+                  <img src={getValues("coverImage")} className="w-full h-full object-cover" alt="Cover" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2">
+                    <Upload className="h-8 w-8 opacity-20" />
+                    <span className="text-xs">No image selected</span>
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  </div>
+                )}
               </div>
 
               <Tabs defaultValue="upload" className="w-full">
@@ -193,7 +179,7 @@ export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProp
                     <Link className="h-3 w-3" /> URL
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="upload" className="pt-4">
                   <div className="flex items-center justify-center w-full">
                     <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
@@ -208,56 +194,57 @@ export function EditBrandingDialog({ business, trigger }: EditBrandingDialogProp
                 </TabsContent>
 
                 <TabsContent value="gallery" className="pt-4">
-                   {galleryImages.length > 0 ? (
-                     <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto pr-1">
-                        {galleryImages.map((url, i) => (
-                          <div 
-                            key={i} 
-                            onClick={() => form.setValue("coverImage", url)}
-                            className={cn(
-                              "aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-all",
-                              form.watch("coverImage") === url ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-muted-foreground/20"
-                            )}
-                          >
-                            <img src={url} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
-                          </div>
-                        ))}
-                     </div>
-                   ) : (
-                     <div className="text-center py-8 text-[10px] text-muted-foreground bg-muted/30 rounded-lg">
-                        Go to "Visual Showcase" to add gallery images first.
-                     </div>
-                   )}
+                  {galleryImages.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2 max-h-[150px] overflow-y-auto pr-1">
+                      {galleryImages.map((url, i) => (
+                        <div
+                          key={i}
+                          onClick={() => setValue("coverImage", url)}
+                          className={cn(
+                            "aspect-video rounded-md overflow-hidden cursor-pointer border-2 transition-all",
+                            watch("coverImage") === url ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-muted-foreground/20"
+                          )}
+                        >
+                          <img src={url} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-[10px] text-muted-foreground bg-muted/30 rounded-lg">
+                      Go to "Visual Showcase" to add gallery images first.
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="url" className="pt-4">
-                   <FormField
-                    control={form.control}
-                    name="coverImage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input {...field} placeholder="https://example.com/hero.jpg" />
-                        </FormControl>
-                        <FormDescription className="text-[10px]">
-                          Enter a direct path to an image file.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <Field>
+                    <Controller
+                      control={control}
+                      name="coverImage"
+                      render={({ field }) => (
+                        <Input {...field} placeholder="https://example.com/hero.jpg" />
+                      )}
+                    />
+                    <FieldDescription className="text-[10px]">
+                      Enter a direct path to an image file.
+                    </FieldDescription>
+                    <FieldError errors={[errors.coverImage]} />
+                  </Field>
                 </TabsContent>
               </Tabs>
             </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Update Branding
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </FieldGroup>
+
+          <DialogFooter>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update Branding
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
 }
+
+
