@@ -5,7 +5,7 @@ import { Plus, Package, Edit, Trash2, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ServiceDialog } from "./service-dialog"
-import { deleteService } from "@/app/actions/services"
+import { useDeleteService } from "@/lib/hooks/useBusinesses"
 import { toast } from "sonner"
 
 interface ServiceListProps {
@@ -16,6 +16,7 @@ interface ServiceListProps {
 export function ServicesList({ businessId, services }: ServiceListProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingService, setEditingService] = useState<any>(null)
+  const deleteMutation = useDeleteService(businessId)
 
   const handleEdit = (service: any) => {
     setEditingService(service)
@@ -24,12 +25,10 @@ export function ServicesList({ businessId, services }: ServiceListProps) {
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to remove this service from your shelves?")) {
-      const result = await deleteService(id)
-      if (result.success) {
-        toast.success("Service removed from shelves")
-      } else {
-        toast.error("Failed to remove service")
-      }
+      deleteMutation.mutate(id, {
+        onSuccess: () => toast.success("Service removed from shelves"),
+        onError: () => toast.error("Failed to remove service"),
+      })
     }
   }
 
