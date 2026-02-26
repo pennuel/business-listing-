@@ -16,7 +16,8 @@
     "incremental": true,
     "declaration": true,
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "types": ["node"]
   },
   "include": ["index.ts", "src/**/*.ts", "prisma/seed.ts"],
   "exclude": ["node_modules"]

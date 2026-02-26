@@ -17,9 +17,10 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/lib/*": ["./src/lib/*"],
-      "@/components/ui/*": ["./src/ui/*"],
-      "@/hooks/*": ["./src/hooks/*"]
+      "@/src/*": ["./src/*"],
+      "@/src/lib/*": ["./src/lib/*"],
+      "@/src/ui/*": ["./src/ui/*"],
+      "@/src/hooks/*": ["./src/hooks/*"]
     }
   },
   "include": ["src"]
