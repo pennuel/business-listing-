@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { database } from "@think-id/database"
+import { businessService } from "@think-id/database"
 
 // Mock business data (same as main API)
 const mockBusinesses = [
@@ -109,7 +109,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const businessId = params.id
 
     // Get business using database manager
-    const business = await database.getBusinessById(businessId)
+    const business = await businessService.getBusinessById(businessId)
 
     if (!business) {
       return NextResponse.json({ error: "Business not found" }, { status: 404 })

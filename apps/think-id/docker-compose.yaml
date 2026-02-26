@@ -1,44 +1,68 @@
 
 
 services:
-  db:
-    image: postgres:17-alpine
-    container_name: postgres_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: think_business_registration
-    volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
-      # Optional: mount custom Postgres config files here (create ./db/conf/ if used)
-      # - ./db/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
-      # - ./db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
-    ports:
-      # Configure host binding and external port via .env (safer defaults: localhost)
-      # Set BIND_HOST=0.0.0.0 to allow external connections (use with caution).
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U myuser -d think_business_registration || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 5s
+  # db:
+  #   image: postgres:17-alpine
+  #   container_name: postgres_db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: myuser
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: think_business_registration
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #     - ./db/init:/docker-entrypoint-initdb.d:ro
+  #     # Optional: mount custom Postgres config files here (create ./db/conf/ if used)
+  #     # - ./db/conf/postgresql.conf:/var/lib/postgresql/data/postgresql.conf:ro
+  #     # - ./db/conf/pg_hba.conf:/var/lib/postgresql/data/pg_hba.conf:ro
+  #   ports:
+  #     # Configure host binding and external port via .env (safer defaults: localhost)
+  #     # Set BIND_HOST=0.0.0.0 to allow external connections (use with caution).
+  #     - "5432:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U myuser -d think_business_registration || exit 1"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 10
+  #     start_period: 5s
 
-  prisma-migrator:
-    image: node:20-alpine
-    container_name: prisma_migrator
-    working_dir: /app
-    volumes:
-      - ./:/app:cached
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: "postgresql://myuser:password@db:5432/think_business_registration?schema=public"
-    command: sh ./scripts/docker-init.sh
-    restart: 'no'
+  # prisma-migrator:
+  #   image: node:20-alpine
+  #   container_name: prisma_migrator
+  #   working_dir: /app
+  #   volumes:
+  #     - ./:/app:cached
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   environment:
+  #     DATABASE_URL: "postgresql://myuser:password@db:5432/think_business_registration?schema=public"
+  #   command: sh ./scripts/docker-init.sh
+  #   restart: 'no'
+
+  think-id:
+    container_name: think_id_app
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: think-id
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+
+
+  business-listing:
+    container_name: business_listing_app
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+      args:
+        APP_NAME: business-listing
+    restart: unless-stopped
+    ports:
+      - "3000:3000"  # Change the host port if 3001 is already in use
+
 
 volumes:
   db_data:

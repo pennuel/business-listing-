@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { database } from "@think-id/database";
+import { businessService } from "@think-id/database";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by business ID if provided
     if (businessId) {
-      const business = await database.businesses.getBusinessById(businessId);
+      const business = await businessService.getBusinessById(businessId);
       if (!business) {
         return NextResponse.json(
           { error: "Business not found" },
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     // Filter by email if provided
     if (email) {
-      const userBusinesses = await database.businesses.getBusinessesByEmail(email);
+      const userBusinesses = await businessService.getBusinessesByEmail(email);
       const normalized = userBusinesses.map((b) => ({
         ...b,
         schedule: (b as any).weekdaySchedule ?? (b as any).schedule ?? {},
@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
 
     // Filter by userId if provided
     if (userId) {
-      const userBusinesses = await database.businesses.getBusinessesByUserId(userId);
-      const normalized = userBusinesses.map((b) => ({
+      const userBusinesses = await businessService.getBusinessesByUserId(userId);
+      const normalized = userBusinesses?.map((b) => ({
         ...b,
         schedule: (b as any).weekdaySchedule ?? (b as any).schedule ?? {},
       }));
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     if (status) options.status = status;
     if (category) options.category = category;
 
-    const result = await database.businesses.getAllBusinesses(options);
+    const result = await businessService.getAllBusinesses(options);
 
     if (typeof result === "object" && "businesses" in result) {
       // Paginated result - normalize entries
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create business using database manager
-    const newBusiness = await database.businesses.createBusiness(body);
+    const newBusiness = await businessService.createBusiness(body);
 
     return NextResponse.json(
       { success: true, business: newBusiness },
@@ -147,7 +147,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update business using database manager
-    const updatedBusiness = await database.businesses.updateBusiness(businessId, body);
+    const updatedBusiness = await businessService.updateBusiness(businessId, body);
 
     if (!updatedBusiness) {
       return NextResponse.json(
@@ -182,7 +182,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete business using database manager
-    const deletedBusiness = await database.businesses.deleteBusiness(businessId);
+    const deletedBusiness = await businessService.deleteBusiness(businessId);
 
     if (!deletedBusiness) {
       return NextResponse.json(

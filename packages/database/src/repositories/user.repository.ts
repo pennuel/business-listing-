@@ -17,8 +17,8 @@ export class UserRepository {
   async create(data: CreateUserData): Promise<User | null> {
     const response = await authRepository.signUp(data);
     // Extract user data from the response if available
-    if (response.user) {
-      return response.user as unknown as User;
+    if (response.message?.user) {
+      return response.message.user as unknown as User;
     }
     return null;
   }
@@ -31,12 +31,17 @@ export class UserRepository {
     return null;
   }
 
-  async sync_with_db(userId: string): Promise<User > {
+  async sync_with_db(userId: string): Promise<User> {
     // No-op since we're using the API
-    const result = await apiRequest<User>("/api/auth/sync/" + userId, "GET", undefined, {
-          params: { userId }
-        })
-        return result 
+    const result = await apiRequest<User>(
+      "/api/auth/sync/" + userId,
+      "GET",
+      undefined,
+      {
+        params: { userId },
+      },
+    );
+    return result;
   }
 
   async findOrCreate(data: Partial<CreateUserData>): Promise<User | null> {
