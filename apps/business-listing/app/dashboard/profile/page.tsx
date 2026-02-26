@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth"
-import { businessRepository } from "@think-id/database"
+import { getBusinessByIdAction, getBusinessesByUserIdAction } from "@/app/actions/business"
 import { redirect } from "next/navigation"
 import { ProfileContent } from "@/components/dashboard/profile-content"
 
@@ -15,23 +15,30 @@ export default async function ProfilePage({
   }
 
   const params = await searchParams
-  const selectedBusinessId = params.businessId
-  
-  let business;
-  if (selectedBusinessId) {
-    business = await businessRepository.findById(selectedBusinessId)
-  } else {
-    const businesses = await businessRepository.findByUserId(session.user.id)
-    business = businesses?.[0];
+  let businessId = params.businessId
+
+  // If no businessId in URL, fall back to the first business for this user
+  if (!businessId) {
+    const listResult = await getBusinessesByUserIdAction(session.user.id)
+    const firstBusiness = listResult.success ? listResult.businesses?.[0] : null
+    businessId = firstBusiness?.id?.toString()
   }
 
-  if (!business) {
+  if (!businessId) {
+    redirect("/dashboard")
+  }
+
+  // Server-prefetch the full business (normalized) for instant render + pass as initialData
+  const result = await getBusinessByIdAction(businessId)
+  const initialBusiness = result.success ? result.business : null
+
+  if (!initialBusiness) {
     redirect("/dashboard")
   }
 
   return (
     <div className="flex-1 space-y-4">
-      <ProfileContent business={business} />
+      <ProfileContent businessId={businessId} initialBusiness={initialBusiness} />
     </div>
   )
 }

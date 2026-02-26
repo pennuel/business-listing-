@@ -23,72 +23,11 @@ import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialo
 import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
 import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
 import { useBusinessById } from "@/lib/hooks/useBusinesses"
+import { OpeningHours, getCurrentStatus } from "@/components/business/opening-hours"
+import { GalleryGrid } from "@/components/business/gallery-grid"
+import { BusinessServices } from "@/components/business/business-services"
+import { BusinessAmenities } from "@/components/business/business-amenities"
 
-const DAY_KEYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
-const DAY_LABELS: Record<string,string> = {
-  monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday',
-  thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday',
-}
-const DAY_KEY_TO_INDEX: Record<string,number> = {
-  sunday:0, monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6,
-}
-
-function getScheduleForDay(business: any, dayKey: string): string | null {
-  const wd = business.weekdaySchedule ?? business.schedule?.weekday
-  const we = business.weekendSchedule ?? business.schedule?.weekend
-  const isWeekend = dayKey === 'saturday' || dayKey === 'sunday'
-  // Capitalize first letter to handle DB keys like "Thursday" alongside lowercase "thursday"
-  const capitalKey = dayKey.charAt(0).toUpperCase() + dayKey.slice(1)
-  if (!isWeekend && typeof wd === 'object') {
-    const val = wd?.[dayKey] ?? wd?.[capitalKey]
-    if (val) return val
-  }
-  if (isWeekend && typeof we === 'object') {
-    const val = we?.[dayKey] ?? we?.[capitalKey]
-    if (val) return val
-  }
-  if (!isWeekend && typeof wd === 'string') return wd
-  if (isWeekend && typeof we === 'string') return we
-  return null
-}
-
-function parseTimeToMinutes(timeStr: string): number {
-  const str = timeStr.trim()
-  // 24-hour format: "09:00" or "17:30"
-  const match24 = str.match(/^(\d{1,2}):(\d{2})$/)
-  if (match24) return parseInt(match24[1]) * 60 + parseInt(match24[2])
-  // 12-hour format: "9:00 AM", "5:00 PM", "9AM", etc.
-  const match12 = str.match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i)
-  if (!match12) return -1
-  let h = parseInt(match12[1])
-  const m = parseInt(match12[2] ?? '0')
-  const ampm = match12[3]?.toUpperCase()
-  if (ampm === 'PM' && h !== 12) h += 12
-  if (ampm === 'AM' && h === 12) h = 0
-  return h * 60 + m
-}
-
-function getCurrentStatus(business: any) {
-  if (business.isManuallyOpen === true) return { isOpen: true, message: "Open Now (Owner set)" }
-  if (business.isManuallyOpen === false) return { isOpen: false, message: "Closed (Owner set)" }
-
-  const now = new Date()
-  const dayKeys = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
-  const todayKey = dayKeys[now.getDay()]
-  const schedStr = getScheduleForDay(business, todayKey)
-  if (!schedStr || schedStr.toLowerCase() === 'closed') return { isOpen: false, message: "Closed Today" }
-
-  const parts = schedStr.split('-').map((s: string) => s.trim())
-  if (parts.length < 2) return { isOpen: true, message: schedStr }
-
-  const openMin = parseTimeToMinutes(parts[0])
-  const closeMin = parseTimeToMinutes(parts[1])
-  const nowMin = now.getHours() * 60 + now.getMinutes()
-  if (openMin < 0 || closeMin < 0) return { isOpen: true, message: schedStr }
-  if (nowMin >= openMin && nowMin <= closeMin) return { isOpen: true, message: `Open · Closes at ${parts[1]}` }
-  if (nowMin < openMin) return { isOpen: false, message: `Closed · Opens at ${parts[0]}` }
-  return { isOpen: false, message: 'Closed' }
-}
 
 export function ProfileContent({
   businessId,
@@ -103,25 +42,8 @@ export function ProfileContent({
   const resolvedId = business.id ?? (business as any).bizId?.toString() ?? businessId
   const displayName = business.name ?? (business as any).businessName ?? "Business"
   const displayPhone = business.phone ?? (business as any).phoneNumber
-
-  const weekday = business.schedule?.weekday || business.weekdaySchedule as any
-  const weekend = business.schedule?.weekend || business.weekendSchedule as any
-
-
   const liveStatus = getCurrentStatus(business)
 
-  const todayIndex = new Date().getDay()
-
-  const scheduleDays = DAY_KEYS.map(dayKey => {
-  const schedStr = getScheduleForDay(business, dayKey)
-  const isClosed = !schedStr || schedStr.toLowerCase() === 'closed'
-    return {
-      name: DAY_LABELS[dayKey],
-      dayKey,
-      schedStr: schedStr || 'Closed',
-      isClosed
-    }
-  })
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header with back button */}
@@ -155,7 +77,7 @@ export function ProfileContent({
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="relative h-64 sm:h-80 w-full rounded-xl overflow-hidden mb-8 shadow-lg group">
-          {/* {business.coverImage ? (
+          {business.coverImage ? (
             <img 
               src={business.coverImage} 
               alt={business.name} 
@@ -165,7 +87,7 @@ export function ProfileContent({
             <div className="w-full h-full bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center">
               <Building2 className="h-24 w-24 text-white opacity-20" />
             </div>
-          )} */}
+          )}
           
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end">
             <div className="p-6 sm:p-8 w-full relative">
@@ -221,51 +143,49 @@ export function ProfileContent({
                  <EditGalleryDialog business={business as any} />
               </div>
               <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                Image Gallery
+                <span>Image Gallery</span>
+                {Array.isArray(business.gallery) && business.gallery.length > 0 && (
+                  <span className="text-sm font-normal text-gray-400">({business.gallery.length})</span>
+                )}
               </h2>
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {/* {Array.isArray(business.gallery) && (business.gallery as any).length > 0 ? (
-                    (business.gallery as any).map((img: string, i: number) => (
-                      <div key={i} className="aspect-square rounded-lg overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
-                        <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover" />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-12 text-center text-gray-400 border-2 border-dashed border-gray-100 rounded-lg">
-                      <p>No gallery images yet.</p>
-                      <Button variant="outline" className="mt-4" onClick={() => {}}>
-                        Add Photos
-                      </Button>
-                    </div>
-                  )} */}
-                </div>
+                <GalleryGrid
+                  images={Array.isArray(business.gallery) ? business.gallery : []}
+                  emptyMessage="No gallery images yet. Hover over this section to add some!"
+                />
               </div>
             </section>
 
-            {/* Amenities Section */}
+            {/* Services Section */}
             <section className="relative group">
-              <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                 <EditAmenitiesDialog business={business as any} />
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Services &amp; Offerings</h2>
+                {Array.isArray(business.services) && business.services.length > 0 && (
+                  <span className="text-sm text-gray-400">{business.services.length} listed</span>
+                )}
               </div>
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                Amenities & Perks
-              </h2>
-              <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* {Array.isArray(business.amenities) && (business.amenities as any).length > 0 ? (
-                    (business.amenities as any).map((amenity: string) => (
-                      <div key={amenity} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                        <span className="text-gray-700 font-medium">{amenity}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-400 italic">No amenities listed yet.</p>
-                  )} */}
-                </div>
-              </div>
+              <BusinessServices
+                services={Array.isArray(business.services) ? business.services : []}
+                variant="card"
+                emptyMessage="No services added yet."
+              />
             </section>
+
+            {/* Amenities Section */}
+            {Array.isArray(business.amenities) && business.amenities.length > 0 && (
+              <section className="relative group">
+                <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                   <EditAmenitiesDialog business={business as any} />
+                </div>
+                <h2 className="text-xl font-bold mb-4">Amenities &amp; Perks</h2>
+                <div className="bg-white rounded-xl border border-gray-200 p-6">
+                  <BusinessAmenities
+                    amenities={business.amenities as string[]}
+                    variant="pills"
+                  />
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -339,19 +259,8 @@ export function ProfileContent({
                   <Clock className="h-4 w-4 text-gray-400" />
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-5 px-0">
-                <div className="px-6 space-y-2.5">
-                  {scheduleDays.map((day) => (
-                    <div key={day.name} className={`flex justify-between items-center text-sm ${DAY_KEY_TO_INDEX[day.dayKey] === todayIndex ? 'font-semibold' : ''}`}>
-                      <span className={DAY_KEY_TO_INDEX[day.dayKey] === todayIndex ? 'text-blue-600' : 'text-gray-500'}>
-                        {day.name}{DAY_KEY_TO_INDEX[day.dayKey] === todayIndex && ' ·'}
-                      </span>
-                      <span className={day.isClosed ? 'text-red-500 font-medium' : 'text-gray-900'}>
-                        {day.isClosed ? 'Closed' : day.schedStr}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="pt-5 px-6">
+                <OpeningHours business={business} />
               </CardContent>
             </Card>
           </div>
