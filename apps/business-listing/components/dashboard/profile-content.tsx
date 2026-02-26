@@ -1,49 +1,5 @@
 "use client"
 
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Separator } from "@/components/ui/separator"
-// import {
-//   Building2,
-//   Phone,
-//   Mail,
-//   Globe,
-//   MapPin,
-//   Clock,
-//   ExternalLink,
-//   Edit,
-//   ArrowLeft,
-// } from "lucide-react"
-// import Link from "next/link"
-// import { EditBrandingDialog } from "@/components/dashboard/edit-branding-dialog"
-// import { EditContactDialog } from "@/components/dashboard/edit-contact-dialog"
-// import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
-// import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
-// import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
-// import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Button } from "@/components/ui/button"
-// import { Badge } from "@/components/ui/badge"
-// import { Separator } from "@/components/ui/separator"
-// import {
-//   Building2,
-//   Phone,
-//   Mail,
-//   Globe,
-//   MapPin,
-//   Clock,
-//   ExternalLink,
-//   Edit,
-//   ArrowLeft,
-// } from "lucide-react"
-// import Link from "next/link"
-// import { EditBrandingDialog } from "@/components/dashboard/edit-branding-dialog"
-// import { EditContactDialog } from "@/components/dashboard/edit-contact-dialog"
-// import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
-// import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
-// import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
-// import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -66,60 +22,106 @@ import { EditGalleryDialog } from "@/components/dashboard/edit-gallery-dialog"
 import { EditAmenitiesDialog } from "@/components/dashboard/edit-amenities-dialog"
 import { EditLocationDialog } from "@/components/dashboard/edit-location-dialog"
 import { EditHoursDialog } from "@/components/dashboard/edit-hours-dialog"
+import { useBusinessById } from "@/lib/hooks/useBusinesses"
 
-function formatTime(time: string) {
-  if (!time || typeof time !== 'string' || !time.includes(":")) return time
-  const [hours, minutes] = time.split(":")
-  const hour = parseInt(hours)
-  const ampm = hour >= 12 ? "PM" : "AM"
-  const displayHour = hour % 12 || 12
-  return `${displayHour}:${minutes} ${ampm}`
+const DAY_KEYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday']
+const DAY_LABELS: Record<string,string> = {
+  monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday',
+  thursday:'Thursday', friday:'Friday', saturday:'Saturday', sunday:'Sunday',
+}
+const DAY_KEY_TO_INDEX: Record<string,number> = {
+  sunday:0, monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6,
+}
+
+function getScheduleForDay(business: any, dayKey: string): string | null {
+  const wd = business.weekdaySchedule ?? business.schedule?.weekday
+  const we = business.weekendSchedule ?? business.schedule?.weekend
+  const isWeekend = dayKey === 'saturday' || dayKey === 'sunday'
+  // Capitalize first letter to handle DB keys like "Thursday" alongside lowercase "thursday"
+  const capitalKey = dayKey.charAt(0).toUpperCase() + dayKey.slice(1)
+  if (!isWeekend && typeof wd === 'object') {
+    const val = wd?.[dayKey] ?? wd?.[capitalKey]
+    if (val) return val
+  }
+  if (isWeekend && typeof we === 'object') {
+    const val = we?.[dayKey] ?? we?.[capitalKey]
+    if (val) return val
+  }
+  if (!isWeekend && typeof wd === 'string') return wd
+  if (isWeekend && typeof we === 'string') return we
+  return null
+}
+
+function parseTimeToMinutes(timeStr: string): number {
+  const str = timeStr.trim()
+  // 24-hour format: "09:00" or "17:30"
+  const match24 = str.match(/^(\d{1,2}):(\d{2})$/)
+  if (match24) return parseInt(match24[1]) * 60 + parseInt(match24[2])
+  // 12-hour format: "9:00 AM", "5:00 PM", "9AM", etc.
+  const match12 = str.match(/^(\d{1,2}):?(\d{2})?\s*(AM|PM)$/i)
+  if (!match12) return -1
+  let h = parseInt(match12[1])
+  const m = parseInt(match12[2] ?? '0')
+  const ampm = match12[3]?.toUpperCase()
+  if (ampm === 'PM' && h !== 12) h += 12
+  if (ampm === 'AM' && h === 12) h = 0
+  return h * 60 + m
 }
 
 function getCurrentStatus(business: any) {
   if (business.isManuallyOpen === true) return { isOpen: true, message: "Open Now (Owner set)" }
   if (business.isManuallyOpen === false) return { isOpen: false, message: "Closed (Owner set)" }
 
-  if (typeof business.weekdaySchedule === 'string') {
-      return { isOpen: true, message: business.weekdaySchedule }
-  }
-
   const now = new Date()
-  const day = now.toString().toLowerCase().substring(0, 3) 
-  const dayMap: { [key: string]: string } = { sun: "sunday", mon: "monday", tue: "tuesday", wed: "wednesday", thu: "thursday", fri: "friday", sat: "saturday" }
-  const fullDay = dayMap[day]
-  
-  const weekday = business.weekdaySchedule as any
-  const weekend = business.weekendSchedule as any
-  const daySchedule = (weekday?.[fullDay] || weekend?.[fullDay])
-  
-  if (!daySchedule?.isOpen) return { isOpen: false, message: "Closed Today" }
+  const dayKeys = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']
+  const todayKey = dayKeys[now.getDay()]
+  const schedStr = getScheduleForDay(business, todayKey)
+  if (!schedStr || schedStr.toLowerCase() === 'closed') return { isOpen: false, message: "Closed Today" }
 
-  const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0')
-  if (currentTime >= daySchedule.open && currentTime <= daySchedule.close) {
-    return { isOpen: true, message: `Open until ${formatTime(daySchedule.close)}` }
-  }
-  return { isOpen: false, message: currentTime < daySchedule.open ? `Opens at ${formatTime(daySchedule.open)}` : "Closed" }
+  const parts = schedStr.split('-').map((s: string) => s.trim())
+  if (parts.length < 2) return { isOpen: true, message: schedStr }
+
+  const openMin = parseTimeToMinutes(parts[0])
+  const closeMin = parseTimeToMinutes(parts[1])
+  const nowMin = now.getHours() * 60 + now.getMinutes()
+  if (openMin < 0 || closeMin < 0) return { isOpen: true, message: schedStr }
+  if (nowMin >= openMin && nowMin <= closeMin) return { isOpen: true, message: `Open · Closes at ${parts[1]}` }
+  if (nowMin < openMin) return { isOpen: false, message: `Closed · Opens at ${parts[0]}` }
+  return { isOpen: false, message: 'Closed' }
 }
 
-export function ProfileContent({ business }: { business: any }) {
+export function ProfileContent({
+  businessId,
+  initialBusiness,
+}: {
+  businessId: string
+  initialBusiness: any
+}) {
+  const { data: business = initialBusiness } = useBusinessById(businessId, { initialData: initialBusiness })
   if (!business) return null
 
-  const weekday = business.weekdaySchedule as any
-  const weekend = business.weekendSchedule as any
-  
-  const scheduleDays = [
-    { name: 'Monday', ...weekday?.monday },
-    { name: 'Tuesday', ...weekday?.tuesday },
-    { name: 'Wednesday', ...weekday?.wednesday },
-    { name: 'Thursday', ...weekday?.thursday },
-    { name: 'Friday', ...weekday?.friday },
-    { name: 'Saturday', ...weekend?.saturday },
-    { name: 'Sunday', ...weekend?.sunday },
-  ]
+  const resolvedId = business.id ?? (business as any).bizId?.toString() ?? businessId
+  const displayName = business.name ?? (business as any).businessName ?? "Business"
+  const displayPhone = business.phone ?? (business as any).phoneNumber
+
+  const weekday = business.schedule?.weekday || business.weekdaySchedule as any
+  const weekend = business.schedule?.weekend || business.weekendSchedule as any
+
 
   const liveStatus = getCurrentStatus(business)
 
+  const todayIndex = new Date().getDay()
+
+  const scheduleDays = DAY_KEYS.map(dayKey => {
+  const schedStr = getScheduleForDay(business, dayKey)
+  const isClosed = !schedStr || schedStr.toLowerCase() === 'closed'
+    return {
+      name: DAY_LABELS[dayKey],
+      dayKey,
+      schedStr: schedStr || 'Closed',
+      isClosed
+    }
+  })
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header with back button */}
@@ -130,7 +132,7 @@ export function ProfileContent({ business }: { business: any }) {
             asChild
             className="flex items-center gap-2"
           >
-            <Link href={`/dashboard?businessId=${business.id}`}>
+            <Link href={`/dashboard?businessId=${resolvedId}`}>
                 <ArrowLeft className="h-4 w-4" />
                 Back to Dashboard
             </Link>
@@ -141,7 +143,7 @@ export function ProfileContent({ business }: { business: any }) {
                Live Editing Mode
             </Badge>
             <Button size="sm" variant="outline" className="gap-2" asChild>
-              <a href={`/window/${business.id}`} target="_blank">
+              <a href={`/window/${resolvedId}`} target="_blank">
                 <ExternalLink className="h-4 w-4" />
                 View Public Window
               </a>
@@ -182,7 +184,7 @@ export function ProfileContent({ business }: { business: any }) {
                       {liveStatus.message}
                     </Badge>
                   </div>
-                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{business.name}</h1>
+                  <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{displayName}</h1>
                   <p className="text-blue-100 italic">{(business as any).tagline || "Providing quality " + ((business as any).category?.offeringEntity?.offeringName || "services") + " to the community."}</p>
                 </div>
               </div>
@@ -281,7 +283,7 @@ export function ProfileContent({ business }: { business: any }) {
                   <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
                     <Phone className="h-4 w-4" />
                   </div>
-                  <span>{business.phone}</span>
+                  <span>{displayPhone}</span>
                 </div>
                 <div className="flex items-center gap-3 text-gray-700">
                   <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
@@ -340,10 +342,12 @@ export function ProfileContent({ business }: { business: any }) {
               <CardContent className="pt-5 px-0">
                 <div className="px-6 space-y-2.5">
                   {scheduleDays.map((day) => (
-                    <div key={day.name} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">{day.name}</span>
-                      <span className={`font-medium ${day.isOpen ? 'text-gray-900' : 'text-red-500'}`}>
-                        {day.isOpen ? `${formatTime(day.open)} - ${formatTime(day.close)}` : 'Closed'}
+                    <div key={day.name} className={`flex justify-between items-center text-sm ${DAY_KEY_TO_INDEX[day.dayKey] === todayIndex ? 'font-semibold' : ''}`}>
+                      <span className={DAY_KEY_TO_INDEX[day.dayKey] === todayIndex ? 'text-blue-600' : 'text-gray-500'}>
+                        {day.name}{DAY_KEY_TO_INDEX[day.dayKey] === todayIndex && ' ·'}
+                      </span>
+                      <span className={day.isClosed ? 'text-red-500 font-medium' : 'text-gray-900'}>
+                        {day.isClosed ? 'Closed' : day.schedStr}
                       </span>
                     </div>
                   ))}
