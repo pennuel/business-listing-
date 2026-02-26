@@ -13,10 +13,11 @@ import { useUserSync } from '@/lib/hooks/useUserSync';
 
 interface DashboardClientProps {
   userId: string;
+  initialBusinesses: any[];
   children: React.ReactNode;
 }
 
-export function DashboardClient({ userId, children }: DashboardClientProps) {
+export function DashboardClient({ userId, initialBusinesses, children }: DashboardClientProps) {
 
   const {data: session} = useSession();
 
@@ -25,17 +26,20 @@ export function DashboardClient({ userId, children }: DashboardClientProps) {
   console.log('DashboardClient mounted, userId:', userId);
   
   
-  // Fetch businesses with TanStack Query caching
-  const { data: businesses = [], isLoading, error } = useUserBusinesses(userId);
+  // Fetch businesses with TanStack Query - uses initialData for instant render
+  // Then refetches in background to catch real-time updates from other users
+  const { data, isLoading, error } = useUserBusinesses(userId, { 
+    initialData: initialBusinesses 
+  });
 
   if (error) {
     console.error('Failed to load businesses:', error);
   }
                                                  
 
-  console.log('DashboardClient - businesses:', businesses);
+  console.log('DashboardClient - businesses:', data);
 
-  const businessesList = ((businesses as any) || []).map((b: any) => {
+  const businessesList = (Array.isArray(data) ? data : []).map((b: any) => {
     const normalized = normalizeBusiness(b);
     return {
       id: normalized.id,

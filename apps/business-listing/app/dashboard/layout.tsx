@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { getBusinessesByUserIdAction } from "@/app/actions/business"
 import { DashboardClient } from "./dashboard-client"
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -11,9 +12,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login")
   }
 
-  // Pass to client component - user data is already synced on login via auth callback
+  const userId = session.user.id as string
+
+  // Prefetch businesses on server for faster initial render
+  const result = await getBusinessesByUserIdAction(userId)
+  const initialBusinesses = result.success ? result.businesses || [] : []
+
   return (
-    <DashboardClient userId={session.user.id as string} >
+    <DashboardClient 
+      userId={userId}
+      initialBusinesses={initialBusinesses}
+    >
       {children}
     </DashboardClient>
   )

@@ -1,60 +1,45 @@
 "use client"
 
-import { useEffect } from "react"
-import { useUserBusinesses, useBusinessById } from "@/lib/hooks/useBusinesses"
+import { useEffect, useState } from "react"
 import { DashboardContent } from "@/components/dashboard/dashboard-content"
 import { Button } from "@/components/ui/button"
+import { BusinessInfo } from "@think-id/types"
 import { PlusCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 export function DashboardPageClient({ 
-  userId, 
-  businessId 
+  userId,
+  businesses,
+  selectedBusiness,
+  businessId
 }: { 
   userId: string;
+  businesses: BusinessInfo[];
+  selectedBusiness?: BusinessInfo | null;
   businessId?: string;
 }) {
   const router = useRouter()
-  console.log("DashboardPageClient - userId:", userId, "businessId:", businessId)
-  
-  // Fetch all user businesses
-  const { data, isLoading: isLoadingBusinesses } = useUserBusinesses(userId)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-  // Fetch specific business if businessId is provided
-  const { data: selectedBusiness, isLoading: isLoadingBusiness } = useBusinessById(businessId)
+  console.log("💻 DashboardPageClient mounted, userId:", userId)
+  console.log("💻 DashboardPageClient - businesses:", businesses)
+  console.log("💻 DashboardPageClient - selectedBusiness:", selectedBusiness)
+  console.log("💻 DashboardPageClient - businessId:", businessId)
 
-  // Redirect if no businessId but businesses exist
+  // Auto-redirect to first business if none selected
   useEffect(() => {
-    if (!businessId && data && data.length > 0) {
-      const firstBiz = data[0]
-      const id = firstBiz.bizId || (firstBiz as any).id
-      if (id) {
-        router.replace(`/dashboard?businessId=${id}`)
+    if (!businessId && businesses && businesses.length > 0) {
+      const firstId = businesses[0].bizId || (businesses[0] as any).id
+      if (firstId) {
+        setIsTransitioning(true)
+        router.push(`/dashboard?businessId=${firstId}`)
       }
     }
-  }, [businessId, data, router])
-
-  console.log("Businesses-Dashboard-Client:", data)
-
-  if (isLoadingBusinesses) {
-    return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (isLoadingBusinesses || (businessId && isLoadingBusiness)) {
-    return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
+  }, [businessId, businesses, router])
 
   // No businesses at all
-  if (!data || data.length === 0) {
+  if (!businesses || businesses.length === 0) {
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center space-y-4">
         <div className="text-center space-y-2">
@@ -71,21 +56,38 @@ export function DashboardPageClient({
     )
   }
 
-  const businessToRender = businessId ? selectedBusiness : null;
-
-  console.log("Selected Business:", businessToRender)
-
-  if (businessId && !businessToRender && !isLoadingBusiness) {
-     return (
-        <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center space-y-4">
-            <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Business Not Found</h2>
-            </div>
-        </div>
-     )
+  // Transitioning between businesses
+  if (isTransitioning) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
-  if (!businessToRender) return null;
+  // Business requested but not found
+  if (businessId && !selectedBusiness) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center space-y-4">
+        <div className="text-center space-y-2">
+          <h2 className="text-2xl font-bold">Business Not Found</h2>
+          <p className="text-muted-foreground">The business you're looking for doesn't exist or you don't have access to it.</p>
+        </div>
+        <Button asChild>
+          <Link href="/dashboard">Back to Dashboard</Link>
+        </Button>
+      </div>
+    )
+  }
 
-  return <DashboardContent business={businessToRender} />
+  if (!selectedBusiness) return null;
+
+  // Render the selected business dashboard
+  return (
+    <div className="min-h-screen bg-muted/30 py-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <DashboardContent business={selectedBusiness} />
+      </div>
+    </div>
+  )
 }
