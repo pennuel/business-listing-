@@ -1,106 +1,33 @@
 "use client"
 
-
 import { StoreStatusToggle } from "@/components/dashboard/store-status-toggle"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { 
-  Phone, MapPin, MousePointerClick, MessageSquare, Plus, Upload, 
+  Phone, MapPin, MousePointerClick, Plus, Upload, 
   Globe, Mail, Clock, ExternalLink, Edit 
 } from "lucide-react"
 import Link from "next/link"
-
-function formatTime(time: string) {
-  if (!time || typeof time !== 'string' || !time.includes(":")) return time
-  const [hours, minutes] = time.split(":")
-  const hour = parseInt(hours)
-  const ampm = hour >= 12 ? "PM" : "AM"
-  const displayHour = hour % 12 || 12
-  return `${displayHour}:${minutes} ${ampm}`
-}
-
-function formatSchedule(business: any) {
-  const weekday = business.weekdaySchedule as any
-  const weekend = business.weekendSchedule as any
-  
-  // Handle string-based fallback
-  if (typeof weekday === 'string') {
-    return (
-        <div className="space-y-1">
-            <div className="flex justify-between text-sm">
-                <span className="font-medium">Mon - Fri</span>
-                <span className="text-muted-foreground">{weekday}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-                <span className="font-medium">Sat - Sun</span>
-                <span className="text-muted-foreground">{typeof weekend === 'string' ? weekend : 'Closed'}</span>
-            </div>
-        </div>
-    )
-  }
-
-  const days = [
-    { name: 'Mon', ...weekday?.monday },
-    { name: 'Tue', ...weekday?.tuesday },
-    { name: 'Wed', ...weekday?.wednesday },
-    { name: 'Thu', ...weekday?.thursday },
-    { name: 'Fri', ...weekday?.friday },
-    { name: 'Sat', ...weekend?.saturday },
-    { name: 'Sun', ...weekend?.sunday },
-  ]
-
-  return (
-    <div className="space-y-2">
-      {days.map((day) => (
-        <div key={day.name} className="flex justify-between items-center text-sm">
-          <span className="font-medium">{day.name}</span>
-          <span className="text-muted-foreground">
-            {day.isOpen ? `${formatTime(day.open)} - ${formatTime(day.close)}` : 'Closed'}
-          </span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function getLiveStatus(business: any) {
-  try {
-    if (business.isManuallyOpen === true) return { isOpen: true, message: "Open Now (Owner set)" }
-    if (business.isManuallyOpen === false) return { isOpen: false, message: "Closed (Owner set)" }
-
-    const now = new Date()
-    const day = now.toString().toLowerCase().substring(0, 3) 
-    const dayMap: { [key: string]: string } = {
-      sun: "sunday", mon: "monday", tue: "tuesday", wed: "wednesday", thu: "thursday", fri: "friday", sat: "saturday",
-    }
-    const fullDay = dayMap[day]
-    
-    const weekday = business.weekdaySchedule as any
-    const weekend = business.weekendSchedule as any
-    const daySchedule = (weekday?.[fullDay] || weekend?.[fullDay])
-    
-    if (!daySchedule || !daySchedule.isOpen) return { isOpen: false, message: "Closed today" }
-
-    const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0')
-    const open = daySchedule.open
-    const close = daySchedule.close
-
-    if (currentTime >= open && currentTime <= close) {
-      return { isOpen: true, message: `Open until ${formatTime(close)}` }
-    }
-    if (currentTime < open) {
-      return { isOpen: false, message: `Opens at ${formatTime(open)}` }
-    }
-    return { isOpen: false, message: "Closed for the day" }
-  } catch (err) {
-    return { isOpen: false, message: "Hours not available" }
-  }
-}
+import { OpeningHours, getCurrentStatus } from "@/components/business/opening-hours"
+import { BusinessServices } from "@/components/business/business-services"
+import { BusinessAmenities } from "@/components/business/business-amenities"
 
 export function DashboardContent({ business }: { business: any }) {
-   if (!business) return null
+
+   
+   if (!business) {
+     console.error("DashboardContent - business is null/undefined!")
+     return (
+       <div className="p-8 text-center">
+         <h2 className="text-2xl font-bold text-red-600">No Business Data</h2>
+         <p className="text-muted-foreground mt-2">The business data could not be loaded.</p>
+       </div>
+     )
+   }
+
+
 
   // Calculate generic stats
   const analytics = (business as any).analytics || []
@@ -109,9 +36,10 @@ export function DashboardContent({ business }: { business: any }) {
   const totalDirections = analytics.reduce((acc: any, curr: any) => acc + curr.directions, 0)
   const totalClicks = analytics.reduce((acc: any, curr: any) => acc + curr.websiteClicks, 0)
 
-  const scheduleStatus = getLiveStatus(business)
-  const services = (business as any).services || []
-  const reviews = (business as any).reviews || []
+  const scheduleStatus = getCurrentStatus(business)
+  const services  = (business as any).services  ?? []
+  const amenities = (business as any).amenities ?? []
+  const reviews   = (business as any).reviews   ?? []
 
   return (
     <div className="flex flex-col gap-6">
@@ -361,7 +289,7 @@ export function DashboardContent({ business }: { business: any }) {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {formatSchedule(business)}
+              <OpeningHours business={business} />
             </CardContent>
           </Card>
         </div>
@@ -381,29 +309,25 @@ export function DashboardContent({ business }: { business: any }) {
                  </Button>
               </CardHeader>
               <CardContent>
-                 <div className="space-y-4">
-                    {services.length > 0 ? (
-                       <div className="grid gap-3">
-                          {services.slice(0, 3).map((service: any) => (
-                             <div key={service.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
-                                <div>
-                                   <div className="font-medium text-sm">{service.name}</div>
-                                   <div className="text-[10px] text-muted-foreground uppercase">{service.duration} mins</div>
-                                </div>
-                                <div className="text-sm font-bold">
-                                   {service.currency} {Number(service.price).toLocaleString()}
-                                </div>
-                             </div>
-                          ))}
-                       </div>
-                    ) : (
-                       <div className="rounded-md border border-dashed p-8 text-center text-muted-foreground text-sm">
-                          No items listed yet.
-                       </div>
-                    )}
-                 </div>
+                <BusinessServices
+                  services={services}
+                  variant="shelf"
+                  limit={3}
+                  emptyMessage="No items listed yet."
+                />
               </CardContent>
            </Card>
+
+           {amenities.length > 0 && (
+             <Card>
+               <CardHeader className="pb-2">
+                 <CardTitle className="text-sm font-bold text-muted-foreground uppercase tracking-wide">Amenities</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <BusinessAmenities amenities={amenities} variant="list" />
+               </CardContent>
+             </Card>
+           )}
 
            <Card>
               <CardHeader>
