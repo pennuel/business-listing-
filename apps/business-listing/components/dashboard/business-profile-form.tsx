@@ -1,18 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form"
+  Field,
+  FieldTitle,
+  FieldError,
+  FieldDescription,
+  FieldGroup,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -45,6 +43,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
   const [galleryInput, setGalleryInput] = useState("")
 
   const form = useForm<z.infer<typeof profileSchema>>({
+    // @ts-ignore
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: business.name || "",
@@ -53,7 +52,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
       phone: business.phone || "",
       email: business.email || "",
       website: business.website || "",
-      category: business.category || "",
+      category: typeof business.category === 'object' ? business.category?.categoryName || "" : business.category || "",
       coverImage: business.coverImage || "",
       amenities: Array.isArray(business.amenities) ? business.amenities : [],
       gallery: Array.isArray(business.gallery) ? business.gallery : [],
@@ -100,9 +99,10 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
     }
   }
 
+  const { control, handleSubmit, watch, setValue, getValues, formState: { errors } } = form
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-2 space-y-6">
             {/* Core Branding */}
@@ -114,50 +114,24 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                 <CardDescription>How your business identifies itself in the mall.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control= {form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="The Coffee Nook" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tagline"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tagline / Catchphrase</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Brewing happiness, one cup at a time." {...field} />
-                      </FormControl>
-                      <FormDescription>A short phrase that appears under your name.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Story & Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Tell your customers about what makes your business special..." 
-                          className="min-h-[150px]" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FieldGroup>
+                  <Field>
+                    <FieldTitle>Business Name</FieldTitle>
+                    <Controller control={control} name="name" render={({ field }) => <Input placeholder="The Coffee Nook" {...field} />} />
+                    <FieldError errors={[errors.name]} />
+                  </Field>
+                  <Field>
+                    <FieldTitle>Tagline / Catchphrase</FieldTitle>
+                    <Controller control={control} name="tagline" render={({ field }) => <Input placeholder="Brewing happiness, one cup at a time." {...field} />} />
+                    <FieldDescription>A short phrase that appears under your name.</FieldDescription>
+                    <FieldError errors={[errors.tagline]} />
+                  </Field>
+                  <Field>
+                    <FieldTitle>Story & Description</FieldTitle>
+                    <Controller control={control} name="description" render={({ field }) => <Textarea placeholder="Tell your customers about what makes your business special..." className="min-h-[150px]" {...field} />} />
+                    <FieldError errors={[errors.description]} />
+                  </Field>
+                </FieldGroup>
               </CardContent>
             </Card>
 
@@ -170,24 +144,16 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                 <CardDescription>The "Mannequin" — visual appeal of your storefront.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="coverImage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cover Image URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://example.com/storefront.jpg" {...field} />
-                      </FormControl>
-                      <FormDescription>The main hero image for your window display.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {form.watch("coverImage") && (
+                <Field>
+                  <FieldTitle>Cover Image URL</FieldTitle>
+                  <Controller control={control} name="coverImage" render={({ field }) => <Input placeholder="https://example.com/storefront.jpg" {...field} />} />
+                  <FieldDescription>The main hero image for your window display.</FieldDescription>
+                  <FieldError errors={[errors.coverImage]} />
+                </Field>
+                {watch("coverImage") && (
                   <div className="relative aspect-video rounded-lg overflow-hidden border">
                     <img 
-                      src={form.watch("coverImage")} 
+                      src={watch("coverImage")} 
                       alt="Preview" 
                       className="object-cover w-full h-full"
                     />
@@ -221,7 +187,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-                  {form.watch("gallery").map((url, index) => (
+                  {watch("gallery").map((url, index) => (
                     <div key={index} className="relative aspect-square group rounded-lg overflow-hidden border">
                       <img src={url} alt={`Gallery ${index}`} className="object-cover w-full h-full" />
                       <button
@@ -233,7 +199,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                       </button>
                     </div>
                   ))}
-                  {form.watch("gallery").length === 0 && (
+                  {watch("gallery").length === 0 && (
                     <div className="col-span-full py-8 text-center border-2 border-dashed rounded-lg text-muted-foreground bg-muted/30">
                       No gallery images added yet.
                     </div>
@@ -266,7 +232,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                   <Button type="button" onClick={addAmenity}>Add</Button>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
-                  {form.watch("amenities").map((amenity, index) => (
+                  {watch("amenities").map((amenity, index) => (
                     <div 
                       key={index} 
                       className="bg-secondary text-secondary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-2"
@@ -281,7 +247,7 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                       </button>
                     </div>
                   ))}
-                  {form.watch("amenities").length === 0 && (
+                  {watch("amenities").length === 0 && (
                     <p className="text-sm text-muted-foreground italic">No amenities added yet.</p>
                   )}
                 </div>
@@ -299,58 +265,28 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
                 <CardDescription>Essential contact info.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Public Email</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Website</FormLabel>
-                      <FormControl>
-                        <Input placeholder="https://..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Business Category</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FieldGroup>
+                  <Field>
+                    <FieldTitle>Phone Number</FieldTitle>
+                    <Controller control={control} name="phone" render={({ field }) => <Input {...field} />} />
+                    <FieldError errors={[errors.phone]} />
+                  </Field>
+                  <Field>
+                    <FieldTitle>Public Email</FieldTitle>
+                    <Controller control={control} name="email" render={({ field }) => <Input {...field} />} />
+                    <FieldError errors={[errors.email]} />
+                  </Field>
+                  <Field>
+                    <FieldTitle>Website</FieldTitle>
+                    <Controller control={control} name="website" render={({ field }) => <Input placeholder="https://..." {...field} />} />
+                    <FieldError errors={[errors.website]} />
+                  </Field>
+                  <Field>
+                    <FieldTitle>Business Category</FieldTitle>
+                    <Controller control={control} name="category" render={({ field }) => <Input {...field} />} />
+                    <FieldError errors={[errors.category]} />
+                  </Field>
+                </FieldGroup>
               </CardContent>
             </Card>
 
@@ -369,6 +305,5 @@ export function BusinessProfileForm({ business }: BusinessProfileFormProps) {
           </div>
         </div>
       </form>
-    </Form>
   )
 }
