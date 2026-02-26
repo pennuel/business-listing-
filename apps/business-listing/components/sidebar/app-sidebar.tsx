@@ -32,7 +32,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BusinessSwitcher } from "@/components/dashboard/business-switcher"
 // Note: Redux removed from sidebar; prefer passing `user` and `businesses` via props
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   businesses?: {
@@ -112,10 +112,10 @@ export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: pro
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="border-b">
         <SidebarMenu>
-          <SidebarMenuItem>
-            <BusinessSwitcher
-              businesses={propsBusinesses}
-              currentBusinessId={businessId}
+          <SidebarMenuItem className="h-auto">
+            <BusinessSwitcher 
+              businesses={propsBusinesses} 
+              currentBusinessId={businessId} 
               className="h-9"
             />
           </SidebarMenuItem>
@@ -184,7 +184,10 @@ export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: pro
                     Account Settings
                   </a>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-red-500">
+                <DropdownMenuItem
+                  className="text-red-500 cursor-pointer"
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out
                 </DropdownMenuItem>
