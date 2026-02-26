@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import {
@@ -14,13 +14,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
+  Field,
+  FieldTitle,
+  FieldError,
+  FieldGroup,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -65,6 +63,8 @@ export function EditContactDialog({ business, trigger }: EditContactDialogProps)
     }
   }
 
+  const { control, handleSubmit, formState: { errors } } = form
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -79,61 +79,52 @@ export function EditContactDialog({ business, trigger }: EditContactDialogProps)
           <DialogTitle>Update Contact Details</DialogTitle>
           <DialogDescription>Let customers know how to reach you.</DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Phone className="h-3 w-3" /> Phone Number
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Mail className="h-3 w-3" /> Public Email
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <Globe className="h-3 w-3" /> Website
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <DialogFooter>
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Contact Info
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FieldGroup>
+            <Field>
+              <FieldTitle className="flex items-center gap-2">
+                <Phone className="h-3 w-3" /> Phone Number
+              </FieldTitle>
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field }) => <Input {...field} />}
+              />
+              <FieldError errors={[errors.phone]} />
+            </Field>
+
+            <Field>
+              <FieldTitle className="flex items-center gap-2">
+                <Mail className="h-3 w-3" /> Public Email
+              </FieldTitle>
+              <Controller
+                control={control}
+                name="email"
+                render={({ field }) => <Input {...field} />}
+              />
+              <FieldError errors={[errors.email]} />
+            </Field>
+
+            <Field>
+              <FieldTitle className="flex items-center gap-2">
+                <Globe className="h-3 w-3" /> Website
+              </FieldTitle>
+              <Controller
+                control={control}
+                name="website"
+                render={({ field }) => <Input placeholder="https://..." {...field} />}
+              />
+              <FieldError errors={[errors.website]} />
+            </Field>
+          </FieldGroup>
+
+          <DialogFooter>
+            <Button type="submit" disabled={isLoading} className="w-full">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Contact Info
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
