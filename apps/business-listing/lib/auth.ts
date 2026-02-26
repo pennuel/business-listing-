@@ -26,13 +26,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, profile }) {
-      if (user) {
-        token= profile as any
+      // First sign-in: capture the FusionAuth user ID from profile
+      if (user && profile) {
+        // FusionAuth sets the user ID in the 'sub' claim
+        token.sub = (profile as any)?.sub || token.sub
+        // Store additional profile data if needed
+        token.email = (user as any)?.email || (profile as any)?.email
       }
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
+        // Use token.sub which contains the FusionAuth user ID
         session.user.id = token.sub as string
 
         // console.log("Session callback - session.user:", session.user)
