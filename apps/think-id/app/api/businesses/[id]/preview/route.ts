@@ -1,17 +1,20 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { database } from "@think-id/database"
+import { type NextRequest, NextResponse } from "next/server";
+import { businessService } from "@think-id/database";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const { id } = params;
 
   try {
-    const business = await database.businesses.getBusinessById(id)
+    const business = await businessService.getBusinessById(id);
 
     if (!business) {
-      return NextResponse.json({ error: "Business not found" }, { status: 404 })
+      return NextResponse.json(
+        { error: "Business not found" },
+        { status: 404 },
+      );
     }
 
     // Normalize schedule for front-end consumption if needed
@@ -23,11 +26,14 @@ export async function GET(
       // Ensure other fields are present even if null in DB
       description: business.description || "",
       website: business.website || "",
-    }
+    };
 
-    return NextResponse.json({ business: normalized })
+    return NextResponse.json({ business: normalized });
   } catch (err) {
-    console.error("Error fetching business preview:", err)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    console.error("Error fetching business preview:", err);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 }
