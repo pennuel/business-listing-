@@ -19,13 +19,15 @@ import {
   Phone,
   MapPin,
   Calendar,
-  Briefcase,
-  GraduationCap,
-  Award,
   ArrowLeft,
   LayoutDashboard,
+  Loader2,
+  User2,
+  AtSign,
+  ShieldCheck,
 } from "lucide-react";
-
+import { useSession } from "next-auth/react";
+import { useUserQuery } from "@/hooks/useUserQuery";
 import { useUserStore } from "@/stores/userStore";
 
 interface ProfilePageProps {
@@ -33,15 +35,49 @@ interface ProfilePageProps {
   onBack: () => void;
 }
 
-export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
-  // fetch the user profile data from an API or state management
-  const { user } = useUserStore();
+function getInitials(firstName?: string | null, lastName?: string | null, email?: string | null) {
+  const f = firstName?.charAt(0) ?? "";
+  const l = lastName?.charAt(0) ?? "";
+  return (f + l).toUpperCase() || email?.charAt(0)?.toUpperCase() || "U";
+}
 
-  console.log("User Profile Data:", user);
+export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
+  const { data: session } = useSession();
+  const userId = (session?.user as any)?.id as string | undefined;
+
+  // Live data from FusionAuth via TanStack Query
+  const { data: apiUser, isLoading } = useUserQuery(userId);
+
+  // Zustand store as fallback while query resolves
+  const { user: storeUser } = useUserStore();
+
+  // Prefer fresh API data; fall back to Zustand-cached user; then session
+  const user = apiUser ?? storeUser;
+
+  // Safe accessors for optional FusionAuth user.data custom fields
+  const professionTitle = user?.data?.profession?.title;
+  const role = user?.data?.role;
+  const bio = user?.data?.bio;
+  const town = user?.data?.location?.town;
+  const website = user?.data?.website;
+  const linkedin = user?.data?.LinkedIn;
+  const twitter = user?.data?.twitter;
+  const github = user?.data?.github;
+
+  if (isLoading && !user) {
+    return (
+      <div className="flex flex-1 items-center justify-center min-h-[40vh]">
+        <div className="flex flex-col items-center gap-3 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-sm">Loading profile…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-2 sm:p-4 pt-0">
-      {/* Back Navigation - Top Level */}
+      {/* Back Navigation */}
       <div className="flex items-center gap-2 mb-4">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -52,50 +88,43 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
       {/* Profile Header */}
       <Card>
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          <Avatar className="h-24 w-24" style={{ border: "2px solid #e5e7eb",  }}>
+          <Avatar className="h-24 w-24" style={{ border: "2px solid #e5e7eb" }}>
             <AvatarImage
-              src="/logos/THiNK_Logo_Updated-02(icon).jpg"
+              src={user?.imageUrl || "/logos/THiNK_Logo_Updated-02(icon).jpg"}
               alt="Profile"
             />
             <AvatarFallback className="text-2xl">
-              {user ? `${user.firstName[0]}${user.lastName[0]}` : "U"}
+              {getInitials(user?.firstName, user?.lastName, user?.email)}
             </AvatarFallback>
           </Avatar>
+
           <div className="flex-1 w-full">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
               <h1 className="text-2xl sm:text-3xl font-bold">
-                {user ? `${user.firstName} ${user.lastName}` : "Loading..."}
+                {user
+                  ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.username || "User"
+                  : "Loading…"}
               </h1>
-
-              <Button
-                size="sm"
-                onClick={() => onEditProfile()}
-                className="w-full sm:w-auto"
-              >
+              <Button size="sm" onClick={onEditProfile} className="w-full sm:w-auto">
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onBack()}
-                className="w-full sm:w-auto"
-              >
+              <Button size="sm" variant="outline" onClick={onBack} className="w-full sm:w-auto">
                 <LayoutDashboard className="h-4 w-4 mr-2" />
                 Go to Dashboard
               </Button>
             </div>
-            <p className="text-lg text-muted-foreground mb-3">
-              {user ? user.data.profession.title : ""}
-            </p>
+
+            {professionTitle && (
+              <p className="text-lg text-muted-foreground mb-3">{professionTitle}</p>
+            )}
+
             <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">
-                {user ? user.data.role : "User"}
-              </Badge>
+              <Badge variant="secondary">{role ?? "Member"}</Badge>
               <Badge variant="outline">
-                {user && user.verified ? "Verified" : "Not verified"}
+                <ShieldCheck className="h-3 w-3 mr-1" />
+                {user?.verified ? "Verified" : "Not verified"}
               </Badge>
-              {/* <Badge variant="outline">5 Years Experience</Badge> */}
             </div>
           </div>
         </CardHeader>
@@ -111,52 +140,49 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" value={user?.firstName} readOnly />
+                <Label htmlFor="firstName" className="flex items-center gap-1.5">
+                  <User2 className="h-3.5 w-3.5 text-muted-foreground" /> First Name
+                </Label>
+                <Input id="firstName" value={user?.firstName ?? ""} readOnly />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" value={user?.lastName} readOnly />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                value={user?.data.bio || ""}
-                readOnly
-                rows={3}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="location"
-                  value={user?.data.location.town}
-                  readOnly
-                />
+                <Label htmlFor="lastName" className="flex items-center gap-1.5">
+                  <User2 className="h-3.5 w-3.5 text-muted-foreground" /> Last Name
+                </Label>
+                <Input id="lastName" value={user?.lastName ?? ""} readOnly />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dob">Date of Birth</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <Input id="dob" value={user?.birthDate} readOnly />
-              </div>
+              <Label htmlFor="username" className="flex items-center gap-1.5">
+                <AtSign className="h-3.5 w-3.5 text-muted-foreground" /> Username
+              </Label>
+              <Input id="username" value={user?.username ?? ""} readOnly />
             </div>
-            {/* <div className="space-y-2">
-              <Label htmlFor="preferredLanguages">Preferred Languages</Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="preferredLanguages"
-                  value={user?.preferredLanguages}
-                  readOnly
-                />
+
+            {bio !== undefined && (
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea id="bio" value={bio || ""} readOnly rows={3} />
               </div>
-            </div> */}
+            )}
+
+            {town !== undefined && (
+              <div className="space-y-2">
+                <Label htmlFor="location">Location</Label>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <Input id="location" value={town || ""} readOnly />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="dob" className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" /> Date of Birth
+              </Label>
+              <Input id="dob" value={user?.birthDate ?? ""} readOnly />
+            </div>
           </CardContent>
         </Card>
 
@@ -171,165 +197,48 @@ export function ProfilePage({ onEditProfile, onBack }: ProfilePageProps) {
               <Label htmlFor="email">Email Address</Label>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                <Input id="email" value={user?.email} readOnly />
+                <Input id="email" value={user?.email ?? ""} readOnly />
               </div>
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
-                <Input id="phone" value={user?.mobilePhone} readOnly />
+                <Input id="phone" value={user?.mobilePhone ?? ""} readOnly />
               </div>
             </div>
 
-            {user?.data.website && (
+            {website && (
               <div className="space-y-2">
                 <Label htmlFor="website">Website</Label>
-                <Input id="website" value={user?.data.website} readOnly />
+                <Input id="website" value={website} readOnly />
               </div>
             )}
-            {user?.data.LinkedIn && (
+
+            {linkedin && (
               <div className="space-y-2">
                 <Label htmlFor="linkedin">LinkedIn</Label>
-                <Input id="linkedin" value={user?.data.LinkedIn} readOnly />
+                <Input id="linkedin" value={linkedin} readOnly />
               </div>
             )}
 
-            {user?.data.twitter && (
+            {twitter && (
               <div className="space-y-2">
-                <Label htmlFor="twitter">Twitter</Label>
-                <Input id="twitter" value={user?.data.twitter} readOnly />
+                <Label htmlFor="twitter">Twitter / X</Label>
+                <Input id="twitter" value={twitter} readOnly />
               </div>
             )}
 
-            {user?.data.github && (
+            {github && (
               <div className="space-y-2">
-                <Label htmlFor="github">Github</Label>
-                <Input id="github" value={user?.data.github} readOnly />
+                <Label htmlFor="github">GitHub</Label>
+                <Input id="github" value={github} readOnly />
               </div>
             )}
           </CardContent>
         </Card>
-
-        {/* Professional Information */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Professional Information</CardTitle>
-            <CardDescription>Your work and career details</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center gap-3 p-3 border rounded-lg">
-              <Briefcase className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Senior Full Stack Developer</p>
-                <p className="text-sm text-muted-foreground">TechCorp Inc. • 2021 - Present</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 border rounded-lg">
-              <Briefcase className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Full Stack Developer</p>
-                <p className="text-sm text-muted-foreground">StartupXYZ • 2019 - 2021</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-3 border rounded-lg">
-              <GraduationCap className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Computer Science, B.S.</p>
-                <p className="text-sm text-muted-foreground">University of California • 2015 - 2019</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
-
-        {/* Skills & Achievements */}
-        {/* <Card>
-          <CardHeader>
-            <CardTitle>Skills & Achievements</CardTitle>
-            <CardDescription>Your expertise and accomplishments</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label className="text-sm font-medium">Technical Skills</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                <Badge variant="secondary">React</Badge>
-                <Badge variant="secondary">Node.js</Badge>
-                <Badge variant="secondary">TypeScript</Badge>
-                <Badge variant="secondary">Python</Badge>
-                <Badge variant="secondary">AWS</Badge>
-                <Badge variant="secondary">Docker</Badge>
-                <Badge variant="secondary">PostgreSQL</Badge>
-                <Badge variant="secondary">GraphQL</Badge>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Recent Achievements</Label>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Award className="h-5 w-5 text-yellow-500" />
-                <div>
-                  <p className="font-medium">Employee of the Month</p>
-                  <p className="text-sm text-muted-foreground">TechCorp Inc. • March 2024</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 border rounded-lg">
-                <Award className="h-5 w-5 text-blue-500" />
-                <div>
-                  <p className="font-medium">AWS Solutions Architect Certified</p>
-                  <p className="text-sm text-muted-foreground">Amazon Web Services • 2023</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
-
-      {/* Account Statistics */}
-      {/* <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Member Since</p>
-                <p className="font-semibold">January 2019</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Profile Views</p>
-                <p className="font-semibold">2,847</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Briefcase className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Projects</p>
-                <p className="font-semibold">23</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Achievements</p>
-                <p className="font-semibold">12</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div> */}
     </div>
   );
 }

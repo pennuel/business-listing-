@@ -1,5 +1,8 @@
-import { userRepository, type CreateUserData } from "../repositories/user.repository";
-import { User } from "@think-id/types";
+import {
+  userRepository,
+  type CreateUserData,
+} from "../repositories/user.repository";
+import { User, UpdateUserRequest } from "@think-id/types";
 
 export class UserService {
   async createUser(data: CreateUserData): Promise<User | null> {
@@ -10,7 +13,8 @@ export class UserService {
     const user = await userRepository.findById(id);
     return user;
   }
-  async syncUserWithDB(userId: string): Promise<User > {
+
+  async syncUserWithDB(userId: string): Promise<User> {
     return await userRepository.sync_with_db(userId);
   }
 
@@ -28,7 +32,7 @@ export class UserService {
     return await userRepository.findAll();
   }
 
-  async updateUser(id: string, data: any): Promise<User | null> {
+  async updateUser(id: string, data: UpdateUserRequest): Promise<User | null> {
     return await userRepository.update(id, data);
   }
 

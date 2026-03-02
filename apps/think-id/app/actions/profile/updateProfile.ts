@@ -1,76 +1,51 @@
 "use server";
 
-import { User } from "@/types/user";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { userService } from "@think-id/database";
+import type { UpdateUserRequest } from "@think-id/types";
 
+/**
+ * Updates the FusionAuth user profile via the Spring Boot API.
+ * Reads the user's ID from the active session so no ID needs to be passed in.
+ */
 export async function updateProfile(
-  formData: FormData
-): Promise<{ data?: User; error?: string }> {
+  formData: FormData,
+): Promise<{ success: boolean; error?: string }> {
   try {
-    // Get all form data and convert FormDataEntryValue to string
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as any)?.id;
+    if (!userId) {
+      return { success: false, error: "Not authenticated" };
+    }
+
     const getValue = (key: string) => {
       const value = formData.get(key);
-      return value ? String(value) : undefined;
+      return value ? String(value).trim() : undefined;
     };
 
-    // Construct user data with proper types
-    const data: Partial<User> = {
-      firstName: getValue("firstName") || "",
-      lastName: getValue("lastName") || "",
+    const data: UpdateUserRequest = {
+      firstName: getValue("firstName"),
+      lastName: getValue("lastName"),
       username: getValue("username"),
-      email: getValue("email"),
-      birthDate: getValue("birthDate"),
       mobilePhone: getValue("mobilePhone"),
-      imageUrl: getValue("imageUrl"), // Add image URL handling
-      data: {
-        profession: {
-          title: getValue("title") || "",
-        },
-        bio: getValue("bio") || "",
-        location: {
-          town: getValue("location") || "",
-        },
-        website: getValue("website"),
-        LinkedIn: getValue("linkedin"),
-        twitter: getValue("twitter"),
-        github: getValue("github"),
-      },
+      birthDate: getValue("birthDate"),
     };
 
-    console.log(' user data to update: ', data);
+    const updated = await userService.updateUser(userId, data);
 
-    // Here you would typically:
-    // 1. Validate the data
-    // 2. Make an API call to your backend
-    // 3. Update the database
-    // const response = await fetch('your-api-endpoint', {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data),
-    // });
-    // const result = await response.json();
+    if (!updated) {
+      return {
+        success: false,
+        error: "Failed to update profile — API returned no user",
+      };
+    }
 
-    // Mock the response by combining existing user data with updates
-    const updatedUser = {
-      // Add required User fields that shouldn't be updated
-      id: "1",
-      active: true,
-      connectorId: "default",
-      insertInstant: new Date().toISOString(),
-      lastLoginInstant: new Date().toISOString(),
-      lastUpdateInstant: new Date().toISOString(),
-      passwordLastUpdateInstant: new Date().toISOString(),
-      tenantId: "default",
-      twoFactorEnabled: false,
-      usernameStatus: "ACTIVE",
-      verified: true,
-      ...data, // Spread in the updates
-    } as User;
-
-    return {
-      data: updatedUser,
-    };
+    return { success: true };
   } catch (error) {
+    console.error("[updateProfile] Error:", error);
     return {
+      success: false,
       error:
         error instanceof Error ? error.message : "Failed to update profile",
     };

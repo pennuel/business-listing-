@@ -247,7 +247,6 @@ export interface User {
   languageId: number | null;
   ageGroup: string | null;
   businesses: BusinessInfo[];
-
 }
 
 export interface BusinessTypeRequest {
@@ -268,7 +267,7 @@ export interface SignUpRequest {
 }
 
 export interface AuthenticatorConfiguration {
-  algorithm?: 'HmacSHA1' | 'HmacSHA256' | 'HmacSHA512';
+  algorithm?: "HmacSHA1" | "HmacSHA256" | "HmacSHA512";
   codeLength?: number; // int32
   timeStep?: number; // int32
 }
@@ -288,6 +287,20 @@ export interface FusionApiResponseRegistrationResponse {
   status?: number; // int32
   message?: RegistrationResponse;
   error?: Errors;
+}
+
+export interface FusionApiResponseUserResponse {
+  status?: number; // int32
+  message?: { user?: User };
+  error?: Errors;
+}
+
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+  mobilePhone?: string;
+  username?: string;
+  birthDate?: string; // date (YYYY-MM-DD)
 }
 
 export interface LocalTime {
@@ -368,12 +381,31 @@ export interface UserRegistration {
         dateTimeBefore?: string; // date-time
       }>;
       transitionRules: Array<{
-        month?: 'JANUARY' | 'FEBRUARY' | 'MARCH' | 'APRIL' | 'MAY' | 'JUNE' | 'JULY' | 'AUGUST' | 'SEPTEMBER' | 'OCTOBER' | 'NOVEMBER' | 'DECEMBER';
-        timeDefinition?: 'UTC' | 'WALL' | 'STANDARD';
+        month?:
+          | "JANUARY"
+          | "FEBRUARY"
+          | "MARCH"
+          | "APRIL"
+          | "MAY"
+          | "JUNE"
+          | "JULY"
+          | "AUGUST"
+          | "SEPTEMBER"
+          | "OCTOBER"
+          | "NOVEMBER"
+          | "DECEMBER";
+        timeDefinition?: "UTC" | "WALL" | "STANDARD";
         standardOffset?: { totalSeconds?: number; id?: string };
         offsetBefore?: { totalSeconds?: number; id?: string };
         offsetAfter?: { totalSeconds?: number; id?: string };
-        dayOfWeek?: 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+        dayOfWeek?:
+          | "MONDAY"
+          | "TUESDAY"
+          | "WEDNESDAY"
+          | "THURSDAY"
+          | "FRIDAY"
+          | "SATURDAY"
+          | "SUNDAY";
         dayOfMonthIndicator?: number;
         localTime?: LocalTime;
         midnightEndOfDay?: boolean;
@@ -381,7 +413,7 @@ export interface UserRegistration {
     };
   };
   username?: string;
-  usernameStatus?: 'ACTIVE' | 'PENDING' | 'REJECTED';
+  usernameStatus?: "ACTIVE" | "PENDING" | "REJECTED";
   verified?: boolean;
 }
 
@@ -412,7 +444,11 @@ export interface LoginPreventedResponse {
 export interface LoginResponse {
   actions?: LoginPreventedResponse[];
   changePasswordId?: string;
-  changePasswordReason?: 'Administrative' | 'Breached' | 'Expired' | 'Validation';
+  changePasswordReason?:
+    | "Administrative"
+    | "Breached"
+    | "Expired"
+    | "Validation";
   configurableMethods?: string[];
   emailVerificationId?: string;
   methods?: TwoFactorMethod[];
@@ -421,7 +457,7 @@ export interface LoginResponse {
   refreshTokenId?: string; // uuid
   registrationVerificationId?: string;
   state?: Record<string, any>;
-  threatsDetected: Array<'ImpossibleTravel'>;
+  threatsDetected: Array<"ImpossibleTravel">;
   token?: string;
   tokenExpirationInstant?: string; // date-time
   trustToken?: string;
@@ -504,7 +540,23 @@ export interface IdentityProviderLink {
   displayName?: string;
   identityProviderId?: string; // uuid
   identityProviderName?: string;
-  identityProviderType?: 'Apple' | 'EpicGames' | 'ExternalJWT' | 'Facebook' | 'Google' | 'HYPR' | 'LinkedIn' | 'Nintendo' | 'OpenIDConnect' | 'SAMLv2' | 'SAMLv2IdPInitiated' | 'SonyPSN' | 'Steam' | 'Twitch' | 'Twitter' | 'Xbox';
+  identityProviderType?:
+    | "Apple"
+    | "EpicGames"
+    | "ExternalJWT"
+    | "Facebook"
+    | "Google"
+    | "HYPR"
+    | "LinkedIn"
+    | "Nintendo"
+    | "OpenIDConnect"
+    | "SAMLv2"
+    | "SAMLv2IdPInitiated"
+    | "SonyPSN"
+    | "Steam"
+    | "Twitch"
+    | "Twitter"
+    | "Xbox";
   identityProviderUserId?: string;
   insertInstant?: string; // date-time
   lastLoginInstant?: string; // date-time

@@ -1,7 +1,11 @@
 // User repository - adapted to use the Auth API instead of Prisma
 import { apiRequest } from "../api-client";
 import { authRepository } from "./auth.repository";
-import { User } from "@think-id/types";
+import {
+  User,
+  UpdateUserRequest,
+  FusionApiResponseUserResponse,
+} from "@think-id/types";
 
 export interface CreateUserData {
   id?: string;
@@ -24,7 +28,16 @@ export class UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    return null;
+    try {
+      const response = await apiRequest<FusionApiResponseUserResponse>(
+        `/api/auth/user/${id}`,
+        "GET",
+      );
+      return response.message?.user ?? null;
+    } catch (error) {
+      console.error("UserRepository.findById failed:", error);
+      return null;
+    }
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -53,8 +66,18 @@ export class UserRepository {
     return [];
   }
 
-  async update(id: string, data: any): Promise<User | null> {
-    return null;
+  async update(id: string, data: UpdateUserRequest): Promise<User | null> {
+    try {
+      const response = await apiRequest<FusionApiResponseUserResponse>(
+        `/api/auth/user/${id}`,
+        "PUT",
+        data,
+      );
+      return response.message?.user ?? null;
+    } catch (error) {
+      console.error("UserRepository.update failed:", error);
+      return null;
+    }
   }
 
   async delete(id: string): Promise<User | null> {
