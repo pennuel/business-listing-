@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { signInAction } from "@/app/actions/auth"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,10 +29,11 @@ export default function LoginPage() {
     setError("")
 
     try {
-      await signIn(provider, {
-        callbackUrl: "/dashboard",
-        redirect: true,
-      })
+      const result = await signInAction(provider, "/dashboard")
+      if (result?.error) {
+        setError(result.error)
+        setIsLoading(false)
+      }
     } catch (error) {
       console.error("OAuth login error:", error)
       setError("An error occurred. Please try again.")
