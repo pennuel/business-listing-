@@ -1,12 +1,11 @@
 "use server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { businessService, categoryService } from "@think-id/database";
 import type { BusinessData } from "./page";
 import { BusinessInfoRequest, BusinessInfo } from "@think-id/types";
 
 export async function submitBusinessData(
-  businessData: BusinessData & { userId?: string }
+  businessData: BusinessData & { userId?: string },
 ) {
   console.log("Starting business data submission...");
 
@@ -43,10 +42,9 @@ export async function submitBusinessData(
     return { success: false, error: "Address is required" };
   }
 
-
   try {
     // fetch the session to get user information
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     const payload: BusinessInfoRequest = {
       // Basic Information
@@ -77,13 +75,13 @@ export async function submitBusinessData(
           Object.entries(businessData.weekdaySchedule).map(([day, hrs]) => [
             day.charAt(0).toUpperCase() + day.slice(1),
             hrs.isOpen ? `${hrs.open} - ${hrs.close}` : "Closed",
-          ])
+          ]),
         ),
         weekend: Object.fromEntries(
           Object.entries(businessData.weekendSchedule).map(([day, hrs]) => [
             day.charAt(0).toUpperCase() + day.slice(1),
             hrs.isOpen ? `${hrs.open} - ${hrs.close}` : "Closed",
-          ])
+          ]),
         ),
         holiday: {
           "Default Holiday": businessData.holidayHours.isOpen
@@ -96,21 +94,21 @@ export async function submitBusinessData(
     console.log("Payload prepared for business creation/update:", payload);
     let business: BusinessInfo;
     if (businessData.id) {
-       console.log("Updating existing business:", businessData.id);
-       business = await businessService.updateBusiness(businessData.id, payload);
+      console.log("Updating existing business:", businessData.id);
+      business = await businessService.updateBusiness(businessData.id, payload);
     } else {
       // For creation, add the user ID if available
       const createData: BusinessInfoRequest = {
         ...payload,
         userId: (session?.user as any)?.id || undefined,
       };
-      
+
       business = await businessService.createBusiness(createData);
     }
 
     const businessId = business.bizId?.toString() || (business as any).id || "";
     console.log("Business operation successful:", businessId);
-    
+
     // Return success and let the client handle the redirect
     return { success: true, businessId };
   } catch (error) {

@@ -1,7 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import { userService } from "@think-id/database";
 import type { UpdateUserRequest } from "@think-id/types";
 
@@ -13,7 +12,7 @@ export async function updateProfile(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
     const userId = (session?.user as any)?.id;
     if (!userId) {
       return { success: false, error: "Not authenticated" };

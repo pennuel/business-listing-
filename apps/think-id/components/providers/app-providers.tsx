@@ -1,6 +1,7 @@
 "use client";
 
 import { SessionProvider } from "next-auth/react";
+import type { Session } from "next-auth";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
@@ -9,9 +10,10 @@ import { useState } from "react";
 
 interface ProvidersProps {
   children: ReactNode;
+  session?: Session | null;
 }
 
-export function AppProviders({ children }: ProvidersProps) {
+export function AppProviders({ children, session }: ProvidersProps) {
   // useState ensures a stable QueryClient instance per component tree
   const [queryClient] = useState(
     () =>
@@ -26,7 +28,7 @@ export function AppProviders({ children }: ProvidersProps) {
   );
 
   return (
-    <SessionProvider>
+    <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster />

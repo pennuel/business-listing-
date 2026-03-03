@@ -1,12 +1,14 @@
-import type { NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import GitHubProvider from "next-auth/providers/github"
-import FusionAuthProvider from "next-auth/providers/fusionauth"
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
+import FusionAuthProvider from "next-auth/providers/fusionauth";
 
-export const authOptions: NextAuthOptions = {
+export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     // FusionAuth (OpenID Connect/OAuth2) provider
-    ...(process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
+    ...(process.env.FUSIONAUTH_CLIENT_ID &&
+    process.env.FUSIONAUTH_CLIENT_SECRET &&
+    process.env.FUSIONAUTH_ISSUER
       ? [
           FusionAuthProvider({
             id: "fusionauth",
@@ -38,24 +40,20 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-  // pages: {
-  //   signIn: "/login",
-  //   error: "/login",
-  // },
   callbacks: {
     async jwt({ token, user, profile }) {
       if (user) {
         // Try to set token.id from multiple possible sources (OAuth/OIDC subject, user id)
-        token.id = (user as any).id ?? (profile as any)?.sub ?? token.sub
+        token.id = (user as any).id ?? (profile as any)?.sub ?? token.sub;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string
+        session.user.id = token.id as string;
       }
-      return session
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
+});

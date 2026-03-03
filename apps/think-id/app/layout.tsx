@@ -32,19 +32,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+import { auth } from "@/lib/auth"
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
   return (
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head>
         <body className={inter.className}>
-          <AppProviders>{children}</AppProviders>
+          <AppProviders session={session}>{children}</AppProviders>
         </body>
     </html>
   )
 }
+
