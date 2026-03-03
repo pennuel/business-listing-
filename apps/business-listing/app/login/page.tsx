@@ -1,13 +1,4 @@
-<<<<<<< HEAD
 import { signIn } from "@/lib/auth"
-=======
-"use client"
-
-import type React from "react"
-import { useState } from "react"
-import { signInAction } from "@/app/actions/auth"
-import { useRouter } from "next/navigation"
->>>>>>> e7644a2cf9ab846899ec30bbe6acc8221c13eb5b
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Building2, AlertCircle } from "lucide-react"
