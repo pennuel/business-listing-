@@ -3,6 +3,9 @@ import FusionAuthProvider from "next-auth/providers/fusionauth"
 import { userService } from "@think-id/database"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  debug: process.env.NODE_ENV === "development",
+  trustHost: true,
+  basePath: "/api/auth",
   providers: [
     ...(process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
       ? [
@@ -42,19 +45,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // console.log("Session callback - session.user:", session.user)
 
-        if (!session.user.id) {
-          try {
-            const dbUser = await userService.syncUserWithDB(token.sub as string)
-            // session.user.dbUser = dbUser
-            // session.user.dbSynced = true
-          } catch (error) {
-            console.error("Failed to sync user on login:", error)
-          }
-        }
+        // if (!session.user.id) {
+        //   try {
+        //     const dbUser = await userService.syncUserWithDB(token.sub as string)
+        //     // session.user.dbUser = dbUser
+        //     // session.user.dbSynced = true
+        //   } catch (error) {
+        //     console.error("Failed to sync user on login:", error)
+        //   }
+        // }
       }
       // console.log("Session callback - final session:", session)
       return session
     },
   },
-  secret: process.env.NEXTAUTH_SECRET,
 })
