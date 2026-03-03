@@ -3,9 +3,10 @@ import type { Metadata } from "next"
 import { Inter, Roboto } from "next/font/google"
 import "./globals.css"
 import { Providers } from "@/components/providers/session-provider"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
+import { auth } from "@/lib/auth"
 
-const roboto = Roboto({subsets:['latin'],variable:'--font-sans'});
+const roboto = Roboto({subsets:['latin'],variable:'--font-sans'})
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,15 +22,17 @@ metadata.icons = {
   apple: "/apple-touch-icon.png",
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
   return (
     <html lang="en" className={cn("h-full", roboto.variable)}>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   )

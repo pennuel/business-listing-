@@ -1,44 +1,11 @@
-"use client"
-
-import type React from "react"
-import { useState } from "react"
-import { signIn, getSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { signIn } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Building2, Github, Mail, AlertCircle } from "lucide-react"
+import { Mail, Building2, AlertCircle } from "lucide-react"
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("demo@example.com")
-  const [password, setPassword] = useState("password")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-
-  const handleCredentialsLogin = async (e: React.FormEvent) => {
-    // credentials no longer supported; prevent default and show a helpful message
-    e.preventDefault()
-    setError("This app uses FusionAuth OAuth. Use the 'Continue with FusionAuth' button.")
-  }
-
-  const handleOAuthLogin = async (provider: string) => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      await signIn(provider, {
-        callbackUrl: "/dashboard",
-        redirect: true,
-      })
-    } catch (error) {
-      console.error("OAuth login error:", error)
-      setError("An error occurred. Please try again.")
-      setIsLoading(false)
-    }
-  }
+export default async function LoginPage(props: {searchParams: Promise<{ error?: string }>}) {
+  const searchParams = await props.searchParams
+  const error = searchParams?.error
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -52,23 +19,25 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           {error && (
-            <Alert variant="destructive">
+            <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+              <span>An error occurred during authentication. Please try again.</span>
+            </div>
           )}
 
-          {/* OAuth Providers */}
+          {/* OAuth Providers wrapped in Server Action Form */}
           <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={() => handleOAuthLogin("fusionauth")}
-              disabled={isLoading}
+            <form
+              action={async () => {
+                "use server"
+                await signIn("fusionauth", { redirectTo: "/dashboard" })
+              }}
             >
-              <Mail className="mr-2 h-4 w-4" />
-              Continue with FusionAuth
-            </Button>
+              <Button type="submit" variant="outline" className="w-full bg-transparent">
+                <Mail className="mr-2 h-4 w-4" />
+                Continue with FusionAuth
+              </Button>
+            </form>
           </div>
 
           <div className="relative">
@@ -80,12 +49,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Informational note: credentials removed in favor of FusionAuth OAuth */}
-          <form onSubmit={handleCredentialsLogin} className="space-y-4">
-            <div className="text-sm text-muted-foreground">
-              This application uses FusionAuth for authentication. Click "Continue with FusionAuth" to sign in.
-            </div>
-          </form>
+          <div className="text-sm text-center text-muted-foreground">
+            This application uses FusionAuth for authentication. Click "Continue with FusionAuth" to sign in.
+          </div>
         </CardContent>
       </Card>
     </div>

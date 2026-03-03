@@ -1,39 +1,40 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
-import { getToken } from "next-auth/jwt"
+import { auth } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
+export default auth((req) => {
+  const isLoggedIn = !!req.auth;
+  const { pathname } = req.nextUrl;
 
-//  this will be called on every request
-export async function middleware(request: NextRequest) {
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  })
-
-  const { pathname } = request.nextUrl
-
-  // Protect dashboard and onboarding routes
+  // Protect dashboard and backoffice routes
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/backoffice")) {
-    if (!token) {
+    if (!isLoggedIn) {
       // Prefer redirecting directly to FusionAuth provider if configured
-      const providerPath = process.env.FUSIONAUTH_CLIENT_ID && process.env.FUSIONAUTH_CLIENT_SECRET && process.env.FUSIONAUTH_ISSUER
-        ? "/api/auth/signin/fusionauth"
-        : "/login"
+      const providerPath =
+        process.env.FUSIONAUTH_CLIENT_ID &&
+        process.env.FUSIONAUTH_CLIENT_SECRET &&
+        process.env.FUSIONAUTH_ISSUER
+          ? "/api/auth/signin/fusionauth"
+          : "/login";
 
-      const redirectUrl = new URL(providerPath, request.url)
-      redirectUrl.searchParams.set("callbackUrl", request.url)
-      return NextResponse.redirect(redirectUrl)
+      const redirectUrl = new URL(providerPath, req.url);
+      redirectUrl.searchParams.set("callbackUrl", req.url);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
   // Redirect authenticated users away from login page
-  if (pathname === "/login" && token) {
-    return NextResponse.redirect(new URL("/dashboard", request.url))
+  if (pathname === "/login" && isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  return NextResponse.next()
-}
+  return NextResponse.next();
+});
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/onboarding/:path*", "/login"],
-}
+  matcher: [
+    "/dashboard/:path*",
+    "/onboarding/:path*",
+    "/login",
+    "/backoffice/:path*",
+  ],
+};
