@@ -161,7 +161,7 @@ function OnboardingContent() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/login");
+      router.push("/auth/signin/fusionauth?callbackUrl=/onboarding");
     }
   }, [user, authLoading, router]);
 

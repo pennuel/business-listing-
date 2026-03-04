@@ -19,7 +19,7 @@ export function Navbar() {
   const router = useRouter()
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/" })
+    await signOut({ callbackUrl: "/api/auth/logout" })
   }
 
   if (status === "loading") {

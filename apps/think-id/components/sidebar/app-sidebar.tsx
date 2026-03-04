@@ -243,7 +243,10 @@ export function AppSidebar({ activeSection, onSectionChange, ...props }: AppSide
                   <Settings />
                   Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-500 cursor-pointer"
+                  onClick={() => signOut({ callbackUrl: "/api/auth/logout" })}
+                >
                   <LogOut />
                   Log out
                 </DropdownMenuItem>

@@ -7,6 +7,7 @@ import { BusinessInfo } from "@think-id/types"
 import { PlusCircle, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useBusinessById } from "@/lib/hooks/useBusinesses"
 
 export function DashboardPageClient({ 
   userId,
@@ -21,6 +22,11 @@ export function DashboardPageClient({
 }) {
   const router = useRouter()
   const [isTransitioning, setIsTransitioning] = useState(false)
+
+  // Fetch real-time data from TanStack using server's data as initialData
+  const { data: business, isFetching, isLoading } = useBusinessById(businessId, {
+    initialData: selectedBusiness
+  })
 
   // Auto-redirect to first business if none selected
   useEffect(() => {
@@ -60,8 +66,8 @@ export function DashboardPageClient({
     )
   }
 
-  // Business requested but not found
-  if (businessId && !selectedBusiness) {
+  // Business requested but not found (either locally or from server)
+  if (businessId && !business && !isLoading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center space-y-4">
         <div className="text-center space-y-2">
@@ -75,13 +81,28 @@ export function DashboardPageClient({
     )
   }
 
-  if (!selectedBusiness) return null;
+  // Hard loading state (if initialData wasn't provided or we forced a full re-fetch)
+  if (isLoading || !business) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] flex-col items-center justify-center space-y-4">
+         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+         <p className="text-sm text-muted-foreground animate-pulse">Loading dashboard structure...</p>
+      </div>
+    )
+  }
 
   // Render the selected business dashboard
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
+    <div className="min-h-screen bg-muted/30 py-8 relative">
+      {/* TanStack background data fetch indicator */}
+      {isFetching && !isTransitioning && (
+        <div className="absolute top-2 right-4 flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-xs font-semibold shadow-sm animate-pulse border border-primary/20">
+          <Loader2 className="h-3 w-3 animate-spin" />
+          Syncing latest updates...
+        </div>
+      )}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <DashboardContent business={selectedBusiness} />
+        <DashboardContent business={business} />
       </div>
     </div>
   )

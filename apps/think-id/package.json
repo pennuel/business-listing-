@@ -43,6 +43,7 @@
     "@think-id/database": "workspace:^",
     "@think-id/types": "workspace:^",
     "@think-id/ui": "workspace:*",
+    "auth": "^1.5.2",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

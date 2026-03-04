@@ -11,7 +11,7 @@ export default async function ServicesPage({
   const session = await auth()
 
   if (!session?.user?.id) {
-    redirect("/login")
+    redirect("/api/auth/signin/fusionauth?callbackUrl=/dashboard/services")
   }
 
   const params = await searchParams

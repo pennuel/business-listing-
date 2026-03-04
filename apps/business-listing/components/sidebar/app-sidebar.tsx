@@ -186,7 +186,7 @@ export function AppSidebar({ businesses: propsBusinesses, currentBusinessId: pro
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-red-500 cursor-pointer"
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={() => signOut({ callbackUrl: "/api/auth/logout" })}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Log out

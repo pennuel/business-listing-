@@ -5,7 +5,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/s
 import { AppSidebar } from "@/components/sidebar/app-sidebar"
 import { useUserBusinesses } from '@/lib/hooks/useBusinesses';
 import { useSession } from "next-auth/react"
-
+import { Loader2 } from "lucide-react"
 
 import { normalizeBusiness } from '@/lib/utils/mappers';
 
@@ -28,7 +28,7 @@ export function DashboardClient({ userId, initialBusinesses, children }: Dashboa
   
   // Fetch businesses with TanStack Query - uses initialData for instant render
   // Then refetches in background to catch real-time updates from other users
-  const { data, isLoading, error } = useUserBusinesses(userId, { 
+  const { data, isLoading, error, isFetching } = useUserBusinesses(userId, { 
     initialData: initialBusinesses 
   });
 
@@ -66,7 +66,12 @@ export function DashboardClient({ userId, initialBusinesses, children }: Dashboa
           <SidebarTrigger className="-ml-1" />
           <div className="h-4 w-px bg-border mx-2" />
           <span className="font-semibold">Business Dashboard</span>
-          {isLoading && <span className="text-xs text-muted-foreground ml-2">Loading...</span>}
+          {isFetching && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-2 animate-pulse bg-muted px-2 py-1 rounded-full">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Syncing...
+            </div>
+          )}
         </header>
 
         <div className="flex-1 overflow-auto p-6">
