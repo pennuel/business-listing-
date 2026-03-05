@@ -6,16 +6,25 @@ import { Building2, Search, MapPin, Star, ArrowRight, Clock } from "lucide-react
 import { Input } from "@/components/ui/input"
 import { Navbar } from "@/components/navbar"
 import { normalizeBusiness } from "@/lib/utils/normalize"
+import { HomeSearch } from "@/components/home-search"
 
 export default async function HomePage() {
   let businesses: any[] = []
+  let allCategories: string[] = []
+  let allLocations: string[] = []
+
   try {
     const result = await businessService.getAllBusinesses({
       status: "active",
-      limit: 12
+      limit: 200
     })
     const rawBusinesses = Array.isArray(result) ? result : (result?.businesses || [])
-    businesses = rawBusinesses.map((b: any) => normalizeBusiness(b))
+    const normalized = rawBusinesses.map((b: any) => normalizeBusiness(b))
+    
+    allCategories = Array.from(new Set(normalized.map((b: any) => typeof b.category === 'object' ? b.category?.categoryName : b.category).filter(Boolean))) as string[]
+    allLocations = Array.from(new Set(normalized.map((b: any) => b.county).filter(Boolean))) as string[]
+    
+    businesses = normalized.slice(0, 12)
   } catch (error) {
     console.error("Failed to fetch businesses:", error)
   }
@@ -28,21 +37,14 @@ export default async function HomePage() {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4 text-gray-900">
-            Welcome to the <span className="text-blue-600">Think Mall</span>
+            Welcome to the <span className="text-blue-600">THiNK Business Listing</span>
           </h1>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Explore the best service providers and shops in your community. Every window tells a story.
           </p>
           
-          <div className="max-w-2xl mx-auto relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-blue-600 transition-colors" />
-            <Input 
-              placeholder="Search for services, shops, or locations..." 
-              className="pl-12 h-14 text-lg shadow-sm rounded-full border-2 focus-visible:ring-blue-600"
-            />
-            <Button className="absolute right-2 top-2 h-10 rounded-full px-6 bg-blue-600 hover:bg-blue-700">
-              Find
-            </Button>
+          <div className="max-w-3xl mx-auto mt-4 mb-2 relative z-20">
+            <HomeSearch categories={allCategories} locations={allLocations} />
           </div>
         </div>
       </div>
