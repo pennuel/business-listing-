@@ -2,17 +2,18 @@
  * Admin API proxy — thin wrapper over the Kotlin backend.
  * All admin routes live here so we can add auth middleware in one place.
  *
- * Supported resources (GET/POST/DELETE):
- *   categories, businesses, reviews, businessTypes, complaints,
- *   sectors, industries, offerings (GET only — no Kotlin controller yet)
- *   stats (GET only — aggregated counts)
- *
- * Sector / Industry / Offering controllers do not exist in Kotlin yet.
- * Those cases fall back to mock data with { source: "mock" }.
+ * Supported resources (GET / POST / DELETE):
+ *   Management:
+ *     categories, businesses, reviews, businessTypes, complaints
+ *   Taxonomy:
+ *     sectors, industries, offerings
+ *   Location:
+ *     countries, counties, subCounties
+ *   Aggregated:
+ *     stats
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 
 const BACKEND =
   process.env.BUSINESS_SERVER_API_URL?.replace(/\/$/, "") ||
@@ -42,27 +43,24 @@ async function kfetch<T>(path: string, init?: RequestInit): Promise<T> {
   }
 }
 
-function paginate(data: any, page = 0, size = 50) {
-  // Handle both paged { content: [] } and raw []
+function paginate(data: any) {
   if (Array.isArray(data)) return { content: data, totalElements: data.length };
   return {
-    content: data?.content ?? [],
-    totalElements: data?.totalElements ?? 0,
+    content: data?.content ?? data?.item ?? [],
+    totalElements: data?.totalElements ?? data?.totalItems ?? 0,
   };
 }
 
 // ── GET ────────────────────────────────────────────────────────────────────
 
 export async function GET(request: NextRequest) {
-  // const session = await auth()
-  // if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const resource = request.nextUrl.searchParams.get("resource") || "stats";
   const page = request.nextUrl.searchParams.get("page") || "0";
   const size = request.nextUrl.searchParams.get("size") || "50";
 
   try {
     switch (resource) {
+      // ── Management ─────────────────────────────────────────────────────
       case "categories": {
         const raw = await kfetch(
           `/api/Category/getCategories?page=${page}&size=${size}`,
@@ -94,7 +92,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(paginate(raw));
       }
 
-      // ── Taxonomy entities (no Kotlin controllers yet — mock fallback) ──
+      // ── Taxonomy ───────────────────────────────────────────────────────
       case "sectors": {
         try {
           const raw = await kfetch(
@@ -164,32 +162,110 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      // ── Location ───────────────────────────────────────────────────────
+      case "countries": {
+        try {
+          const raw = await kfetch(
+            `/api/country/getCountries?page=${page}&size=${size}`,
+          );
+          return NextResponse.json({ ...paginate(raw), source: "backend" });
+        } catch {
+          const mock = [
+            {
+              countryId: 1,
+              countryName: "Kenya",
+              countryCode: "KE",
+              flagLogo: "🇰🇪",
+            },
+            {
+              countryId: 2,
+              countryName: "Uganda",
+              countryCode: "UG",
+              flagLogo: "🇺🇬",
+            },
+            {
+              countryId: 3,
+              countryName: "Tanzania",
+              countryCode: "TZ",
+              flagLogo: "🇹🇿",
+            },
+          ];
+          return NextResponse.json({
+            content: mock,
+            totalElements: mock.length,
+            source: "mock",
+          });
+        }
+      }
+      case "counties": {
+        try {
+          const raw = await kfetch(
+            `/api/county/getCounties?page=${page}&size=${size}`,
+          );
+          return NextResponse.json({ ...paginate(raw), source: "backend" });
+        } catch {
+          const mock = [
+            { countyId: 1, countyName: "Nairobi" },
+            { countyId: 2, countyName: "Mombasa" },
+            { countyId: 3, countyName: "Kisumu" },
+            { countyId: 4, countyName: "Nakuru" },
+            { countyId: 5, countyName: "Eldoret" },
+          ];
+          return NextResponse.json({
+            content: mock,
+            totalElements: mock.length,
+            source: "mock",
+          });
+        }
+      }
+      case "subCounties": {
+        try {
+          const raw = await kfetch(
+            `/api/subCounty/getSubCounties?page=${page}&size=${size}`,
+          );
+          return NextResponse.json({ ...paginate(raw), source: "backend" });
+        } catch {
+          const mock = [
+            { subCountyId: 1, subCountyName: "Westlands", countyId: 1 },
+            { subCountyId: 2, subCountyName: "Embakasi", countyId: 1 },
+            { subCountyId: 3, subCountyName: "Starehe", countyId: 1 },
+            { subCountyId: 4, subCountyName: "Mvita", countyId: 2 },
+            { subCountyId: 5, subCountyName: "Kisumu Central", countyId: 3 },
+          ];
+          return NextResponse.json({
+            content: mock,
+            totalElements: mock.length,
+            source: "mock",
+          });
+        }
+      }
+
+      // ── Stats ──────────────────────────────────────────────────────────
       case "stats": {
-        // Fire all in parallel — ignore individual failures
-        const [biz, cats, reviews, complaints] = await Promise.allSettled([
-          kfetch<any>("/api/BusinessInfo/getBusinessInfos?page=0&size=1"),
-          kfetch<any>("/api/Category/getCategories?page=0&size=1"),
-          kfetch<any>("/api/Reviews/getReviews?page=0&size=1"),
-          kfetch<any>("/api/Complaints/getCategories?page=0&size=1"),
-        ]);
+        const [biz, cats, reviews, complaints, sectors, countries] =
+          await Promise.allSettled([
+            kfetch<any>("/api/BusinessInfo/getBusinessInfos?page=0&size=1"),
+            kfetch<any>("/api/Category/getCategories?page=0&size=1"),
+            kfetch<any>("/api/Reviews/getReviews?page=0&size=1"),
+            kfetch<any>("/api/Complaints/getCategories?page=0&size=1"),
+            kfetch<any>("/api/sector/getSectors?page=0&size=1"),
+            kfetch<any>("/api/country/getCountries?page=0&size=1"),
+          ]);
+        const count = (r: PromiseSettledResult<any>) =>
+          r.status === "fulfilled"
+            ? (r.value?.totalElements ?? r.value?.totalItems ?? null)
+            : null;
         return NextResponse.json({
-          businesses:
-            biz.status === "fulfilled" ? (biz.value?.totalElements ?? 0) : null,
-          categories:
-            cats.status === "fulfilled"
-              ? (cats.value?.totalElements ?? 0)
-              : null,
-          reviews:
-            reviews.status === "fulfilled"
-              ? (reviews.value?.totalElements ?? 0)
-              : null,
-          complaints:
-            complaints.status === "fulfilled"
-              ? (complaints.value?.totalElements ?? 0)
-              : null,
+          businesses: count(biz),
+          categories: count(cats),
+          reviews: count(reviews),
+          complaints: count(complaints),
+          sectors: count(sectors),
+          countries: count(countries),
           backendOnline: biz.status === "fulfilled",
         });
       }
+
       default:
         return NextResponse.json(
           { error: "Unknown resource" },
@@ -207,9 +283,6 @@ export async function GET(request: NextRequest) {
 // ── POST ───────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // const session = await auth()
-  // if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const resource = request.nextUrl.searchParams.get("resource");
   let body: any = {};
   try {
@@ -220,6 +293,7 @@ export async function POST(request: NextRequest) {
 
   try {
     switch (resource) {
+      // ── Management ─────────────────────────────────────────────────────
       case "categories": {
         if (!body.categoryName?.trim())
           return NextResponse.json(
@@ -244,6 +318,106 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json(data, { status: 201 });
       }
+      case "complaints": {
+        if (!body.complaint?.trim())
+          return NextResponse.json(
+            { error: "complaint is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/Complaints/addComplaint", {
+          method: "POST",
+          body: JSON.stringify({ complaint: body.complaint.trim() }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+
+      // ── Taxonomy ───────────────────────────────────────────────────────
+      case "sectors": {
+        if (!body.sectorName?.trim())
+          return NextResponse.json(
+            { error: "sectorName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/sector/addSector", {
+          method: "POST",
+          body: JSON.stringify({ sectorName: body.sectorName.trim() }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+      case "industries": {
+        if (!body.industryName?.trim())
+          return NextResponse.json(
+            { error: "industryName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/industry/addIndustry", {
+          method: "POST",
+          body: JSON.stringify({ industryName: body.industryName.trim() }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+      case "offerings": {
+        if (!body.offeringName?.trim())
+          return NextResponse.json(
+            { error: "offeringName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/offering/addOffering", {
+          method: "POST",
+          body: JSON.stringify({ offeringName: body.offeringName.trim() }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+
+      // ── Location ───────────────────────────────────────────────────────
+      case "countries": {
+        if (!body.countryName?.trim())
+          return NextResponse.json(
+            { error: "countryName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/country/addCountry", {
+          method: "POST",
+          body: JSON.stringify({
+            countryName: body.countryName.trim(),
+            countryCode: body.countryCode?.trim() || null,
+            flagLogo: body.flagLogo?.trim() || null,
+          }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+      case "counties": {
+        if (!body.countyName?.trim())
+          return NextResponse.json(
+            { error: "countyName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/county/addCounty", {
+          method: "POST",
+          body: JSON.stringify({
+            countyName: body.countyName.trim(),
+            countryId: body.countryId ? Number(body.countryId) : null,
+          }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+      case "subCounties": {
+        if (!body.subCountyName?.trim())
+          return NextResponse.json(
+            { error: "subCountyName is required" },
+            { status: 400 },
+          );
+        const data = await kfetch("/api/subCounty/addSubCounty", {
+          method: "POST",
+          body: JSON.stringify({
+            subCountyName: body.subCountyName.trim(),
+            countyId: body.countyId ? Number(body.countyId) : null,
+            countryId: body.countryId ? Number(body.countryId) : null,
+          }),
+        });
+        return NextResponse.json(data, { status: 201 });
+      }
+
       default:
         return NextResponse.json(
           { error: "POST not supported for resource" },
@@ -258,9 +432,6 @@ export async function POST(request: NextRequest) {
 // ── DELETE ─────────────────────────────────────────────────────────────────
 
 export async function DELETE(request: NextRequest) {
-  // const session = await auth()
-  // if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-
   const resource = request.nextUrl.searchParams.get("resource");
   const id = request.nextUrl.searchParams.get("id");
 
@@ -268,6 +439,7 @@ export async function DELETE(request: NextRequest) {
 
   try {
     switch (resource) {
+      // ── Management ─────────────────────────────────────────────────────
       case "categories": {
         await kfetch(`/api/Category/deleteOne?id=${id}`, { method: "DELETE" });
         return NextResponse.json({ success: true });
@@ -286,6 +458,41 @@ export async function DELETE(request: NextRequest) {
         });
         return NextResponse.json({ success: true });
       }
+      case "businessTypes": {
+        await kfetch(`/api/businessType/deleteOne?id=${id}`, {
+          method: "DELETE",
+        });
+        return NextResponse.json({ success: true });
+      }
+
+      // ── Taxonomy ───────────────────────────────────────────────────────
+      case "sectors": {
+        await kfetch(`/api/sector/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+      case "industries": {
+        await kfetch(`/api/industry/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+      case "offerings": {
+        await kfetch(`/api/offering/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+
+      // ── Location ───────────────────────────────────────────────────────
+      case "countries": {
+        await kfetch(`/api/country/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+      case "counties": {
+        await kfetch(`/api/county/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+      case "subCounties": {
+        await kfetch(`/api/subCounty/deleteOne?id=${id}`, { method: "DELETE" });
+        return NextResponse.json({ success: true });
+      }
+
       default:
         return NextResponse.json(
           { error: "DELETE not supported for resource" },
