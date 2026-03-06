@@ -1,13 +1,11 @@
-import { BusinessInfo, businessService } from "@think-id/database"
 import { Navbar } from "@/components/navbar"
-import { normalizeBusiness } from "@/lib/utils/normalize"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Building2, MapPin, Star } from "lucide-react"
-import { SearchPromptBox, SearchFilterBar } from "./search-filters"
+import { SearchPromptBox, SearchFilterBar, SearchSidebar } from "./search-filters"
 import Link from "next/link"
 import { GET as getFilters } from "../api/filters/route"
-import { GET as getDummySearch } from "../api/search/route"
+import { fetchAllBusinesses, filterBusinesses } from "@/lib/backend"
 import {
   Pagination,
   PaginationContent,
@@ -36,77 +34,65 @@ export default async function SearchPage({
   let allLocations: string[] = []
   let extraFilters: any = {}
 
+  // Load filter metadata (categories, locations, price ranges, etc.)
   try {
     const dummyFiltersRes = await getFilters()
     extraFilters = await dummyFiltersRes.json()
   } catch (err) {
-    console.error("Failed to load dummy filters", err)
+    console.error("Failed to load filters", err)
   }
 
-  let dummyBusinessesList: any[] = []
+  // Load businesses from Kotlin backend (graceful fallback to empty)
   try {
-    const dRes = await getDummySearch(new Request("http://localhost/api/search"))
-    const dData = await dRes.json()
-    dummyBusinessesList = dData.businesses || []
-  } catch(err) {
-    console.warn("Could not load dummy businesses")
-  }
+    let allBusinesses = await fetchAllBusinesses(0, 200)
 
-  try {
-    const result = await businessService.getAllBusinesses({
-      status: "active",
-      limit: 200
+    allCategories = Array.from(
+      new Set([
+        ...allBusinesses
+          .map((b: any) =>
+            typeof b.category === "object" ? b.category?.categoryName : b.category
+          )
+          .filter(Boolean),
+        ...(extraFilters.categories || []),
+      ])
+    ) as string[]
+
+    allLocations = Array.from(
+      new Set([
+        ...allBusinesses.map((b: any) => b.county).filter(Boolean),
+        ...(extraFilters.locations || []),
+      ])
+    ) as string[]
+
+    // Apply search filters
+    businesses = filterBusinesses(allBusinesses, {
+      query,
+      category: selectedCategories.length === 1 ? selectedCategories[0] : undefined,
+      location: selectedLocations.length === 1 ? selectedLocations[0] : undefined,
+      openNow,
     })
-    
-    // Merge database results with dummy API results
-    const rawDbBusinesses = Array.isArray(result) ? result : (result?.businesses || [])
-    const combinedRaw = [...rawDbBusinesses, ...dummyBusinessesList]
-    
-    let normalized = combinedRaw.map((b: any) => normalizeBusiness(b))
-    
-    allCategories = Array.from(new Set([
-      ...normalized.map((b: any) => typeof b.category === 'object' ? b.category?.categoryName : b.category).filter(Boolean),
-      ...(extraFilters.categories || [])
-    ])) as string[]
-    
-    allLocations = Array.from(new Set([
-      ...normalized.map((b: any) => b.county).filter(Boolean),
-      ...(extraFilters.locations || [])
-    ])) as string[]
-    
-    if (query) {
-      const q = query.toLowerCase()
-      normalized = normalized.filter((b: any) => 
-        (b.name && b.name.toLowerCase().includes(q)) ||
-        (b.description && b.description.toLowerCase().includes(q)) ||
-        (b.tagline && b.tagline.toLowerCase().includes(q))
-      )
-    }
-    
-    if (selectedCategories.length > 0) {
-      const cats = selectedCategories.map(c => c.toLowerCase())
-      normalized = normalized.filter((b: any) => {
-        const catName = typeof b.category === 'object' ? b.category?.categoryName : b.category
-        return catName && typeof catName === 'string' && cats.includes(catName.toLowerCase())
+
+    // Multi-select category filter (when more than one selected)
+    if (selectedCategories.length > 1) {
+      const cats = selectedCategories.map((c) => c.toLowerCase())
+      businesses = businesses.filter((b: any) => {
+        const catName =
+          typeof b.category === "object" ? b.category?.categoryName : b.category
+        return catName && cats.includes(catName.toLowerCase())
       })
     }
-    
-    if (selectedLocations.length > 0) {
-      const locs = selectedLocations.map(l => l.toLowerCase())
-      normalized = normalized.filter((b: any) => {
-        const cty = b.county?.toLowerCase() || ''
-        const sub = b.subCounty?.toLowerCase() || ''
-        return locs.some(l => cty.includes(l) || sub.includes(l))
+
+    // Multi-select location filter (when more than one selected)
+    if (selectedLocations.length > 1) {
+      const locs = selectedLocations.map((l) => l.toLowerCase())
+      businesses = businesses.filter((b: any) => {
+        const cty = b.county?.toLowerCase() || ""
+        const sub = b.subCounty?.toLowerCase() || ""
+        return locs.some((l) => cty.includes(l) || sub.includes(l))
       })
     }
-    
-    if (openNow) {
-      normalized = normalized.filter((b: any) => b.isManuallyOpen === true)
-    }
-    
-    businesses = normalized
   } catch (error) {
-    console.error("Failed to fetch businesses:", error)
+    console.error("[SearchPage] Backend unavailable:", error)
   }
 
   const pageParam = parseInt(searchParams.page as string || "1")
@@ -130,43 +116,53 @@ export default async function SearchPage({
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      
+
+      {/* Search header */}
       <div className="bg-white border-b pt-8 pb-8 relative z-10 shadow-sm">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <div className="text-center mb-8">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-6">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
               Search Results
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Find the best services and shops near you
+            <p className="text-muted-foreground mt-1">
+              {businesses.length} result{businesses.length !== 1 ? "s" : ""}
+              {query && (
+                <> for <span className="font-semibold text-blue-600">&ldquo;{query}&rdquo;</span></>
+              )}
             </p>
           </div>
-          
           <SearchPromptBox initialQuery={query} />
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8 flex-1 max-w-6xl">
-        <div className="flex-1">
-          <div className="mb-6">
-            <SearchFilterBar 
-              initialCategories={selectedCategories}
-              initialLocations={selectedLocations}
-              initialOpenNow={openNow}
-              categories={allCategories}
-              locations={allLocations}
-              extraFilters={extraFilters}
-            />
-          </div>
-          
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold">
-              {businesses.length} Result{businesses.length !== 1 ? 's' : ''} 
-              {query && <span> for <span className="text-blue-600">"{query}"</span></span>}
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Mobile filter bar — hidden on lg */}
+        <div className="mb-5 lg:hidden">
+          <SearchFilterBar
+            initialCategories={selectedCategories}
+            initialLocations={selectedLocations}
+            initialOpenNow={openNow}
+            categories={allCategories}
+            locations={allLocations}
+            extraFilters={extraFilters}
+          />
+        </div>
+
+        {/* Sidebar + results layout */}
+        <div className="flex gap-8 items-start">
+          {/* Desktop sidebar — visible on lg+ */}
+          <SearchSidebar
+            categories={allCategories}
+            locations={allLocations}
+            extraFilters={extraFilters}
+            initialCategories={selectedCategories}
+            initialLocations={selectedLocations}
+            initialOpenNow={openNow}
+          />
+
+          {/* Results column */}
+          <div className="flex-1 min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {paginatedBusinesses.map((business, index) => (
               <Link
                 key={business.id ?? index}
@@ -213,16 +209,16 @@ export default async function SearchPage({
               </Link>
             ))}
             
-            {businesses.length === 0 && (
-              <div className="col-span-full py-16 text-center bg-white rounded-xl border border-dashed">
-                <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Building2 className="h-8 w-8 text-gray-400" />
+              {businesses.length === 0 && (
+                <div className="col-span-full py-16 text-center bg-white rounded-xl border border-dashed">
+                  <div className="h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Building2 className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">No businesses found</h3>
+                  <p className="text-muted-foreground max-w-sm mx-auto mt-2">Try adjusting your filters or search query to find what you&apos;re looking for.</p>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">No businesses found</h3>
-                <p className="text-muted-foreground max-w-sm mx-auto mt-2">Try adjusting your filters or search query to find what you're looking for.</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
           
           {totalPages > 1 && (
             <div className="mt-12 mb-8">
@@ -268,6 +264,7 @@ export default async function SearchPage({
               </Pagination>
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>
