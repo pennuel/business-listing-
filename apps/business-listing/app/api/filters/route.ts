@@ -3,17 +3,17 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const dummyFilters = {
     categories: [
+      "Photography",
       "Plumbers",
       "Electricians",
-      "Carpenters",
       "Cleaning",
-      "Landscaping",
       "Auto Repair",
       "Catering",
-      "Photography",
-      "Retail",
       "Healthcare",
       "Education",
+      "Retail",
+      "Landscaping",
+      "Carpenters",
     ],
     locations: [
       "Nairobi",
@@ -28,10 +28,10 @@ export async function GET() {
       "Kakamega",
     ],
     priceRanges: [
-      "Under $50",
-      "$50 - $100",
-      "$100 - $500",
-      "Over $500",
+      "Under Ksh 1,000",
+      "Ksh 1,000 - 5,000",
+      "Ksh 5,000 - 20,000",
+      "Over Ksh 20,000",
       "Custom Quote",
     ],
     ratings: ["4.5 & up", "4.0 & up", "3.0 & up", "New"],

@@ -266,7 +266,20 @@ export function AdminResourcePage({
               </thead>
               <tbody className="divide-y">
                 {filtered.map((row, i) => {
-                  const rowId = String(row.id ?? row.bizId ?? row.ID ?? row.categoryId ?? i)
+                  const rowId = String(
+                    row.id ??
+                    row.bizId ??
+                    row.ID ??
+                    row.categoryId ??
+                    row.sectorId ??
+                    row.industryId ??
+                    row.offeringId ??
+                    row.countryId ??
+                    row.countyId ??
+                    row.subCountyId ??
+                    row.businessTypeId ??
+                    i
+                  )
                   const isDeleting = deleting === rowId
                   const pendingConfirm = confirmDelete === rowId
                   return (

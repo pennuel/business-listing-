@@ -16,6 +16,8 @@ import {
   ExternalLink,
   Settings,
   ShieldCheck,
+  MapPin,
+  Globe,
 } from "lucide-react"
 
 const NAV_MANAGEMENT = [
@@ -31,6 +33,12 @@ const NAV_TAXONOMY = [
   { href: "/admin/sectors", label: "Sectors", icon: Layers },
   { href: "/admin/industries", label: "Industries", icon: Building2 },
   { href: "/admin/offerings", label: "Offerings", icon: Tag },
+]
+
+const NAV_LOCATION = [
+  { href: "/admin/countries", label: "Countries", icon: Globe },
+  { href: "/admin/counties", label: "Counties", icon: MapPin },
+  { href: "/admin/sub-counties", label: "Sub-Counties", icon: MapPin },
 ]
 
 
@@ -81,6 +89,10 @@ const Sidebar = ({ onClose }: { onClose?: () => void }) => (
       ))}
       <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-3 mt-4 mb-2">Taxonomy</div>
       {NAV_TAXONOMY.map((item) => (
+        <NavItem key={item.href} {...item} exact={false} />
+      ))}
+      <div className="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-3 mt-4 mb-2">Location</div>
+      {NAV_LOCATION.map((item) => (
         <NavItem key={item.href} {...item} exact={false} />
       ))}
     </nav>
