@@ -7,7 +7,7 @@ import { Progress } from "@think-id/ui/components/ui/progress";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@think-id/ui/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signIn } from "next-auth/react";
 import BasicInfoForm from "./components/BasicInfoForm";
 import BusinessTypeForm from "./components/BusinessTypeForm";
 import LocationForm from "./components/LocationForm";
@@ -161,9 +161,9 @@ function OnboardingContent() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/auth/signin/fusionauth?callbackUrl=/onboarding");
+      signIn("fusionauth", { callbackUrl: `/onboarding${window.location.search}` });
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading]);
 
   // Pre-fill email from user data
   useEffect(() => {
@@ -245,6 +245,7 @@ function OnboardingContent() {
 
     try {
       console.log("Business data to submit:", businessData);
+      console.log("userId is: ", user?.id);
       const result = await submitBusinessData({
         ...businessData,
         userId: user?.id,

@@ -8,7 +8,7 @@ export default auth((req) => {
   // Protect dashboard and backoffice routes — redirect straight to FusionAuth
   if (pathname.startsWith("/dashboard") || pathname.startsWith("/backoffice")) {
     if (!isLoggedIn) {
-      const redirectUrl = new URL("/api/auth/signin/fusionauth", req.url);
+      const redirectUrl = new URL("/login", req.url);
       redirectUrl.searchParams.set("callbackUrl", req.url);
       return NextResponse.redirect(redirectUrl);
     }
