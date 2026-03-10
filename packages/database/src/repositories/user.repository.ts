@@ -30,7 +30,7 @@ export class UserRepository {
   async findById(id: string): Promise<User | null> {
     try {
       const response = await apiRequest<FusionApiResponseUserResponse>(
-        `/api/auth/user/${id}`,
+        `/api/userManagement/fetchUserById/${id}`,
         "GET",
       );
       return response.message?.user ?? null;
@@ -41,7 +41,16 @@ export class UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return null;
+    try {
+      const response = await apiRequest<FusionApiResponseUserResponse>(
+        `/api/userManagement/fetchUserByEmail/${email}`,
+        "GET",
+      );
+      return response.message?.user ?? null;
+    } catch (error) {
+      console.error("UserRepository.findByEmail failed:", error);
+      return null;
+    }
   }
 
   async sync_with_db(userId: string): Promise<User> {
