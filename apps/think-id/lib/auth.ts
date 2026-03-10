@@ -20,37 +20,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }),
         ]
       : []),
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-      ? [
-          GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
-      : []),
-    ...(process.env.GITHUB_ID && process.env.GITHUB_SECRET
-      ? [
-          GitHubProvider({
-            clientId: process.env.GITHUB_ID,
-            clientSecret: process.env.GITHUB_SECRET,
-          }),
-        ]
-      : []),
   ],
   session: {
     strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user, profile }) {
-      if (user) {
-        // Try to set token.id from multiple possible sources (OAuth/OIDC subject, user id)
-        token.id = (user as any).id ?? (profile as any)?.sub ?? token.sub;
+     if (user && profile) {
+        // FusionAuth sets the user ID in the 'sub' claim
+        token.sub = (profile as any)?.sub || token.sub;
+        // Store additional profile data if needed
+        token.email = (user as any)?.email || (profile as any)?.email;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id as string;
+        session.user.id = token.sub as string;
+        console.log("session data", session);
       }
       return session;
     },

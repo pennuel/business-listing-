@@ -1,6 +1,6 @@
 import NextAuth from "next-auth";
 import FusionAuthProvider from "next-auth/providers/fusionauth";
-import { userService } from "@think-id/database"
+import { userService } from "@think-id/database";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   debug: process.env.NODE_ENV === "development",
@@ -26,8 +26,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: "/api/auth/signin/fusionauth",
-    error: "/api/auth/signin/fusionauth",
+    signIn: "/login",
+    // error: "/login",
   },
   callbacks: {
     /**
@@ -37,35 +37,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
      */
     async signIn({ profile }) {
       const userId = (profile as any)?.sub;
-      const applicationId = process.env.FUSIONAUTH_APPLICATION_ID;
-      const apiUrl =
-        process.env.BUSINESS_SERVER_API_URL || "http://localhost:8081";
 
-      if (!userId || !applicationId) return true; // nothing to register, allow sign-in
+      console.log("this is the userId",userId)
 
+      
+      // Sync user to our local DB right after successful FusionAuth login
       try {
-        const res = await fetch(`${apiUrl}/api/auth/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, applicationId }),
-        });
-
-        if (!res.ok) {
-          const body = await res.text();
-          // A 400 with "duplicate registration" is expected on subsequent logins — allow it
-          if (res.status === 400 && body.toLowerCase().includes("duplicate")) {
-            return true;
-          }
-          console.error(
-            `[auth] FusionAuth registration failed (${res.status}):`,
-            body,
-          );
+        const checkUser = await userService.getUserById(userId);
+        console.log("this is the checkUser",checkUser)
+        if (!checkUser) {
+          await userService.syncUserWithDB(userId);
+          console.log("user synced to local database")
         }
-      } catch (error) {
-        // Don't block login if the registration call fails — log and continue
+      } catch (dbError) {
         console.error(
-          "[auth] Failed to register user in FusionAuth application:",
-          error,
+          "[auth] Failed to sync user to local database during sign in:",
+          dbError,
         );
       }
 
@@ -76,9 +63,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // Only populated on the first sign-in — capture FusionAuth user ID
       if (user && profile) {
         // FusionAuth sets the user ID in the 'sub' claim
-        token.sub = (profile as any)?.sub || token.sub
+        token.sub = (profile as any)?.sub || token.sub;
         // Store additional profile data if needed
-        token.email = (user as any)?.email || (profile as any)?.email
+        token.email = (user as any)?.email || (profile as any)?.email;
       }
       return token;
     },
@@ -86,22 +73,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token && session.user) {
         // Use token.sub which contains the FusionAuth user ID
-        session.user.id = token.sub as string
+        session.user.id = token.sub as string;
 
         // console.log("Session callback - session.user:", session.user)
 
         if (!session.user.id) {
           try {
-            const dbUser = await userService.syncUserWithDB(token.sub as string)
+            const dbUser = await userService.syncUserWithDB(
+              token.sub as string,
+            );
             // session.user.dbUser = dbUser
             // session.user.dbSynced = true
           } catch (error) {
-            console.error("Failed to sync user on login:", error)
+            console.error("Failed to sync user on login:", error);
           }
         }
       }
-      console.log("Session callback - final session:", session)
-      return session
+      console.log("Session callback - final session:", session);
+      return session;
     },
   },
 });
